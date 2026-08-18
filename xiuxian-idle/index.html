@@ -138,7 +138,9 @@
                     <button class="tab-btn active" data-tab="cultivation">功法</button>
                     <button class="tab-btn" data-tab="pills">丹药</button>
                     <button class="tab-btn" data-tab="artifacts">法宝</button>
+                    <button class="tab-btn" data-tab="pets">灵宠</button>
                     <button class="tab-btn" data-tab="adventure">历练</button>
+                    <button class="tab-btn" data-tab="dungeon">秘境</button>
                     <button class="tab-btn" data-tab="daily">日常</button>
                     <button class="tab-btn" data-tab="achievements">成就</button>
                 </div>
@@ -175,11 +177,26 @@
                     <div class="artifact-inventory" id="artifact-inventory"></div>
                 </div>
 
+                <!-- 灵宠标签页 -->
+                <div class="tab-content" id="tab-pets">
+                    <h2 class="panel-title">◈ 灵宠阁 ◈</h2>
+                    <div id="pet-active" class="pet-active"></div>
+                    <h2 class="panel-title" style="margin-top: 16px;">◈ 灵宠背包 ◈</h2>
+                    <div class="pet-inventory" id="pet-inventory"></div>
+                </div>
+
                 <!-- 历练标签页 -->
                 <div class="tab-content" id="tab-adventure">
                     <h2 class="panel-title">◈ 历练台 ◈</h2>
                     <div id="adventure-status" class="adventure-status"></div>
                     <div class="adventure-list" id="adventure-list"></div>
+                </div>
+
+                <!-- 秘境标签页 -->
+                <div class="tab-content" id="tab-dungeon">
+                    <h2 class="panel-title">◈ 秘境挑战 ◈</h2>
+                    <div class="dungeon-power">当前战力：<span id="player-power">0</span></div>
+                    <div class="dungeon-list" id="dungeon-list"></div>
                 </div>
 
                 <!-- 日常标签页 -->
@@ -246,8 +263,17 @@
                 <button id="close-breakthrough-btn" class="claim-btn">继续修炼</button>
             </div>
         </div>
+
+        <!-- 随机事件弹窗 -->
+        <div id="event-modal" class="modal hidden">
+            <div class="modal-content event-modal">
+                <h2 id="event-title">◈ 奇遇 ◈</h2>
+                <p id="event-desc" class="modal-desc"></p>
+                <div id="event-choices" class="event-choices"></div>
+            </div>
+        </div>
     </div>
 
-    <script src="js/game.js?v=6"></script>
+    <script src="js/game.js?v=7"></script>
 </body>
 </html>

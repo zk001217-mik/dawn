@@ -126,6 +126,95 @@ const CONFIG = {
 
     saveSlotCount: 3,
 
+    // 灵宠配置
+    petTypes: [
+        { id: 'firefox', name: '火狐', icon: '🦊', effect: 'cultivation', base: 2, desc: '火系灵宠，提升修为产出' },
+        { id: 'turtle', name: '玄龟', icon: '🐢', effect: 'stone', base: 1.5, desc: '水系灵宠，提升灵石产出' },
+        { id: 'crane', name: '仙鹤', icon: '🦢', effect: 'both', base: 1, desc: '风系灵宠，全方位提升' },
+        { id: 'tiger', name: '白虎', icon: '🐯', effect: 'cultivation', base: 4, desc: '金系灵宠，大幅提升修为' },
+        { id: 'dragon', name: '青龙', icon: '🐉', effect: 'both', base: 3, desc: '神兽后裔，全方位大幅提升' },
+    ],
+    petQualities: [
+        { name: '凡品', mult: 1.0, color: 'common', maxLevel: 20 },
+        { name: '良品', mult: 1.5, color: 'uncommon', maxLevel: 30 },
+        { name: '上品', mult: 2.5, color: 'rare', maxLevel: 50 },
+        { name: '极品', mult: 4.0, color: 'epic', maxLevel: 80 },
+        { name: '仙品', mult: 7.0, color: 'legendary', maxLevel: 100 },
+    ],
+    petUpgradeCostBase: 50,
+    petUpgradeCostMult: 1.2,
+
+    // 秘境配置
+    dungeons: [
+        { id: 'forest', name: '妖兽森林', desc: '低级妖兽出没，适合练气期修士', realmReq: 0, powerReq: 50, cost: 100, cooldown: 120, cultReward: 200, stoneReward: 150, artifactChance: 0.2, petChance: 0.15, talentPointChance: 0.1 },
+        { id: 'cave', name: '骸骨洞窟', desc: '阴邪之气浓重，藏有古修遗宝', realmReq: 1, powerReq: 300, cost: 300, cooldown: 180, cultReward: 800, stoneReward: 600, artifactChance: 0.3, petChance: 0.2, talentPointChance: 0.15 },
+        { id: 'battlefield', name: '天魔战场', desc: '上古战场遗迹，危险与机缘并存', realmReq: 2, powerReq: 2000, cost: 800, cooldown: 300, cultReward: 4000, stoneReward: 3000, artifactChance: 0.4, petChance: 0.25, talentPointChance: 0.2 },
+        { id: 'mansion', name: '仙府遗迹', desc: '上古仙人洞府，传说中有仙器', realmReq: 3, powerReq: 15000, cost: 2000, cooldown: 600, cultReward: 20000, stoneReward: 15000, artifactChance: 0.5, petChance: 0.3, talentPointChance: 0.3 },
+        { id: 'void', name: '虚空战场', desc: '异界生物入侵之地，唯有大能可入', realmReq: 4, powerReq: 100000, cost: 5000, cooldown: 900, cultReward: 100000, stoneReward: 80000, artifactChance: 0.6, petChance: 0.4, talentPointChance: 0.4 },
+    ],
+
+    // 随机事件配置
+    randomEvents: [
+        {
+            id: 'old_man', title: '路遇老者', desc: '一位白发老者拦住了你，说要传你一段机缘，但需要你付出一些灵石。',
+            choices: [
+                { text: '付出100灵石求教', result: () => { if (gameState.spiritStone >= 100) { gameState.spiritStone -= 100; const g = 500; gameState.cultivation += g; gameState.totalCultivation += g; return `老者传授心得，获得${formatNumber(g)}修为！`; } return '灵石不足，老者摇头离去。'; } },
+                { text: '婉拒离开', result: () => '你礼貌地拒绝了老者，继续修炼。' },
+            ]
+        },
+        {
+            id: 'treasure', title: '发现宝箱', desc: '你在修炼时发现一个古旧宝箱，似乎需要强行打开。',
+            choices: [
+                { text: '强行打开（可能受伤）', result: () => { if (Math.random() > 0.3) { const s = 300 + Math.floor(Math.random() * 500); gameState.spiritStone += s; return `宝箱中有${s}灵石！`; } const loss = Math.floor(gameState.cultivation * 0.1); gameState.cultivation = Math.max(0, gameState.cultivation - loss); return `宝箱是陷阱！损失${formatNumber(loss)}修为。`; } },
+                { text: '谨慎离开', result: () => '你决定不冒险，安全离开。' },
+            ]
+        },
+        {
+            id: 'merchant', title: '云游商人', desc: '一位神秘商人向你兜售商品，价格优惠但数量有限。',
+            choices: [
+                { text: '花200灵石买神秘丹药', result: () => { if (gameState.spiritStone >= 200) { gameState.spiritStone -= 200; const pill = CONFIG.pills[Math.floor(Math.random() * CONFIG.pills.length)]; gameState.pills[pill.id] = (gameState.pills[pill.id] || 0) + 2; return `获得${pill.name} x2！`; } return '灵石不足。'; } },
+                { text: '花500灵石买灵宠蛋', result: () => { if (gameState.spiritStone >= 500) { gameState.spiritStone -= 500; const pet = generatePet(); gameState.petInventory.push(pet); return `孵化出【${pet.name}】！`; } return '灵石不足。'; } },
+                { text: '不买', result: () => '商人耸耸肩离开了。' },
+            ]
+        },
+        {
+            id: 'enlightenment', title: '顿悟天机', desc: '你突然心有所感，似乎触摸到了大道的边缘。',
+            choices: [
+                { text: '闭关参悟', result: () => { const g = getCultivationPerSecond() * 60; gameState.cultivation += g; gameState.totalCultivation += g; return `顿悟成功！获得${formatNumber(g)}修为（相当于60秒产出）！`; } },
+                { text: '顺其自然', result: () => '你将这份感悟记在心中，继续日常修炼。' },
+            ]
+        },
+        {
+            id: 'disciple_offer', title: '拜师者', desc: '一位年轻人慕名而来，希望拜你为师，但他资质平平。',
+            choices: [
+                { text: '收为弟子（获得1名弟子）', result: () => { if (gameState.discipleCount < CONFIG.disciple.maxCount) { gameState.discipleCount++; return '你收下了这名弟子，虽然资质平平但胜在勤恳。'; } return '弟子已达上限，无法再收。'; } },
+                { text: '赠予灵石打发', result: () => { if (gameState.spiritStone >= 50) { gameState.spiritStone -= 50; return '你给了他50灵石作为盘缠，他感激离去。'; } return '灵石不足，年轻人失望离去。'; } },
+            ]
+        },
+        {
+            id: 'spirit_spring', title: '灵泉涌现', desc: '地面突然涌出一股灵泉，灵气充沛！',
+            choices: [
+                { text: '尽情吸收', result: () => { const g = getCultivationPerSecond() * 120; const s = getStonePerSecond() * 120; gameState.cultivation += g; gameState.totalCultivation += g; gameState.spiritStone += s; return `吸收灵泉！获得${formatNumber(g)}修为和${formatNumber(s)}灵石！`; } },
+            ]
+        },
+        {
+            id: 'rogue', title: '遇到劫匪', desc: '几个劫匪拦住了你，索要买路财。',
+            choices: [
+                { text: '交出100灵石', result: () => { if (gameState.spiritStone >= 100) { gameState.spiritStone -= 100; return '你交出灵石，劫匪放你离开。'; } return '你灵石不够，被劫匪搜走了全部灵石！'; } },
+                { text: '奋起反抗', result: () => { if (Math.random() > 0.4) { const s = 200; gameState.spiritStone += s; return `你击退了劫匪，还缴获了${s}灵石！`; } const loss = Math.floor(gameState.cultivation * 0.15); gameState.cultivation = Math.max(0, gameState.cultivation - loss); return `你寡不敌众，被打伤损失${formatNumber(loss)}修为。`; } },
+            ]
+        },
+        {
+            id: 'fate', title: '算命先生', desc: '一位算命先生说能为你测算机缘，需要一些灵石。',
+            choices: [
+                { text: '花50灵石测算', result: () => { if (gameState.spiritStone >= 50) { gameState.spiritStone -= 50; if (Math.random() > 0.5) { gameState.dao += 1; return '先生说你气运加身，你感到道韵增长了1点！'; } return '先生说你近期平淡，并无特别机缘。'; } return '灵石不足。'; } },
+                { text: '不信这些', result: () => '你摆摆手离开了。' },
+            ]
+        },
+    ],
+    eventMinInterval: 180, // 事件最小间隔（秒）
+    eventMaxInterval: 420, // 事件最大间隔（秒）
+
     baseCultivation: 1.5,
     baseStone: 0.8,
     meditateMultiplier: 2.0,
@@ -176,6 +265,14 @@ let gameState = {
     meditateCount: 0,
     upgradeCount: 0,
     currentSlot: 0,
+    // 灵宠
+    activePet: null,
+    petInventory: [],
+    // 秘境
+    dungeonCooldowns: {}, // { dungeonId: timestamp }
+    talentPoints: 0,
+    // 随机事件
+    nextEventTime: 0,
     lastSaveTime: Date.now(),
 };
 
@@ -331,6 +428,7 @@ function getCultivationPerSecond() {
         if (u.effect === 'cultivation' || u.effect === 'both') bonus += getUpgradeEffect(u.id);
     });
     bonus += getArtifactBonus('cultivation');
+    if (gameState.activePet) bonus += getPetBonus(gameState.activePet).cultivation;
     const realmMult = 1 + getCurrentRealm().cultBonus;
     const discipleMult = 1 + gameState.discipleCount * CONFIG.disciple.cultBonus;
     const daoMult = 1 + gameState.dao * 0.01;
@@ -345,6 +443,7 @@ function getStonePerSecond() {
         if (u.effect === 'stone' || u.effect === 'both') bonus += getUpgradeEffect(u.id);
     });
     bonus += getArtifactBonus('stone');
+    if (gameState.activePet) bonus += getPetBonus(gameState.activePet).stone;
     const realmMult = 1 + getCurrentRealm().stoneBonus;
     const discipleMult = 1 + gameState.discipleCount * CONFIG.disciple.stoneBonus;
     const daoMult = 1 + gameState.dao * 0.01;
@@ -763,6 +862,10 @@ function updateUI() {
     renderTasks();
     // 丹药合成
     renderSynthesis();
+    // 灵宠
+    renderPets();
+    // 秘境
+    renderDungeons();
     // 转世
     const daoGain = getRebirthDaoGain();
     document.getElementById('rebirth-info').textContent = `获得道韵：${daoGain}`;
@@ -994,6 +1097,7 @@ function startGame(slotIndex) {
     } else {
         gameState.currentSlot = slotIndex;
         SaveManager.currentSlot = slotIndex;
+        scheduleNextEvent();
     }
     gameStarted = true;
     lastTickTime = Date.now();
@@ -1066,6 +1170,91 @@ function renderSynthesis() {
             <button class="synthesis-btn" ${canSynth ? '' : 'disabled'}>合成</button>`;
         if (canSynth) {
             item.querySelector('.synthesis-btn').addEventListener('click', () => synthesizePill(pill.id));
+        }
+        container.appendChild(item);
+    });
+}
+
+// ========== 灵宠渲染 ==========
+function renderPets() {
+    const activeContainer = document.getElementById('pet-active');
+    if (!activeContainer) return;
+    if (gameState.activePet) {
+        const pet = gameState.activePet;
+        const bonus = getPetBonus(pet);
+        const quality = CONFIG.petQualities[pet.qualityIndex];
+        const upgradeCost = getPetUpgradeCost(pet);
+        const maxed = pet.level >= quality.maxLevel;
+        activeContainer.className = 'pet-active quality-' + pet.qualityColor;
+        activeContainer.innerHTML = `
+            <div class="pet-active-icon">${pet.icon}</div>
+            <div class="pet-active-name">${pet.name}</div>
+            <div class="pet-active-info">
+                Lv.${pet.level}/${quality.maxLevel} | 好感度:${pet.affection}/100<br>
+                修为+${formatNumber(bonus.cultivation)}/秒 灵石+${formatNumber(bonus.stone)}/秒
+            </div>
+            <div class="pet-active-bar"><div class="pet-active-fill" style="width:${pet.affection}%"></div></div>
+            <div class="pet-actions">
+                <button class="pet-btn" ${maxed || gameState.spiritStone < upgradeCost ? 'disabled' : ''} id="pet-upgrade-btn">升级 ${formatNumber(upgradeCost)}灵石</button>
+                <button class="pet-btn" ${gameState.spiritStone < 30 ? 'disabled' : ''} id="pet-feed-btn">喂养 30灵石</button>
+                <button class="pet-btn" id="pet-unequip-btn">收回</button>
+            </div>`;
+        document.getElementById('pet-upgrade-btn')?.addEventListener('click', () => upgradePet(pet.uid));
+        document.getElementById('pet-feed-btn')?.addEventListener('click', feedPet);
+        document.getElementById('pet-unequip-btn')?.addEventListener('click', unequipPet);
+    } else {
+        activeContainer.className = 'pet-active empty';
+        activeContainer.innerHTML = `<div class="pet-active-icon">❓</div><div class="pet-active-name">未出战灵宠</div><div class="pet-active-info">从下方选择一只灵宠出战</div>`;
+    }
+
+    const invContainer = document.getElementById('pet-inventory');
+    if (!invContainer) return;
+    invContainer.innerHTML = '';
+    if (gameState.petInventory.length === 0) {
+        invContainer.innerHTML = '<p class="no-buff" style="grid-column:1/-1">暂无灵宠，去秘境或奇遇中获取吧</p>';
+    }
+    gameState.petInventory.forEach(pet => {
+        const item = document.createElement('div');
+        item.className = `pet-inv-item quality-${pet.qualityColor}`;
+        item.title = `${pet.name}\nLv.${pet.level} 好感度${pet.affection}\n点击出战`;
+        item.innerHTML = `<span class="pet-icon">${pet.icon}</span><span class="pet-name">${pet.name}</span><span class="pet-level">Lv.${pet.level}</span>`;
+        item.addEventListener('click', () => equipPet(pet.uid));
+        invContainer.appendChild(item);
+    });
+}
+
+// ========== 秘境渲染 ==========
+function renderDungeons() {
+    const powerEl = document.getElementById('player-power');
+    if (powerEl) powerEl.textContent = formatNumber(getPlayerPower());
+
+    const container = document.getElementById('dungeon-list');
+    if (!container) return;
+    container.innerHTML = '';
+    CONFIG.dungeons.forEach(d => {
+        const unlocked = gameState.realmIndex >= d.realmReq;
+        const cd = gameState.dungeonCooldowns[d.id] || 0;
+        const cooling = Date.now() < cd;
+        const canAfford = gameState.spiritStone >= d.cost;
+        const power = getPlayerPower();
+        const successRate = Math.min(95, Math.floor(power / d.powerReq * 100));
+
+        const item = document.createElement('div');
+        item.className = 'dungeon-item' + (!unlocked ? ' locked' : (cooling ? ' cooling' : ''));
+        item.innerHTML = `
+            <div class="dungeon-header">
+                <span class="dungeon-name">${d.name}</span>
+                <span class="dungeon-realm">需${CONFIG.realms[d.realmReq].name}</span>
+            </div>
+            <div class="dungeon-desc">${d.desc}</div>
+            <div class="dungeon-info">
+                <span class="dungeon-power-req">推荐战力:${formatNumber(d.powerReq)} (成功率${successRate}%)</span>
+                <span class="dungeon-reward">消耗:${formatNumber(d.cost)}灵石</span>
+            </div>
+            ${cooling ? `<div class="dungeon-cooldown">冷却中: ${formatCountdown((cd - Date.now()) / 1000)}</div>` : ''}
+            ${!unlocked ? `<div class="dungeon-desc" style="color:var(--accent-red)">境界不足，无法挑战</div>` : ''}`;
+        if (unlocked && !cooling && canAfford) {
+            item.addEventListener('click', () => challengeDungeon(d.id));
         }
         container.appendChild(item);
     });
@@ -1237,6 +1426,10 @@ const SaveManager = {
         if (!gameState.checkinClaimedDays) gameState.checkinClaimedDays = [];
         if (gameState.meditateCount === undefined) gameState.meditateCount = 0;
         if (gameState.upgradeCount === undefined) gameState.upgradeCount = 0;
+        if (!gameState.petInventory) gameState.petInventory = [];
+        if (!gameState.dungeonCooldowns) gameState.dungeonCooldowns = {};
+        if (gameState.talentPoints === undefined) gameState.talentPoints = 0;
+        if (!gameState.nextEventTime) gameState.nextEventTime = 0;
     },
 
     // 本地文件夹存储（File System Access API）
@@ -1388,6 +1581,200 @@ function synthesizePill(pillId) {
     return true;
 }
 
+// ========== 灵宠系统 ==========
+function generatePet(forceType = null) {
+    const type = forceType || CONFIG.petTypes[Math.floor(Math.random() * 3)]; // 前3种普通宠
+    const qualityIndex = randomQuality();
+    const quality = CONFIG.petQualities[qualityIndex];
+    return {
+        uid: Date.now() + '_' + Math.random().toString(36).substr(2, 5),
+        typeId: type.id,
+        name: quality.name + type.name,
+        icon: type.icon,
+        effect: type.effect,
+        qualityIndex: qualityIndex,
+        qualityName: quality.name,
+        qualityColor: quality.color,
+        level: 1,
+        exp: 0,
+        affection: 50,
+        base: type.base,
+    };
+}
+
+function getPetBonus(pet) {
+    if (!pet) return { cultivation: 0, stone: 0 };
+    const quality = CONFIG.petQualities[pet.qualityIndex];
+    const levelMult = 1 + (pet.level - 1) * 0.1;
+    const affectionMult = 0.5 + pet.affection / 100;
+    const bonus = pet.base * quality.mult * levelMult * affectionMult;
+    if (pet.effect === 'cultivation') return { cultivation: bonus, stone: 0 };
+    if (pet.effect === 'stone') return { cultivation: 0, stone: bonus };
+    return { cultivation: bonus, stone: bonus };
+}
+
+function getPetUpgradeCost(pet) {
+    return Math.floor(CONFIG.petUpgradeCostBase * Math.pow(CONFIG.petUpgradeCostMult, pet.level - 1) * (pet.qualityIndex + 1));
+}
+
+function upgradePet(uid) {
+    const pet = gameState.petInventory.find(p => p.uid === uid) || gameState.activePet;
+    if (!pet || pet.uid !== uid) return false;
+    const quality = CONFIG.petQualities[pet.qualityIndex];
+    if (pet.level >= quality.maxLevel) { addLog('灵宠已达最高等级', ''); SFX.error(); return false; }
+    const cost = getPetUpgradeCost(pet);
+    if (gameState.spiritStone < cost) { addLog('灵石不足，无法升级灵宠', ''); SFX.error(); return false; }
+    gameState.spiritStone -= cost;
+    pet.level++;
+    pet.affection = Math.min(100, pet.affection + 2);
+    SFX.upgrade();
+    addLog(`${pet.name} 升级到 Lv.${pet.level}`, 'success');
+    updateUI();
+    return true;
+}
+
+function equipPet(uid) {
+    const idx = gameState.petInventory.findIndex(p => p.uid === uid);
+    if (idx === -1) return false;
+    const pet = gameState.petInventory[idx];
+    if (gameState.activePet) gameState.petInventory.push(gameState.activePet);
+    gameState.activePet = pet;
+    gameState.petInventory.splice(idx, 1);
+    SFX.buy();
+    addLog(`出战灵宠：${pet.name}`, 'success');
+    updateUI();
+    return true;
+}
+
+function unequipPet() {
+    if (!gameState.activePet) return false;
+    gameState.petInventory.push(gameState.activePet);
+    gameState.activePet = null;
+    addLog('收回灵宠', '');
+    updateUI();
+    return true;
+}
+
+function feedPet() {
+    if (!gameState.activePet) return false;
+    if (gameState.spiritStone < 30) { addLog('灵石不足，无法喂养', ''); SFX.error(); return false; }
+    gameState.spiritStone -= 30;
+    gameState.activePet.affection = Math.min(100, gameState.activePet.affection + 10);
+    SFX.pill();
+    addLog(`喂养了${gameState.activePet.name}，好感度+10`, 'success');
+    updateUI();
+    return true;
+}
+
+// ========== 秘境系统 ==========
+function getPlayerPower() {
+    let power = 0;
+    power += gameState.realmIndex * 100 + gameState.realmLayer * 10;
+    CONFIG.upgrades.forEach(u => { power += gameState.upgrades[u.id] * (u.effect === 'both' ? 3 : 2); });
+    power += gameState.discipleCount * 5;
+    power += getArtifactBonus('cultivation') + getArtifactBonus('stone');
+    if (gameState.activePet) {
+        const b = getPetBonus(gameState.activePet);
+        power += (b.cultivation + b.stone) * 2;
+    }
+    power += gameState.dao * 10;
+    return Math.floor(power);
+}
+
+function canChallengeDungeon(dungeonId) {
+    const d = CONFIG.dungeons.find(x => x.id === dungeonId);
+    if (!d) return false;
+    if (gameState.realmIndex < d.realmReq) return false;
+    const cd = gameState.dungeonCooldowns[dungeonId] || 0;
+    if (Date.now() < cd) return false;
+    if (gameState.spiritStone < d.cost) return false;
+    return true;
+}
+
+function challengeDungeon(dungeonId) {
+    const d = CONFIG.dungeons.find(x => x.id === dungeonId);
+    if (!d || !canChallengeDungeon(dungeonId)) { SFX.error(); return false; }
+    gameState.spiritStone -= d.cost;
+    gameState.dungeonCooldowns[dungeonId] = Date.now() + d.cooldown * 1000;
+
+    const power = getPlayerPower();
+    const successRate = Math.min(0.95, power / d.powerReq);
+    const success = Math.random() < successRate;
+
+    if (success) {
+        const cultGain = d.cultReward * (1 + gameState.realmIndex * 0.3);
+        const stoneGain = d.stoneReward * (1 + gameState.realmIndex * 0.3);
+        gameState.cultivation += cultGain;
+        gameState.totalCultivation += cultGain;
+        gameState.spiritStone += stoneGain;
+        let msg = `挑战【${d.name}】成功！获得${formatNumber(cultGain)}修为，${formatNumber(stoneGain)}灵石`;
+
+        if (Math.random() < d.artifactChance) {
+            const art = generateArtifact();
+            gameState.artifactInventory.push(art);
+            gameState.artifactFoundCount++;
+            msg += `，获得法宝【${art.name}】`;
+        }
+        if (Math.random() < d.petChance) {
+            const pet = generatePet();
+            gameState.petInventory.push(pet);
+            msg += `，获得灵宠【${pet.name}】`;
+        }
+        if (Math.random() < d.talentPointChance) {
+            gameState.talentPoints = (gameState.talentPoints || 0) + 1;
+            msg += `，获得1天赋点`;
+        }
+        SFX.achievement();
+        addLog(msg, 'breakthrough');
+    } else {
+        const loss = Math.floor(gameState.cultivation * 0.05);
+        gameState.cultivation = Math.max(0, gameState.cultivation - loss);
+        SFX.error();
+        addLog(`挑战【${d.name}】失败，损失${formatNumber(loss)}修为（成功率${Math.floor(successRate * 100)}%）`, '');
+    }
+    checkAchievements();
+    updateUI();
+    return true;
+}
+
+// ========== 随机事件系统 ==========
+function scheduleNextEvent() {
+    const delay = CONFIG.eventMinInterval + Math.random() * (CONFIG.eventMaxInterval - CONFIG.eventMinInterval);
+    gameState.nextEventTime = Date.now() + delay * 1000;
+}
+
+function triggerRandomEvent() {
+    const evt = CONFIG.randomEvents[Math.floor(Math.random() * CONFIG.randomEvents.length)];
+    document.getElementById('event-title').textContent = '◈ ' + evt.title + ' ◈';
+    document.getElementById('event-desc').textContent = evt.desc;
+    const choicesContainer = document.getElementById('event-choices');
+    choicesContainer.innerHTML = '';
+    evt.choices.forEach((choice, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'event-choice-btn';
+        btn.textContent = choice.text;
+        btn.addEventListener('click', () => {
+            const result = choice.result();
+            choicesContainer.innerHTML = `<div class="event-result">${result}</div><button class="claim-btn" onclick="document.getElementById('event-modal').classList.add('hidden')">继续</button>`;
+            SFX.reward();
+            updateUI();
+        });
+        choicesContainer.appendChild(btn);
+    });
+    document.getElementById('event-modal').classList.remove('hidden');
+    scheduleNextEvent();
+}
+
+function checkRandomEvent() {
+    if (!gameState.nextEventTime || gameState.nextEventTime === 0) {
+        scheduleNextEvent();
+        return;
+    }
+    if (Date.now() >= gameState.nextEventTime && gameStarted) {
+        triggerRandomEvent();
+    }
+}
+
 // ========== 游戏主循环 ==========
 let lastTickTime = Date.now();
 
@@ -1512,6 +1899,7 @@ function gameTick() {
     }
 
     if (Math.floor(gameState.playTime) % 5 === 0) checkAchievements();
+    checkRandomEvent();
     updateUI();
 }
 
