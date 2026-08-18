@@ -6,41 +6,42 @@
 // ========== 配置数据 ==========
 const CONFIG = {
     realms: [
-        { name: '练气期', baseCost: 150, multiplier: 1.6, cultBonus: 0, stoneBonus: 0 },
-        { name: '筑基期', baseCost: 1000, multiplier: 1.6, cultBonus: 0.5, stoneBonus: 0.3 },
-        { name: '金丹期', baseCost: 10000, multiplier: 1.7, cultBonus: 1.5, stoneBonus: 1.0 },
-        { name: '元婴期', baseCost: 100000, multiplier: 1.8, cultBonus: 4.0, stoneBonus: 3.0 },
-        { name: '化神期', baseCost: 1000000, multiplier: 1.9, cultBonus: 10.0, stoneBonus: 8.0 },
-        { name: '炼虚期', baseCost: 10000000, multiplier: 2.0, cultBonus: 25.0, stoneBonus: 20.0 },
-        { name: '合体期', baseCost: 100000000, multiplier: 2.1, cultBonus: 60.0, stoneBonus: 50.0 },
-        { name: '大乘期', baseCost: 1000000000, multiplier: 2.2, cultBonus: 150.0, stoneBonus: 120.0 },
-        { name: '渡劫期', baseCost: 10000000000, multiplier: 2.3, cultBonus: 400.0, stoneBonus: 300.0 },
+        { name: '练气期', baseCost: 5000, multiplier: 1.85, cultBonus: 0, stoneBonus: 0 },
+        { name: '筑基期', baseCost: 50000, multiplier: 1.9, cultBonus: 0.3, stoneBonus: 0.2 },
+        { name: '金丹期', baseCost: 500000, multiplier: 2.0, cultBonus: 0.8, stoneBonus: 0.5 },
+        { name: '元婴期', baseCost: 5000000, multiplier: 2.1, cultBonus: 2.0, stoneBonus: 1.5 },
+        { name: '化神期', baseCost: 50000000, multiplier: 2.2, cultBonus: 5.0, stoneBonus: 4.0 },
+        { name: '炼虚期', baseCost: 500000000, multiplier: 2.3, cultBonus: 12.0, stoneBonus: 10.0 },
+        { name: '合体期', baseCost: 5000000000, multiplier: 2.4, cultBonus: 30.0, stoneBonus: 25.0 },
+        { name: '大乘期', baseCost: 50000000000, multiplier: 2.5, cultBonus: 75.0, stoneBonus: 60.0 },
+        { name: '渡劫期', baseCost: 500000000000, multiplier: 2.6, cultBonus: 200.0, stoneBonus: 150.0 },
     ],
 
     upgrades: [
-        { id: 'basic_art', name: '基础吐纳术', desc: '最基础的修炼之法，吸纳天地灵气', baseCost: 10, costMult: 1.15, effect: 'cultivation', baseEffect: 0.8, effectMult: 1.1, unlockRealm: 0, maxLevel: 200 },
-        { id: 'spirit_vein', name: '聚灵阵', desc: '布下聚灵阵法，汇聚灵石矿脉', baseCost: 20, costMult: 1.18, effect: 'stone', baseEffect: 0.5, effectMult: 1.12, unlockRealm: 0, maxLevel: 200 },
-        { id: 'breathing_art', name: '龟息吐纳法', desc: '上古吐纳法门，大幅提升修为速度', baseCost: 150, costMult: 1.2, effect: 'cultivation', baseEffect: 4, effectMult: 1.15, unlockRealm: 1, maxLevel: 150 },
-        { id: 'spirit_field', name: '灵田开垦', desc: '开辟灵田种植灵药，换取灵石', baseCost: 200, costMult: 1.2, effect: 'stone', baseEffect: 3, effectMult: 1.15, unlockRealm: 1, maxLevel: 150 },
-        { id: 'heart_method', name: '心法要诀', desc: '修炼心法，神识与灵力双修', baseCost: 800, costMult: 1.21, effect: 'both', baseEffect: 5, effectMult: 1.16, unlockRealm: 1, maxLevel: 120 },
-        { id: 'alchemy', name: '炼丹之术', desc: '炼制丹药辅助修炼，修为灵石双增', baseCost: 1500, costMult: 1.22, effect: 'both', baseEffect: 10, effectMult: 1.18, unlockRealm: 2, maxLevel: 100 },
-        { id: 'artifact_craft', name: '炼器之术', desc: '锻造法宝护身，产出更上一层楼', baseCost: 3000, costMult: 1.25, effect: 'both', baseEffect: 25, effectMult: 1.2, unlockRealm: 2, maxLevel: 100 },
-        { id: 'formation', name: '周天星斗阵', desc: '引星辰之力入体，修为暴涨', baseCost: 30000, costMult: 1.28, effect: 'cultivation', baseEffect: 120, effectMult: 1.22, unlockRealm: 3, maxLevel: 80 },
-        { id: 'spirit_sword', name: '御剑之术', desc: '剑修法门，凌厉剑意增加灵石获取', baseCost: 40000, costMult: 1.28, effect: 'stone', baseEffect: 80, effectMult: 1.22, unlockRealm: 3, maxLevel: 80 },
-        { id: 'dao_insight', name: '悟道心得', desc: '参悟天地法则，全方位提升', baseCost: 150000, costMult: 1.3, effect: 'both', baseEffect: 350, effectMult: 1.25, unlockRealm: 4, maxLevel: 60 },
+        { id: 'basic_art', name: '基础吐纳术', desc: '最基础的修炼之法，吸纳天地灵气', baseCost: 15, costMult: 1.18, effect: 'cultivation', baseEffect: 0.4, effectMult: 1.02, unlockRealm: 0, maxLevel: 200 },
+        { id: 'spirit_vein', name: '聚灵阵', desc: '布下聚灵阵法，汇聚灵石矿脉', baseCost: 25, costMult: 1.2, effect: 'stone', baseEffect: 0.25, effectMult: 1.02, unlockRealm: 0, maxLevel: 200 },
+        { id: 'breathing_art', name: '龟息吐纳法', desc: '上古吐纳法门，大幅提升修为速度', baseCost: 200, costMult: 1.22, effect: 'cultivation', baseEffect: 2, effectMult: 1.025, unlockRealm: 1, maxLevel: 150 },
+        { id: 'spirit_field', name: '灵田开垦', desc: '开辟灵田种植灵药，换取灵石', baseCost: 300, costMult: 1.22, effect: 'stone', baseEffect: 1.5, effectMult: 1.025, unlockRealm: 1, maxLevel: 150 },
+        { id: 'heart_method', name: '心法要诀', desc: '修炼心法，神识与灵力双修', baseCost: 1000, costMult: 1.24, effect: 'both', baseEffect: 2.5, effectMult: 1.03, unlockRealm: 1, maxLevel: 120 },
+        { id: 'alchemy', name: '炼丹之术', desc: '炼制丹药辅助修炼，修为灵石双增', baseCost: 2500, costMult: 1.25, effect: 'both', baseEffect: 5, effectMult: 1.03, unlockRealm: 2, maxLevel: 100 },
+        { id: 'artifact_craft', name: '炼器之术', desc: '锻造法宝护身，产出更上一层楼', baseCost: 5000, costMult: 1.28, effect: 'both', baseEffect: 12, effectMult: 1.035, unlockRealm: 2, maxLevel: 100 },
+        { id: 'formation', name: '周天星斗阵', desc: '引星辰之力入体，修为暴涨', baseCost: 50000, costMult: 1.3, effect: 'cultivation', baseEffect: 60, effectMult: 1.035, unlockRealm: 3, maxLevel: 80 },
+        { id: 'spirit_sword', name: '御剑之术', desc: '剑修法门，凌厉剑意增加灵石获取', baseCost: 60000, costMult: 1.3, effect: 'stone', baseEffect: 40, effectMult: 1.035, unlockRealm: 3, maxLevel: 80 },
+        { id: 'dao_insight', name: '悟道心得', desc: '参悟天地法则，全方位提升', baseCost: 200000, costMult: 1.32, effect: 'both', baseEffect: 175, effectMult: 1.04, unlockRealm: 4, maxLevel: 60 },
     ],
 
-    disciple: { baseCost: 50, costMult: 1.3, cultBonus: 0.03, stoneBonus: 0.02, maxCount: 50 },
+    disciple: { baseCost: 80, costMult: 1.35, cultBonus: 0.015, stoneBonus: 0.01, maxCount: 50 },
 
     // 丹药配置
     pills: [
-        { id: 'qi_gathering', name: '聚气丹', desc: '凝聚灵气，修为产出+100%，持续5分钟', icon: '🔴', cost: 150, effect: 'buff_cult', value: 1.0, duration: 300 },
-        { id: 'spirit_talisman', name: '聚灵符', desc: '灵石产出+100%，持续5分钟', icon: '🟡', cost: 150, effect: 'buff_stone', value: 1.0, duration: 300 },
-        { id: 'enlightenment', name: '悟道丹', desc: '立即获得30秒修为产出', icon: '🟣', cost: 120, effect: 'instant_cult', value: 30 },
-        { id: 'wealth', name: '点石成金符', desc: '立即获得60秒灵石产出', icon: '🟢', cost: 120, effect: 'instant_stone', value: 60 },
-        { id: 'double_cult', name: '双倍修为丹', desc: '修为产出+200%，持续3分钟', icon: '🟠', cost: 450, effect: 'buff_cult', value: 2.0, duration: 180 },
-        { id: 'double_stone', name: '聚财符', desc: '灵石产出+200%，持续3分钟', icon: '💎', cost: 450, effect: 'buff_stone', value: 2.0, duration: 180 },
-        { id: 'universal', name: '混元丹', desc: '修为和灵石产出各+80%，持续10分钟', icon: '🔵', cost: 1200, effect: 'buff_both', value: 0.8, duration: 600 },
+        { id: 'qi_gathering', name: '聚气丹', desc: '凝聚灵气，修为产出+100%，持续5分钟', icon: '🔴', cost: 300, effect: 'buff_cult', value: 1.0, duration: 300, dailyLimit: 3 },
+        { id: 'spirit_talisman', name: '聚灵符', desc: '灵石产出+100%，持续5分钟', icon: '🟡', cost: 300, effect: 'buff_stone', value: 1.0, duration: 300, dailyLimit: 3 },
+        { id: 'enlightenment', name: '悟道丹', desc: '立即获得30秒修为产出', icon: '🟣', cost: 250, effect: 'instant_cult', value: 30, dailyLimit: 5 },
+        { id: 'wealth', name: '点石成金符', desc: '立即获得60秒灵石产出', icon: '🟢', cost: 250, effect: 'instant_stone', value: 60, dailyLimit: 5 },
+        { id: 'double_cult', name: '双倍修为丹', desc: '修为产出+200%，持续3分钟', icon: '🟠', cost: 800, effect: 'buff_cult', value: 2.0, duration: 180, dailyLimit: 2 },
+        { id: 'double_stone', name: '聚财符', desc: '灵石产出+200%，持续3分钟', icon: '💎', cost: 800, effect: 'buff_stone', value: 2.0, duration: 180, dailyLimit: 2 },
+        { id: 'universal', name: '混元丹', desc: '修为和灵石产出各+80%，持续10分钟', icon: '🔵', cost: 2500, effect: 'buff_both', value: 0.8, duration: 600, dailyLimit: 1 },
+        { id: 'healing', name: '回春丹', desc: '立即恢复50%最大生命值', icon: '💚', cost: 300, effect: 'heal', value: 0.5, dailyLimit: 5 },
     ],
 
     // 法宝品质
@@ -66,11 +67,11 @@ const CONFIG = {
 
     // 历练地点
     adventures: [
-        { id: 'forest', name: '迷雾森林', desc: '低级修士历练之地，偶有灵药', duration: 60, unlockRealm: 0, cultReward: 80, stoneReward: 50, artifactChance: 0.15, pillChance: 0.1 },
-        { id: 'cave', name: '幽暗洞窟', desc: '洞窟深处藏有秘宝，但也有危险', duration: 180, unlockRealm: 1, cultReward: 400, stoneReward: 280, artifactChance: 0.25, pillChance: 0.15 },
-        { id: 'mountain', name: '灵脉山脉', desc: '灵脉汇聚之地，收获颇丰', duration: 300, unlockRealm: 2, cultReward: 2000, stoneReward: 1400, artifactChance: 0.35, pillChance: 0.2 },
-        { id: 'ruins', name: '上古遗迹', desc: '上古修士留下的遗迹，机缘与危机并存', duration: 600, unlockRealm: 3, cultReward: 10000, stoneReward: 7000, artifactChance: 0.45, pillChance: 0.25 },
-        { id: 'void', name: '虚空裂隙', desc: '通往异界的裂隙，传说中有仙器', duration: 1200, unlockRealm: 4, cultReward: 60000, stoneReward: 40000, artifactChance: 0.55, pillChance: 0.35 },
+        { id: 'forest', name: '迷雾森林', desc: '低级修士历练之地，偶有灵药', duration: 60, unlockRealm: 0, cultReward: 120, stoneReward: 75, artifactChance: 0.15, pillChance: 0.1 },
+        { id: 'cave', name: '幽暗洞窟', desc: '洞窟深处藏有秘宝，但也有危险', duration: 180, unlockRealm: 1, cultReward: 600, stoneReward: 420, artifactChance: 0.25, pillChance: 0.15 },
+        { id: 'mountain', name: '灵脉山脉', desc: '灵脉汇聚之地，收获颇丰', duration: 300, unlockRealm: 2, cultReward: 3000, stoneReward: 2100, artifactChance: 0.35, pillChance: 0.2 },
+        { id: 'ruins', name: '上古遗迹', desc: '上古修士留下的遗迹，机缘与危机并存', duration: 600, unlockRealm: 3, cultReward: 15000, stoneReward: 10500, artifactChance: 0.45, pillChance: 0.25 },
+        { id: 'void', name: '虚空裂隙', desc: '通往异界的裂隙，传说中有仙器', duration: 1200, unlockRealm: 4, cultReward: 90000, stoneReward: 60000, artifactChance: 0.55, pillChance: 0.35 },
     ],
 
     // 历练奇遇事件
@@ -131,7 +132,7 @@ const CONFIG = {
 
     // 日常任务
     dailyTasks: [
-        { id: 'meditate_20', name: '打坐修炼', desc: '打坐20次', icon: '☯', target: 20, type: 'meditate', reward: { stone: 100 } },
+        { id: 'forge_1', name: '锻造法宝', desc: '炼器1次', icon: '🔨', target: 1, type: 'forge', reward: { stone: 150 } },
         { id: 'breakthrough_1', name: '突破境界', desc: '突破1次', icon: '⇧', target: 1, type: 'breakthrough', reward: { stone: 200 } },
         { id: 'upgrade_5', name: '修炼功法', desc: '升级功法5次', icon: '📖', target: 5, type: 'upgrade', reward: { stone: 150 } },
         { id: 'adventure_1', name: '外出历练', desc: '完成1次历练', icon: '🗺️', target: 1, type: 'adventure', reward: { stone: 200 } },
@@ -161,13 +162,14 @@ const CONFIG = {
 
     // 炼丹配置
     alchemyRecipes: [
-        { pillId: 'qi_gathering', name: '聚气丹', cost: 80, successRate: 0.85, cooldown: 8 },
-        { pillId: 'spirit_talisman', name: '聚灵符', cost: 80, successRate: 0.85, cooldown: 8 },
-        { pillId: 'enlightenment', name: '悟道丹', cost: 60, successRate: 0.80, cooldown: 8 },
-        { pillId: 'wealth', name: '点石成金符', cost: 60, successRate: 0.80, cooldown: 8 },
-        { pillId: 'double_cult', name: '双倍修为丹', cost: 250, successRate: 0.65, cooldown: 15 },
-        { pillId: 'double_stone', name: '聚财符', cost: 250, successRate: 0.65, cooldown: 15 },
-        { pillId: 'universal', name: '混元丹', cost: 700, successRate: 0.45, cooldown: 25 },
+        { pillId: 'qi_gathering', name: '聚气丹', cost: 150, successRate: 0.85, cooldown: 10 },
+        { pillId: 'spirit_talisman', name: '聚灵符', cost: 150, successRate: 0.85, cooldown: 10 },
+        { pillId: 'enlightenment', name: '悟道丹', cost: 100, successRate: 0.80, cooldown: 10 },
+        { pillId: 'wealth', name: '点石成金符', cost: 100, successRate: 0.80, cooldown: 10 },
+        { pillId: 'double_cult', name: '双倍修为丹', cost: 400, successRate: 0.65, cooldown: 20 },
+        { pillId: 'double_stone', name: '聚财符', cost: 400, successRate: 0.65, cooldown: 20 },
+        { pillId: 'universal', name: '混元丹', cost: 1200, successRate: 0.45, cooldown: 30 },
+        { pillId: 'healing', name: '回春丹', cost: 150, successRate: 0.90, cooldown: 8 },
     ],
 
     // 炼器配置
@@ -181,11 +183,11 @@ const CONFIG = {
 
     // 阵法配置
     formations: [
-        { id: 'gathering', name: '聚灵阵', icon: '🔮', desc: '汇聚天地灵气，修为产出+20%', cost: 500, duration: 1800, effect: 'cultivation', value: 0.20 },
-        { id: 'wealth', name: '聚财阵', icon: '💰', desc: '引动财气入体，灵石产出+20%', cost: 500, duration: 1800, effect: 'stone', value: 0.20 },
-        { id: 'protection', name: '护山大阵', icon: '🛡️', desc: '全方位守护，修为灵石各+15%', cost: 1000, duration: 1800, effect: 'both', value: 0.15 },
-        { id: 'star', name: '周天星斗阵', icon: '⭐', desc: '引星辰之力入体，修为产出+50%', cost: 3000, duration: 1800, effect: 'cultivation', value: 0.50 },
-        { id: 'primordial', name: '混元无极阵', icon: '☯️', desc: '混沌之力环绕，全产出+40%', cost: 5000, duration: 1800, effect: 'both', value: 0.40 },
+        { id: 'gathering', name: '聚灵阵', icon: '🔮', desc: '汇聚天地灵气，修为产出+15%', cost: 1000, duration: 1800, effect: 'cultivation', value: 0.15 },
+        { id: 'wealth', name: '聚财阵', icon: '💰', desc: '引动财气入体，灵石产出+15%', cost: 1000, duration: 1800, effect: 'stone', value: 0.15 },
+        { id: 'protection', name: '护山大阵', icon: '🛡️', desc: '全方位守护，修为灵石各+10%', cost: 2000, duration: 1800, effect: 'both', value: 0.10 },
+        { id: 'star', name: '周天星斗阵', icon: '⭐', desc: '引星辰之力入体，修为产出+35%', cost: 6000, duration: 1800, effect: 'cultivation', value: 0.35 },
+        { id: 'primordial', name: '混元无极阵', icon: '☯️', desc: '混沌之力环绕，全产出+30%', cost: 10000, duration: 1800, effect: 'both', value: 0.30 },
     ],
 
     // 永久丹药（天材地宝）
@@ -325,8 +327,9 @@ const CONFIG = {
             ]
         },
     ],
-    eventMinInterval: 180, // 事件最小间隔（秒）
-    eventMaxInterval: 420, // 事件最大间隔（秒）
+    eventMinInterval: 1800, // 事件最小间隔（秒）= 30分钟
+    eventMaxInterval: 3600, // 事件最大间隔（秒）= 60分钟
+    eventMaxPerDay: 5, // 每天最多奇遇次数
 
     baseCultivation: 1.5,
     baseStone: 0.8,
@@ -336,8 +339,8 @@ const CONFIG = {
     comboMaxMultiplier: 2.0, // 最大连击倍率
     saveKey: 'xiuxian_idle_save_v3',
     autoSaveInterval: 30000,
-    maxOfflineHours: 8,
-    offlineEfficiency: 0.8, // 离线收益效率
+    maxOfflineHours: 48,
+    offlineEfficiency: 0.5, // 离线收益效率
     petInventoryMax: 20, // 灵宠背包上限
 };
 
@@ -388,6 +391,10 @@ let gameState = {
     talentPoints: 0,
     // 炼丹炼器
     alchemyCooldowns: {}, // { pillId: timestamp }
+    alchemyBatchSize: 1, // 批量炼丹数量
+    alchemyCooldownEnd: 0, // 全局炼丹冷却结束时间
+    forgeBatchSize: 1, // 批量炼器数量
+    forgeCooldownEnd: 0, // 全局炼器冷却结束时间
     forgeCooldowns: {}, // { qualityIndex: timestamp }
     // 阵法
     activeFormations: [], // [{ id, endTime }]
@@ -412,7 +419,7 @@ let gameState = {
     // 成就点数
     achievementPoints: 0,
     // 设置
-    settings: { soundEnabled: true, autoSaveInterval: 30, numberFormat: 'short', showFloatingText: true },
+    settings: { soundEnabled: true, autoSaveInterval: 30, numberFormat: 'short', showFloatingText: true, lockPassword: '', autoLockMinutes: 0 },
     // 冷却提醒
     lastCooldownState: {}, // { key: bool wasCooling }
     // 随机事件
@@ -527,7 +534,7 @@ function getUpgradeEffect(id) {
     const u = CONFIG.upgrades.find(x => x.id === id);
     const lv = gameState.upgrades[id];
     if (lv === 0) return 0;
-    return u.baseEffect * lv * Math.pow(1.02, lv);
+    return u.baseEffect * lv * Math.pow(u.effectMult, lv);
 }
 
 function getDiscipleCost() {
@@ -634,8 +641,8 @@ function getStonePerSecond() {
 }
 
 function getRebirthDaoGain() {
-    if (gameState.totalCultivation < 10000) return 0;
-    return Math.floor(Math.sqrt(gameState.totalCultivation / 10000));
+    if (gameState.totalCultivation < 5000) return 0;
+    return Math.max(3, Math.floor(Math.sqrt(gameState.totalCultivation / 5000)));
 }
 
 // ========== 游戏操作 ==========
@@ -728,6 +735,13 @@ function recruitDisciple() {
 }
 
 function rebirth() {
+    // 转世最低境界：筑基期
+    const minRebirthRealm = 1;
+    if (gameState.realmIndex < minRebirthRealm) {
+        addLog(`需达到${CONFIG.realms[minRebirthRealm].name}才能转世重修`, '');
+        SFX.error();
+        return false;
+    }
     const daoGain = getRebirthDaoGain();
     if (daoGain <= 0) { addLog('修为尚浅，转世无法获得道韵', ''); return false; }
     if (!confirm(`确定转世重修？\n重置修为、灵石、功法、弟子、丹药、法宝，获得 ${daoGain} 点道韵`)) return false;
@@ -782,8 +796,22 @@ function buyPill(id) {
 function usePill(id) {
     const pill = CONFIG.pills.find(p => p.id === id);
     if (!pill || !gameState.pills[id] || gameState.pills[id] <= 0) { SFX.error(); return false; }
+
+    // 每日服用限制
+    resetPillDailyUsage();
+    const used = gameState.pillDailyUsage[id] || 0;
+    if (used >= pill.dailyLimit) { addLog(`${pill.name}今日已达服用上限(${pill.dailyLimit}次)`, ''); SFX.error(); return false; }
+
+    // 同类Buff冲突：效果结束才能服用第二个
+    if (pill.effect === 'buff_cult' || pill.effect === 'buff_stone' || pill.effect === 'buff_both') {
+        if (hasActiveBuffOfType(pill.effect)) {
+            addLog('同类丹药效果尚未结束，请等待效果结束后再服用', ''); SFX.error(); return false;
+        }
+    }
+
     gameState.pills[id]--;
     gameState.pillsUsedCount++;
+    gameState.pillDailyUsage[id] = used + 1;
     SFX.pill();
 
     if (pill.effect === 'buff_cult' || pill.effect === 'buff_stone' || pill.effect === 'buff_both') {
@@ -800,10 +828,37 @@ function usePill(id) {
         const gain = getStonePerSecond() * pill.value;
         gameState.spiritStone += gain;
         addLog(`使用 ${pill.name}，获得 ${formatNumber(gain)} 灵石`, 'success');
+    } else if (pill.effect === 'heal') {
+        const healAmount = Math.floor(getMaxHp() * pill.value);
+        gameState.hp = Math.min(getMaxHp(), gameState.hp + healAmount);
+        addLog(`服用 ${pill.name}，恢复 ${healAmount} 生命值`, 'success');
+        showFloatingText(`+${healAmount} HP`);
     }
     checkAchievements();
     updateUI();
     return true;
+}
+
+// 重置每日丹药服用记录
+function resetPillDailyUsage() {
+    const today = getTodayStr();
+    if (gameState.lastPillResetDate !== today) {
+        gameState.pillDailyUsage = {};
+        gameState.enhancedDailyUsage = {};
+        gameState.lastPillResetDate = today;
+    }
+}
+
+// 检查是否有同类Buff在生效中
+function hasActiveBuffOfType(effect) {
+    const now = Date.now();
+    return gameState.activeBuffs.some(b => {
+        if (b.endTime <= now) return false;
+        if (effect === 'buff_both') return true; // 混元丹与所有buff冲突
+        if (b.type === 'both') return true; // 已有混元丹buff，所有buff冲突
+        const targetType = effect === 'buff_cult' ? 'cultivation' : 'stone';
+        return b.type === targetType;
+    });
 }
 
 // ========== 法宝系统 ==========
@@ -1022,20 +1077,83 @@ function applyOfflineEarnings(e) {
 
 // ========== UI 渲染 ==========
 let currentTab = 'cultivation';
+let upgradesCollapsed = true; // 功法列表默认收缩
 
 function switchTab(tabName) {
     currentTab = tabName;
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabName));
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.toggle('active', c.id === 'tab-' + tabName));
+    document.querySelectorAll('.center-tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabName));
+    document.querySelectorAll('.center-tab-content .tab-content').forEach(c => c.classList.toggle('active', c.id === 'tab-' + tabName));
+    renderActiveTabContent();
 }
 
-function updateUI() {
+function renderActiveTabContent() {
+    // 保存当前滚动位置，重建后恢复，避免滚动跳动
+    const activeEl = document.querySelector('.tab-content.active');
+    const savedScroll = activeEl ? activeEl.scrollTop : 0;
+
+    switch (currentTab) {
+        case 'cultivation':
+            renderUpgrades();
+            const dCost = getDiscipleCost();
+            document.getElementById('recruit-cost').textContent = `花费：${formatNumber(dCost)} 灵石`;
+            document.getElementById('recruit-btn').disabled = gameState.spiritStone < dCost || gameState.discipleCount >= CONFIG.disciple.maxCount;
+            break;
+        case 'pills':
+            renderPills();
+            renderSynthesis();
+            renderAlchemy();
+            renderHeavenlyItems();
+            break;
+        case 'artifacts':
+            renderArtifacts();
+            renderForge();
+            break;
+        case 'pets':
+            renderPets();
+            renderPetCollection();
+            break;
+        case 'formation':
+            renderFormations();
+            break;
+        case 'outing':
+            renderAdventures();
+            renderDungeons();
+            break;
+        case 'activity':
+            renderCheckin();
+            renderTasks();
+            renderAchievements();
+            renderAchievementShop();
+            renderStats();
+            renderTitles();
+            break;
+    }
+
+    // 恢复滚动位置
+    if (activeEl) activeEl.scrollTop = savedScroll;
+}
+
+// 快速更新：仅更新数字和进度条，不重建标签页DOM（每100ms调用，无闪烁）
+function updateFastUI() {
     // 资源
     document.getElementById('cultivation-amount').textContent = formatNumber(gameState.cultivation);
     document.getElementById('spirit-stone-amount').textContent = formatNumber(gameState.spiritStone);
     document.getElementById('dao-amount').textContent = gameState.dao;
     document.getElementById('cultivation-rate').textContent = `+${formatNumber(getCultivationPerSecond())}/秒`;
     document.getElementById('spirit-stone-rate').textContent = `+${formatNumber(getStonePerSecond())}/秒`;
+
+    // 战力
+    const powerEl = document.getElementById('power-value');
+    if (powerEl) powerEl.textContent = formatNumber(getPlayerPower());
+
+    // 血量
+    const maxHp = getMaxHp();
+    const hpFill = document.getElementById('hp-fill');
+    const hpText = document.getElementById('hp-text');
+    const hpRegen = document.getElementById('hp-regen-rate');
+    if (hpFill) hpFill.style.width = (gameState.hp / maxHp * 100) + '%';
+    if (hpText) hpText.textContent = `${Math.floor(gameState.hp)} / ${maxHp}`;
+    if (hpRegen) hpRegen.textContent = getHpRegenRate().toFixed(1);
 
     // 境界
     document.getElementById('realm-name').textContent = getRealmName();
@@ -1047,8 +1165,36 @@ function updateUI() {
     const btCost = document.getElementById('breakthrough-cost');
     const failRate = getBreakthroughFailRate();
     const successPct = Math.floor((1 - failRate) * 100);
-    if (gameState.cultivation >= cost) { btBtn.disabled = false; btCost.textContent = `消耗 ${formatNumber(cost)} 修为 (成功率${successPct}%)`; }
-    else { btBtn.disabled = true; btCost.textContent = `需要 ${formatNumber(cost)} 修为 (成功率${successPct}%)`; }
+    if (gameState.cultivation >= cost) { btBtn.disabled = false; btCost.textContent = `突破 ${successPct}%`; }
+    else { btBtn.disabled = true; btCost.textContent = `需${formatNumber(cost)}`; }
+
+    // 境界横幅
+    const realmNameEl = document.getElementById('realm-name-banner');
+    if (realmNameEl) realmNameEl.textContent = getRealmName();
+    const progressFill = document.getElementById('realm-progress-fill');
+    if (progressFill) progressFill.style.width = Math.min(gameState.cultivation / cost, 1) * 100 + '%';
+    const progressText = document.getElementById('realm-progress-text');
+    if (progressText) progressText.textContent = `${formatNumber(gameState.cultivation)} / ${formatNumber(cost)} 修为`;
+
+    // 中间面板数据
+    const centerCult = document.getElementById('center-cult-rate');
+    if (centerCult) centerCult.textContent = '+' + formatNumber(getCultivationPerSecond()) + '/秒';
+    const centerStone = document.getElementById('center-stone-rate');
+    if (centerStone) centerStone.textContent = '+' + formatNumber(getStonePerSecond()) + '/秒';
+    const centerPower = document.getElementById('center-power');
+    if (centerPower) centerPower.textContent = formatNumber(getPlayerPower());
+    const centerHp = document.getElementById('center-hp');
+    if (centerHp) centerHp.textContent = `${Math.floor(gameState.hp)}/${Math.floor(getMaxHp())}`;
+    const centerDisciple = document.getElementById('center-disciple');
+    if (centerDisciple) centerDisciple.textContent = gameState.discipleCount;
+    const centerDao = document.getElementById('center-dao');
+    if (centerDao) centerDao.textContent = gameState.dao;
+    const centerPlaytime = document.getElementById('center-playtime');
+    if (centerPlaytime) centerPlaytime.textContent = formatTime(gameState.playTime);
+    const centerBuff = document.getElementById('center-buff-count');
+    if (centerBuff) centerBuff.textContent = gameState.activeBuffs.length;
+    const centerTotalCult = document.getElementById('center-total-cult');
+    if (centerTotalCult) centerTotalCult.textContent = formatNumber(gameState.totalCultivation);
 
     // 统计
     document.getElementById('play-time').textContent = formatTime(gameState.playTime);
@@ -1058,56 +1204,80 @@ function updateUI() {
 
     // Buff
     renderActiveBuffs();
-    // 功法
-    renderUpgrades();
-    // 弟子
-    const dCost = getDiscipleCost();
-    document.getElementById('recruit-cost').textContent = `花费：${formatNumber(dCost)} 灵石`;
-    document.getElementById('recruit-btn').disabled = gameState.spiritStone < dCost || gameState.discipleCount >= CONFIG.disciple.maxCount;
-    // 丹药
-    renderPills();
-    // 法宝
-    renderArtifacts();
-    // 历练
-    renderAdventures();
-    // 成就
-    renderAchievements();
-    // 签到
-    renderCheckin();
-    // 任务
-    renderTasks();
-    // 丹药合成
-    renderSynthesis();
-    // 灵宠
-    renderPets();
-    // 秘境
-    renderDungeons();
-    // 炼丹
-    renderAlchemy();
-    // 炼器
-    renderForge();
-    // 阵法
-    renderFormations();
-    // 永久丹药
-    renderHeavenlyItems();
-    // 灵宠图鉴
-    renderPetCollection();
-    // 成就商店
-    renderAchievementShop();
-    // 设置
-    renderSettings();
-    // 统计
-    renderStats();
-    // 称号
-    renderTitles();
+
     // 阶段目标
     const goal = getCurrentGoal();
     const goalEl = document.getElementById('current-goal');
     if (goalEl) goalEl.textContent = goal ? `🎯 ${goal.desc}` : '🎉 所有目标已完成！';
     // 转世
     const daoGain = getRebirthDaoGain();
-    document.getElementById('rebirth-info').textContent = `获得道韵：${daoGain}`;
-    document.getElementById('rebirth-btn').disabled = daoGain <= 0;
+    const minRebirthRealm = 1;
+    const canRebirth = gameState.realmIndex >= minRebirthRealm && daoGain > 0;
+    const rebirthInfo = document.getElementById('rebirth-info');
+    if (rebirthInfo) {
+        if (gameState.realmIndex < minRebirthRealm) {
+            rebirthInfo.textContent = `需达到${CONFIG.realms[minRebirthRealm].name}才能转世`;
+        } else {
+            rebirthInfo.textContent = `获得道韵：${daoGain}`;
+        }
+    }
+    const rebirthBtn = document.getElementById('rebirth-btn');
+    if (rebirthBtn) rebirthBtn.disabled = !canRebirth;
+
+    // 轻量实时更新倒计时/进度条（不重建DOM，避免hover闪烁）
+    updateLiveElements();
+}
+
+// 完整更新：快速更新 + 重建当前标签页内容（每500ms或用户操作后调用）
+function updateFullUI() {
+    updateFastUI();
+    renderActiveTabContent();
+}
+
+// 兼容旧调用
+function updateUI() { updateFullUI(); }
+
+// 轻量实时更新：只更新倒计时/进度条文本，不重建DOM（避免hover闪烁）
+function updateLiveElements() {
+    const now = Date.now();
+    let needFullRender = false;
+
+    // 更新炼丹/炼器/秘境冷却
+    document.querySelectorAll('.craft-cooldown, .dungeon-cooldown').forEach(el => {
+        const end = parseInt(el.dataset.cdEnd);
+        if (end > now) {
+            el.textContent = `冷却中: ${formatCountdown((end - now) / 1000)}`;
+        } else {
+            needFullRender = true;
+        }
+    });
+
+    // 更新阵法剩余时间
+    document.querySelectorAll('.formation-time').forEach(el => {
+        const end = parseInt(el.dataset.endTime);
+        if (end > now) {
+            el.textContent = formatCountdown((end - now) / 1000);
+        } else {
+            needFullRender = true;
+        }
+    });
+
+    // 更新历练进度（外出标签）
+    if (currentTab === 'outing') {
+        const statusEl = document.getElementById('adventure-status');
+        if (statusEl && statusEl.classList.contains('active')) {
+            const progress = getAdventureProgress();
+            if (progress) {
+                const timerEl = statusEl.querySelector('.adv-timer');
+                const fillEl = statusEl.querySelector('.adv-progress-fill');
+                if (timerEl) timerEl.textContent = formatCountdown(progress.remaining);
+                if (fillEl) fillEl.style.width = (progress.progress * 100) + '%';
+                if (progress.remaining <= 0) needFullRender = true;
+            }
+        }
+    }
+
+    if (needFullRender) renderActiveTabContent();
 }
 
 function renderActiveBuffs() {
@@ -1133,7 +1303,8 @@ function getUpgradeEffectAtLevel(id, level) {
 function renderUpgrades() {
     const container = document.getElementById('upgrade-list');
     container.innerHTML = '';
-    CONFIG.upgrades.forEach(u => {
+    const visibleUpgrades = upgradesCollapsed ? CONFIG.upgrades.slice(0, 3) : CONFIG.upgrades;
+    visibleUpgrades.forEach(u => {
         const lv = gameState.upgrades[u.id];
         const cost = getUpgradeCost(u.id);
         const effect = getUpgradeEffect(u.id);
@@ -1159,22 +1330,40 @@ function renderUpgrades() {
         if (unlocked && !maxed) item.addEventListener('click', () => buyUpgrade(u.id));
         container.appendChild(item);
     });
+    // 更新展开/收缩按钮
+    const toggleBtn = document.getElementById('upgrade-toggle-btn');
+    if (toggleBtn) {
+        if (CONFIG.upgrades.length > 3) {
+            toggleBtn.style.display = 'block';
+            toggleBtn.textContent = upgradesCollapsed ? `展开全部功法 (${CONFIG.upgrades.length}个) ▼` : '收起功法 ▲';
+        } else {
+            toggleBtn.style.display = 'none';
+        }
+    }
 }
 
 function renderPills() {
     const container = document.getElementById('pill-list');
     container.innerHTML = '';
+    resetPillDailyUsage();
     CONFIG.pills.forEach(p => {
         const count = gameState.pills[p.id] || 0;
         const canAfford = gameState.spiritStone >= p.cost;
+        const used = gameState.pillDailyUsage[p.id] || 0;
+        const dailyLimitReached = used >= p.dailyLimit;
+        const buffConflict = (p.effect === 'buff_cult' || p.effect === 'buff_stone' || p.effect === 'buff_both') && hasActiveBuffOfType(p.effect);
+        const canUse = count > 0 && !dailyLimitReached && !buffConflict;
         const item = document.createElement('div');
         item.className = 'pill-item' + (!canAfford ? ' cant-afford' : '');
+        let statusText = `今日:${used}/${p.dailyLimit}`;
+        if (buffConflict) statusText += ' ⚠同类生效中';
         item.innerHTML = `
             <div class="pill-header"><span class="pill-name">${p.icon} ${p.name}</span><span class="pill-count">x${count}</span></div>
             <div class="pill-desc">${p.desc}</div>
+            <div class="pill-daily-info">${statusText}</div>
             <div class="pill-actions">
                 <button class="pill-btn" ${!canAfford ? 'disabled' : ''} data-action="buy" data-id="${p.id}">购买 ${formatNumber(p.cost)}灵石</button>
-                <button class="pill-btn use-btn" ${count <= 0 ? 'disabled' : ''} data-action="use" data-id="${p.id}">使用</button>
+                <button class="pill-btn use-btn" ${!canUse ? 'disabled' : ''} data-action="use" data-id="${p.id}">使用</button>
             </div>`;
         container.appendChild(item);
     });
@@ -1355,6 +1544,7 @@ function startGame(slotIndex) {
     }
     gameStarted = true;
     lastTickTime = Date.now();
+    resetAutoLockTimer();
     resetDailyTasks();
     document.getElementById('start-screen').classList.add('hidden');
     addLog(info ? `读取存档 ${slotIndex + 1} 成功，当前境界：${getRealmName()}` : '开始新的修仙之旅！', 'success');
@@ -1366,20 +1556,36 @@ function startGame(slotIndex) {
 function renderCheckin() {
     const container = document.getElementById('checkin-area');
     if (!container) return;
-    let html = '';
-    CONFIG.checkinRewards.forEach((r, i) => {
-        const day = i + 1;
-        const claimed = gameState.checkinStreak > day || (gameState.checkinStreak === day && !canCheckin());
-        const isToday = canCheckin() && gameState.checkinStreak + 1 === day;
-        html += `<div class="checkin-day ${claimed ? 'claimed' : ''} ${isToday ? 'today' : ''}">
-            <span class="day-num">${day}</span>
-            <span class="day-reward">${r.desc}</span>
-        </div>`;
-    });
-    html += `<button class="checkin-btn" ${canCheckin() ? '' : 'disabled'}>${canCheckin() ? '每日签到' : '今日已签到'}</button>`;
-    container.innerHTML = html;
+    const checked = !canCheckin();
+    const streak = gameState.checkinStreak || 0;
+    container.innerHTML = `
+        <div style="text-align:center;margin-bottom:10px;font-size:13px;color:var(--text-secondary)">
+            连续签到：<span style="color:var(--text-gold);font-weight:bold">${streak}</span> 天
+            ${checked ? '<span style="color:var(--success);margin-left:8px">今日已签到</span>' : ''}
+        </div>
+        <button class="checkin-btn" ${checked ? 'disabled' : ''}>${checked ? '今日已签到' : '每日签到'}</button>
+    `;
     const btn = container.querySelector('.checkin-btn');
     if (btn) btn.addEventListener('click', doCheckin);
+}
+
+// 显示签到奖励弹窗
+function showCheckinReward(reward, amount, extraName) {
+    const modal = document.getElementById('checkin-modal');
+    if (!modal) return;
+    const rewardText = document.getElementById('checkin-reward-text');
+    const rewardIcon = document.getElementById('checkin-reward-icon');
+    let icon = '🎁';
+    let text = '';
+    if (reward.type === 'stone') { icon = '💎'; text = `${formatNumber(amount)} 灵石`; }
+    else if (reward.type === 'cult') { icon = '✦'; text = `${formatNumber(amount)} 修为`; }
+    else if (reward.type === 'dao') { icon = '❖'; text = `${reward.amount} 道韵`; }
+    else if (reward.type === 'pill') { icon = '💊'; text = `${extraName} x1`; }
+    else if (reward.type === 'artifact') { icon = '⚔'; text = `法宝【${extraName}】`; }
+    rewardIcon.textContent = icon;
+    rewardText.textContent = text;
+    document.getElementById('checkin-streak-text').textContent = `连续签到第 ${gameState.checkinStreak} 天`;
+    modal.classList.remove('hidden');
 }
 
 // ========== 任务渲染 ==========
@@ -1513,7 +1719,7 @@ function renderDungeons() {
                 <span class="dungeon-power-req">推荐战力:${formatNumber(d.powerReq)} (成功率${successRate}%)</span>
                 <span class="dungeon-reward">消耗:${formatNumber(d.cost)}灵石</span>
             </div>
-            ${cooling ? `<div class="dungeon-cooldown">冷却中: ${formatCountdown((cd - Date.now()) / 1000)}</div>` : ''}
+            ${cooling ? `<div class="dungeon-cooldown" data-cd-end="${cd}">冷却中: ${formatCountdown((cd - Date.now()) / 1000)}</div>` : ''}
             ${!unlocked ? `<div class="dungeon-desc" style="color:var(--accent-red)">境界不足，无法挑战</div>` : ''}`;
         if (unlocked && !cooling && canAfford) {
             item.addEventListener('click', () => challengeDungeon(d.id));
@@ -1523,25 +1729,42 @@ function renderDungeons() {
 }
 
 // ========== 炼丹渲染 ==========
+function renderBatchSelector(containerId, batchKey, sizes) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const current = gameState[batchKey] || 1;
+    container.innerHTML = `<label>批量：</label><div class="batch-btns">` +
+        sizes.map(s => `<button class="batch-btn${s === current ? ' active' : ''}" data-size="${s}" data-key="${batchKey}">x${s}</button>`).join('') +
+        `</div>`;
+    container.querySelectorAll('.batch-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            gameState[btn.dataset.key] = parseInt(btn.dataset.size);
+            renderActiveTabContent();
+        });
+    });
+}
+
 function renderAlchemy() {
     const container = document.getElementById('alchemy-list');
     if (!container) return;
+    renderBatchSelector('alchemy-batch-selector', 'alchemyBatchSize', [1, 5, 10, 20, 50]);
     container.innerHTML = '';
+    const globalCd = gameState.alchemyCooldownEnd || 0;
+    const cooling = Date.now() < globalCd;
     CONFIG.alchemyRecipes.forEach(recipe => {
         const pill = CONFIG.pills.find(p => p.id === recipe.pillId);
-        const cd = gameState.alchemyCooldowns[recipe.pillId] || 0;
-        const cooling = Date.now() < cd;
-        const canAfford = gameState.spiritStone >= recipe.cost;
+        const batchSize = gameState.alchemyBatchSize || 1;
+        const totalCost = recipe.cost * batchSize;
+        const canAfford = gameState.spiritStone >= totalCost;
         const item = document.createElement('div');
         item.className = 'craft-item' + (cooling || !canAfford ? ' disabled' : '');
         item.innerHTML = `
             <div class="craft-header"><span class="craft-name">${pill.icon} 炼制${pill.name}</span><span class="craft-rate">成功率${Math.floor(recipe.successRate*100)}%</span></div>
             <div class="craft-desc">比购买便宜${Math.floor((1 - recipe.cost/pill.cost)*100)}%，失败损失灵石</div>
-            <div class="craft-info">消耗:${recipe.cost}灵石 | 冷却:${recipe.cooldown}秒</div>
-            ${cooling ? `<div class="craft-cooldown">冷却中: ${formatCountdown((cd - Date.now()) / 1000)}</div>` : `<div style="display:flex;gap:4px"><button class="craft-btn" ${!canAfford ? 'disabled' : ''}>炼丹</button><button class="craft-btn" ${!canAfford ? 'disabled' : ''} id="batch-alch-${recipe.pillId}">连续</button></div>`}`;
+            <div class="craft-info">消耗:${formatNumber(totalCost)}灵石(x${batchSize}) | 冷却:${recipe.cooldown}秒</div>
+            ${cooling ? `<div class="craft-cooldown" data-cd-end="${globalCd}">丹炉冷却中: ${formatCountdown((globalCd - Date.now()) / 1000)}</div>` : `<button class="craft-btn" ${!canAfford ? 'disabled' : ''}>炼丹 x${batchSize}</button>`}`;
         if (!cooling && canAfford) {
             item.querySelector('.craft-btn').addEventListener('click', (e) => { e.stopPropagation(); alchemyPill(recipe.pillId); });
-            item.querySelector(`#batch-alch-${recipe.pillId}`).addEventListener('click', (e) => { e.stopPropagation(); batchAlchemy(recipe.pillId); });
         }
         container.appendChild(item);
     });
@@ -1551,22 +1774,24 @@ function renderAlchemy() {
 function renderForge() {
     const container = document.getElementById('forge-list');
     if (!container) return;
+    renderBatchSelector('forge-batch-selector', 'forgeBatchSize', [1, 5, 10, 20, 50]);
     container.innerHTML = '';
+    const globalCd = gameState.forgeCooldownEnd || 0;
+    const cooling = Date.now() < globalCd;
     CONFIG.forgeRecipes.forEach(recipe => {
-        const cd = gameState.forgeCooldowns[recipe.qualityIndex] || 0;
-        const cooling = Date.now() < cd;
-        const canAfford = gameState.spiritStone >= recipe.cost;
+        const batchSize = gameState.forgeBatchSize || 1;
+        const totalCost = recipe.cost * batchSize;
+        const canAfford = gameState.spiritStone >= totalCost;
         const quality = CONFIG.artifactQualities[recipe.qualityIndex];
         const item = document.createElement('div');
         item.className = 'craft-item quality-' + quality.color + (cooling || !canAfford ? ' disabled' : '');
         item.innerHTML = `
             <div class="craft-header"><span class="craft-name">炼制${recipe.name}</span><span class="craft-rate">成功率${Math.floor(recipe.successRate*100)}%</span></div>
             <div class="craft-desc">成功获得随机类型的${quality.name}法宝</div>
-            <div class="craft-info">消耗:${recipe.cost}灵石 | 冷却:${recipe.cooldown}秒</div>
-            ${cooling ? `<div class="craft-cooldown">冷却中: ${formatCountdown((cd - Date.now()) / 1000)}</div>` : `<div style="display:flex;gap:4px"><button class="craft-btn" ${!canAfford ? 'disabled' : ''}>炼器</button><button class="craft-btn" ${!canAfford ? 'disabled' : ''} id="batch-forge-${recipe.qualityIndex}">连续</button></div>`}`;
+            <div class="craft-info">消耗:${formatNumber(totalCost)}灵石(x${batchSize}) | 冷却:${recipe.cooldown}秒</div>
+            ${cooling ? `<div class="craft-cooldown" data-cd-end="${globalCd}">炼器炉冷却中: ${formatCountdown((globalCd - Date.now()) / 1000)}</div>` : `<button class="craft-btn" ${!canAfford ? 'disabled' : ''}>炼器 x${batchSize}</button>`}`;
         if (!cooling && canAfford) {
             item.querySelector('.craft-btn').addEventListener('click', (e) => { e.stopPropagation(); forgeArtifact(recipe.qualityIndex); });
-            item.querySelector(`#batch-forge-${recipe.qualityIndex}`).addEventListener('click', (e) => { e.stopPropagation(); batchForge(recipe.qualityIndex); });
         }
         container.appendChild(item);
     });
@@ -1589,7 +1814,7 @@ function renderFormations() {
                 const remain = Math.floor((f.endTime - now) / 1000);
                 const item = document.createElement('div');
                 item.className = 'formation-active';
-                item.innerHTML = `<span>${formation.icon} ${formation.name}</span><span class="formation-time">${formatCountdown(remain)}</span>`;
+                item.innerHTML = `<span>${formation.icon} ${formation.name}</span><span class="formation-time" data-end-time="${f.endTime}">${formatCountdown(remain)}</span>`;
                 activeContainer.appendChild(item);
             });
         }
@@ -1667,17 +1892,7 @@ function showProductionDetails() {
 }
 
 // ========== 批量操作 ==========
-function batchAlchemy(pillId) {
-    let count = 0;
-    while (alchemyPill(pillId)) count++;
-    if (count > 0) addLog(`连续炼丹${count}次`, 'success');
-}
-
-function batchForge(qualityIndex) {
-    let count = 0;
-    while (forgeArtifact(qualityIndex)) count++;
-    if (count > 0) addLog(`连续炼器${count}次`, 'success');
-}
+// 旧批量函数已移除，批量功能集成到炼丹/炼器主按钮中
 
 function batchUpgrade(id) {
     let count = 0;
@@ -1692,8 +1907,8 @@ function batchUpgrade(id) {
 function checkCooldownNotifications() {
     const now = Date.now();
     const checks = [
-        ...CONFIG.alchemyRecipes.map(r => ({ key: 'alch_' + r.pillId, cd: gameState.alchemyCooldowns[r.pillId] || 0, name: '炼丹[' + (CONFIG.pills.find(p=>p.id===r.pillId)?.name || '') + ']' })),
-        ...CONFIG.forgeRecipes.map(r => ({ key: 'forge_' + r.qualityIndex, cd: gameState.forgeCooldowns[r.qualityIndex] || 0, name: '炼器[' + r.name + ']' })),
+        { key: 'alchemy_global', cd: gameState.alchemyCooldownEnd || 0, name: '炼丹炉' },
+        { key: 'forge_global', cd: gameState.forgeCooldownEnd || 0, name: '炼器炉' },
         ...CONFIG.dungeons.map(d => ({ key: 'dung_' + d.id, cd: gameState.dungeonCooldowns[d.id] || 0, name: '秘境[' + d.name + ']' })),
     ];
     checks.forEach(c => {
@@ -1874,7 +2089,7 @@ function renderAchievementShop() {
 
 // ========== 设置渲染 ==========
 function renderSettings() {
-    const container = document.getElementById('settings-panel');
+    const container = document.getElementById('settings-panel-modal');
     if (!container) return;
     const s = gameState.settings;
     container.innerHTML = `
@@ -1906,11 +2121,52 @@ function renderSettings() {
                 <button class="craft-btn" style="width:80px" id="set-float">${s.showFloatingText ? '开启' : '关闭'}</button>
             </label>
         </div>
+        <div class="lock-setting-row">
+            <label>锁屏密码${s.lockPassword ? '（已设置）' : '（未设置）'}</label>
+            <input type="password" id="set-lockpwd" placeholder="输入新密码，留空则清除" autocomplete="off">
+            <div class="lock-setting-btns">
+                <button id="set-lockpwd-save">保存密码</button>
+                <button id="set-lockpwd-clear">清除密码</button>
+            </div>
+        </div>
+        <div class="lock-setting-row">
+            <label>自动锁屏（无操作后）</label>
+            <select id="set-autolock" style="width:100%;padding:6px;background:var(--bg-panel);color:var(--text-primary);border:1px solid var(--border-gold);border-radius:4px">
+                <option value="0" ${s.autoLockMinutes===0?'selected':''}>关闭</option>
+                <option value="1" ${s.autoLockMinutes===1?'selected':''}>1分钟</option>
+                <option value="3" ${s.autoLockMinutes===3?'selected':''}>3分钟</option>
+                <option value="5" ${s.autoLockMinutes===5?'selected':''}>5分钟</option>
+                <option value="10" ${s.autoLockMinutes===10?'selected':''}>10分钟</option>
+                <option value="30" ${s.autoLockMinutes===30?'selected':''}>30分钟</option>
+            </select>
+        </div>
         <div style="font-size:11px;color:var(--text-muted);margin-top:8px">当前称号：${getCurrentTitleName()}</div>`;
     document.getElementById('set-sound').addEventListener('click', () => { gameState.settings.soundEnabled = !gameState.settings.soundEnabled; gameState.soundEnabled = gameState.settings.soundEnabled; renderSettings(); });
     document.getElementById('set-autosave').addEventListener('change', (e) => { gameState.settings.autoSaveInterval = parseInt(e.target.value); });
     document.getElementById('set-numfmt').addEventListener('change', (e) => { gameState.settings.numberFormat = e.target.value; updateUI(); });
     document.getElementById('set-float').addEventListener('click', () => { gameState.settings.showFloatingText = !gameState.settings.showFloatingText; renderSettings(); });
+    document.getElementById('set-lockpwd-save').addEventListener('click', () => {
+        const val = document.getElementById('set-lockpwd').value.trim();
+        if (val) {
+            setLockPassword(val);
+            alert('锁屏密码已设置');
+        } else {
+            alert('密码不能为空');
+        }
+        renderSettings();
+    });
+    document.getElementById('set-lockpwd-clear').addEventListener('click', () => {
+        if (confirm('确定清除锁屏密码？清除后将无法使用锁屏功能。')) {
+            setLockPassword('');
+            alert('锁屏密码已清除');
+            renderSettings();
+        }
+    });
+    document.getElementById('set-autolock').addEventListener('change', (e) => {
+        gameState.settings.autoLockMinutes = parseInt(e.target.value);
+        resetAutoLockTimer();
+        saveGame();
+    });
 }
 
 // ========== 数据统计渲染 ==========
@@ -2125,6 +2381,10 @@ const SaveManager = {
         if (!gameState.dungeonCooldowns) gameState.dungeonCooldowns = {};
         if (gameState.talentPoints === undefined) gameState.talentPoints = 0;
         if (!gameState.alchemyCooldowns) gameState.alchemyCooldowns = {};
+        if (gameState.alchemyBatchSize === undefined) gameState.alchemyBatchSize = 1;
+        if (!gameState.alchemyCooldownEnd) gameState.alchemyCooldownEnd = 0;
+        if (gameState.forgeBatchSize === undefined) gameState.forgeBatchSize = 1;
+        if (!gameState.forgeCooldownEnd) gameState.forgeCooldownEnd = 0;
         if (!gameState.forgeCooldowns) gameState.forgeCooldowns = {};
         if (!gameState.activeFormations) gameState.activeFormations = [];
         if (!gameState.heavenlyUsed) gameState.heavenlyUsed = {};
@@ -2141,9 +2401,19 @@ const SaveManager = {
         if (!gameState.unlockedTitles) gameState.unlockedTitles = [];
         if (!gameState.currentTitle) gameState.currentTitle = '';
         if (gameState.achievementPoints === undefined) gameState.achievementPoints = 0;
-        if (!gameState.settings) gameState.settings = { soundEnabled: true, autoSaveInterval: 30, numberFormat: 'short', showFloatingText: true };
+        if (!gameState.settings) gameState.settings = { soundEnabled: true, autoSaveInterval: 30, numberFormat: 'short', showFloatingText: true, lockPassword: '', autoLockMinutes: 0 };
+        if (gameState.settings.lockPassword === undefined) gameState.settings.lockPassword = '';
+        if (gameState.settings.autoLockMinutes === undefined) gameState.settings.autoLockMinutes = 0;
         if (!gameState.lastCooldownState) gameState.lastCooldownState = {};
         if (!gameState.nextEventTime) gameState.nextEventTime = 0;
+        if (!gameState.eventQueue) gameState.eventQueue = [];
+        if (gameState.eventCountToday === undefined) gameState.eventCountToday = 0;
+        if (!gameState.lastEventDate) gameState.lastEventDate = getTodayStr();
+        if (!gameState.pillDailyUsage) gameState.pillDailyUsage = {};
+        if (!gameState.enhancedDailyUsage) gameState.enhancedDailyUsage = {};
+        if (!gameState.lastPillResetDate) gameState.lastPillResetDate = getTodayStr();
+        if (gameState.hp === undefined) gameState.hp = 100;
+        if (gameState.maxHp === undefined) gameState.maxHp = 100;
     },
 
     // 本地文件夹存储（File System Access API）
@@ -2207,21 +2477,25 @@ function doCheckin() {
     gameState.lastCheckinDate = getTodayStr();
     const dayIndex = (gameState.checkinStreak - 1) % 7;
     const reward = CONFIG.checkinRewards[dayIndex];
-    const realmScale = 1 + gameState.realmIndex * 0.5;
+    const realmScale = 1 + gameState.realmIndex * 3;
+    let rewardAmount = 0;
+    let rewardExtraName = '';
 
     // 发放奖励
-    if (reward.type === 'stone') { const amt = Math.floor(reward.amount * realmScale); gameState.spiritStone += amt; addLog(`签到获得${formatNumber(amt)}灵石`, 'success'); }
-    else if (reward.type === 'cult') { const amt = Math.floor(reward.amount * realmScale); gameState.cultivation += amt; gameState.totalCultivation += amt; addLog(`签到获得${formatNumber(amt)}修为`, 'success'); }
-    else if (reward.type === 'dao') { gameState.dao += reward.amount; addLog(`签到获得${reward.amount}道韵`, 'success'); }
+    if (reward.type === 'stone') { rewardAmount = Math.floor(reward.amount * realmScale); gameState.spiritStone += rewardAmount; addLog(`签到获得${formatNumber(rewardAmount)}灵石`, 'success'); }
+    else if (reward.type === 'cult') { rewardAmount = Math.floor(reward.amount * realmScale); gameState.cultivation += rewardAmount; gameState.totalCultivation += rewardAmount; addLog(`签到获得${formatNumber(rewardAmount)}修为`, 'success'); }
+    else if (reward.type === 'dao') { rewardAmount = reward.amount; gameState.dao += reward.amount; addLog(`签到获得${reward.amount}道韵`, 'success'); }
     else if (reward.type === 'pill') {
         const pill = CONFIG.pills[Math.floor(Math.random() * CONFIG.pills.length)];
         gameState.pills[pill.id] = (gameState.pills[pill.id] || 0) + 1;
+        rewardExtraName = pill.name;
         addLog(`签到获得 ${pill.name} x1`, 'success');
     }
     else if (reward.type === 'artifact') {
         const art = generateArtifact();
         gameState.artifactInventory.push(art);
         gameState.artifactFoundCount++;
+        rewardExtraName = art.name;
         addLog(`签到获得法宝【${art.name}】`, 'breakthrough');
     }
 
@@ -2229,6 +2503,8 @@ function doCheckin() {
     addLog(`签到成功！第${gameState.checkinStreak}天，获得${reward.desc}`, 'success');
     checkAchievements();
     updateUI();
+    // 弹出奖励弹窗
+    showCheckinReward(reward, rewardAmount, rewardExtraName);
     return true;
 }
 
@@ -2253,6 +2529,7 @@ function getTaskProgress(taskId) {
     if (task.type === 'adventure') return gameState.adventureCompleteCount || 0;
     if (task.type === 'pill') return gameState.pillsUsedCount || 0;
     if (task.type === 'recruit') return gameState.discipleCount > 0 ? 1 : 0;
+    if (task.type === 'forge') return gameState.forgeSuccessCount || 0;
     return 0;
 }
 
@@ -2261,7 +2538,7 @@ function claimTask(taskId) {
     if (!task || gameState.taskClaimed[taskId]) return false;
     if (getTaskProgress(taskId) < task.target) { SFX.error(); return false; }
     gameState.taskClaimed[taskId] = true;
-    const realmScale = 1 + gameState.realmIndex * 0.5;
+    const realmScale = 1 + gameState.realmIndex * 3;
     if (task.reward.stone) { const amt = Math.floor(task.reward.stone * realmScale); gameState.spiritStone += amt; addLog(`完成任务【${task.name}】，获得${formatNumber(amt)}灵石`, 'success'); }
     if (task.reward.dao) { gameState.dao += task.reward.dao; addLog(`完成任务【${task.name}】，获得${task.reward.dao}道韵`, 'success'); }
     SFX.reward();
@@ -2274,7 +2551,22 @@ function synthesizePill(pillId) {
     const pill = CONFIG.pills.find(p => p.id === pillId);
     if (!pill) return false;
     if ((gameState.pills[pillId] || 0) < 3) { addLog('丹药不足，需要3颗', ''); SFX.error(); return false; }
+
+    // 强化版每日限制（普通丹药dailyLimit的一半，至少1次）
+    resetPillDailyUsage();
+    const enhancedLimit = Math.max(1, Math.floor(pill.dailyLimit / 2));
+    const enhancedUsed = gameState.enhancedDailyUsage[pillId] || 0;
+    if (enhancedUsed >= enhancedLimit) { addLog(`强化${pill.name}今日已达上限(${enhancedLimit}次)`, ''); SFX.error(); return false; }
+
+    // 同类Buff冲突
+    if (pill.effect === 'buff_cult' || pill.effect === 'buff_stone' || pill.effect === 'buff_both') {
+        if (hasActiveBuffOfType(pill.effect)) {
+            addLog('同类丹药效果尚未结束，请等待效果结束后再合成', ''); SFX.error(); return false;
+        }
+    }
+
     gameState.pills[pillId] -= 3;
+    gameState.enhancedDailyUsage[pillId] = enhancedUsed + 1;
     // 合成强化版：效果翻倍，持续时间不变（对buff类）或数值翻倍（对即时类）
     if (pill.effect === 'buff_cult' || pill.effect === 'buff_stone' || pill.effect === 'buff_both') {
         const type = pill.effect === 'buff_cult' ? 'cultivation' : pill.effect === 'buff_stone' ? 'stone' : 'both';
@@ -2288,6 +2580,10 @@ function synthesizePill(pillId) {
         const gain = getStonePerSecond() * pill.value * 2;
         gameState.spiritStone += gain;
         addLog(`合成强化${pill.name}，获得${formatNumber(gain)}灵石`, 'success');
+    } else if (pill.effect === 'heal') {
+        const healAmount = Math.floor(getMaxHp() * pill.value * 2);
+        gameState.hp = Math.min(getMaxHp(), gameState.hp + healAmount);
+        addLog(`合成强化${pill.name}，恢复${healAmount}生命值`, 'success');
     }
     gameState.pillsUsedCount++;
     SFX.pill();
@@ -2410,21 +2706,34 @@ function canAddPet() {
 function alchemyPill(pillId) {
     const recipe = CONFIG.alchemyRecipes.find(r => r.pillId === pillId);
     if (!recipe) return false;
-    const cd = gameState.alchemyCooldowns[pillId] || 0;
-    if (Date.now() < cd) { addLog('丹炉冷却中', ''); SFX.error(); return false; }
-    if (gameState.spiritStone < recipe.cost) { addLog('灵石不足，无法炼丹', ''); SFX.error(); return false; }
-    gameState.spiritStone -= recipe.cost;
-    gameState.alchemyCooldowns[pillId] = Date.now() + recipe.cooldown * 1000;
+    // 全局冷却：同时只能炼一种丹药
+    if (Date.now() < gameState.alchemyCooldownEnd) { addLog('丹炉冷却中', ''); SFX.error(); return false; }
+    const batchSize = gameState.alchemyBatchSize || 1;
+    const totalCost = recipe.cost * batchSize;
+    if (gameState.spiritStone < totalCost) { addLog(`灵石不足，批量炼丹需要${formatNumber(totalCost)}灵石`, ''); SFX.error(); return false; }
+    gameState.spiritStone -= totalCost;
+    // 批量炼制
+    let successCount = 0;
+    let failCount = 0;
     const pill = CONFIG.pills.find(p => p.id === pillId);
-    if (Math.random() < recipe.successRate) {
-        gameState.pills[pillId] = (gameState.pills[pillId] || 0) + 1;
-        gameState.alchemySuccessCount = (gameState.alchemySuccessCount || 0) + 1;
+    for (let i = 0; i < batchSize; i++) {
+        if (Math.random() < recipe.successRate) {
+            gameState.pills[pillId] = (gameState.pills[pillId] || 0) + 1;
+            gameState.alchemySuccessCount = (gameState.alchemySuccessCount || 0) + 1;
+            successCount++;
+        } else {
+            gameState.alchemyFailCount = (gameState.alchemyFailCount || 0) + 1;
+            failCount++;
+        }
+    }
+    // 设置全局冷却（批量不增加冷却时间，鼓励批量）
+    gameState.alchemyCooldownEnd = Date.now() + recipe.cooldown * 1000;
+    if (successCount > 0) {
         SFX.reward();
-        addLog(`炼丹成功！获得【${pill.name}】x1（成功率${Math.floor(recipe.successRate*100)}%）`, 'success');
+        addLog(`炼丹完成！成功${successCount}次，失败${failCount}次，获得【${pill.name}】x${successCount}`, 'success');
     } else {
-        gameState.alchemyFailCount = (gameState.alchemyFailCount || 0) + 1;
         SFX.error();
-        addLog(`炼丹失败！丹药炸炉，损失${recipe.cost}灵石（成功率${Math.floor(recipe.successRate*100)}%）`, '');
+        addLog(`炼丹全部失败！${batchSize}颗丹药全部炸炉，损失${formatNumber(totalCost)}灵石`, '');
     }
     updateUI();
     return true;
@@ -2434,22 +2743,34 @@ function alchemyPill(pillId) {
 function forgeArtifact(qualityIndex) {
     const recipe = CONFIG.forgeRecipes.find(r => r.qualityIndex === qualityIndex);
     if (!recipe) return false;
-    const cd = gameState.forgeCooldowns[qualityIndex] || 0;
-    if (Date.now() < cd) { addLog('炼器炉冷却中', ''); SFX.error(); return false; }
-    if (gameState.spiritStone < recipe.cost) { addLog('灵石不足，无法炼器', ''); SFX.error(); return false; }
-    gameState.spiritStone -= recipe.cost;
-    gameState.forgeCooldowns[qualityIndex] = Date.now() + recipe.cooldown * 1000;
-    if (Math.random() < recipe.successRate) {
-        const art = generateArtifact(qualityIndex);
-        gameState.artifactInventory.push(art);
-        gameState.artifactFoundCount++;
-        gameState.forgeSuccessCount = (gameState.forgeSuccessCount || 0) + 1;
+    // 全局冷却：同时只能炼一种法宝
+    if (Date.now() < gameState.forgeCooldownEnd) { addLog('炼器炉冷却中', ''); SFX.error(); return false; }
+    const batchSize = gameState.forgeBatchSize || 1;
+    const totalCost = recipe.cost * batchSize;
+    if (gameState.spiritStone < totalCost) { addLog(`灵石不足，批量炼器需要${formatNumber(totalCost)}灵石`, ''); SFX.error(); return false; }
+    gameState.spiritStone -= totalCost;
+    let successCount = 0;
+    let failCount = 0;
+    const quality = CONFIG.artifactQualities[qualityIndex];
+    for (let i = 0; i < batchSize; i++) {
+        if (Math.random() < recipe.successRate) {
+            const art = generateArtifact(qualityIndex);
+            gameState.artifactInventory.push(art);
+            gameState.artifactFoundCount++;
+            gameState.forgeSuccessCount = (gameState.forgeSuccessCount || 0) + 1;
+            successCount++;
+        } else {
+            gameState.forgeFailCount = (gameState.forgeFailCount || 0) + 1;
+            failCount++;
+        }
+    }
+    gameState.forgeCooldownEnd = Date.now() + recipe.cooldown * 1000;
+    if (successCount > 0) {
         SFX.achievement();
-        addLog(`炼器成功！获得【${art.name}】（成功率${Math.floor(recipe.successRate*100)}%）`, 'breakthrough');
+        addLog(`炼器完成！成功${successCount}件${quality.name}法宝，失败${failCount}件`, 'breakthrough');
     } else {
-        gameState.forgeFailCount = (gameState.forgeFailCount || 0) + 1;
         SFX.error();
-        addLog(`炼器失败！法宝损毁，损失${recipe.cost}灵石（成功率${Math.floor(recipe.successRate*100)}%）`, '');
+        addLog(`炼器全部失败！${batchSize}件法宝全部损毁，损失${formatNumber(totalCost)}灵石`, '');
     }
     checkAchievements();
     updateUI();
@@ -2497,6 +2818,54 @@ function getPlayerPower() {
     return Math.floor(power);
 }
 
+// 最大生命值：基础100 + 境界加成 + 战力加成
+function getMaxHp() {
+    const base = 100;
+    const realmBonus = gameState.realmIndex * 50 + gameState.realmLayer * 10;
+    const powerBonus = Math.floor(getPlayerPower() / 10);
+    return base + realmBonus + powerBonus;
+}
+
+// 生命恢复速率：基础1/秒 + 境界加成
+function getHpRegenRate() {
+    return 1 + gameState.realmIndex * 0.5;
+}
+
+// 战力详情拆解
+function getPowerBreakdown() {
+    const items = [];
+    items.push({ name: '境界', value: gameState.realmIndex * 100 + gameState.realmLayer * 10 });
+    let upgradePower = 0;
+    CONFIG.upgrades.forEach(u => { upgradePower += gameState.upgrades[u.id] * (u.effect === 'both' ? 3 : 2); });
+    items.push({ name: '功法升级', value: upgradePower });
+    items.push({ name: '弟子', value: gameState.discipleCount * 5 });
+    const artPower = getArtifactBonus('cultivation') + getArtifactBonus('stone');
+    items.push({ name: '法宝', value: artPower });
+    let petPower = 0;
+    if (gameState.activePet) {
+        const b = getPetBonus(gameState.activePet);
+        petPower = (b.cultivation + b.stone) * 2;
+    }
+    items.push({ name: '灵宠', value: petPower });
+    items.push({ name: '道韵', value: gameState.dao * 10 });
+    return items;
+}
+
+function showPowerModal() {
+    const modal = document.getElementById('power-modal');
+    if (!modal) return;
+    document.getElementById('power-total-value').textContent = formatNumber(getPlayerPower());
+    const list = document.getElementById('power-breakdown-list');
+    const items = getPowerBreakdown();
+    list.innerHTML = items.map(it => `
+        <div class="power-breakdown-item">
+            <span>${it.name}</span>
+            <span class="power-breakdown-value">+${formatNumber(it.value)}</span>
+        </div>
+    `).join('');
+    modal.classList.remove('hidden');
+}
+
 function canChallengeDungeon(dungeonId) {
     const d = CONFIG.dungeons.find(x => x.id === dungeonId);
     if (!d) return false;
@@ -2510,12 +2879,18 @@ function canChallengeDungeon(dungeonId) {
 function challengeDungeon(dungeonId) {
     const d = CONFIG.dungeons.find(x => x.id === dungeonId);
     if (!d || !canChallengeDungeon(dungeonId)) { SFX.error(); return false; }
+    // 血量不足20%无法挑战
+    if (gameState.hp < getMaxHp() * 0.2) { addLog('生命值不足20%，无法挑战秘境，请先恢复', ''); SFX.error(); return false; }
     gameState.spiritStone -= d.cost;
     gameState.dungeonCooldowns[dungeonId] = Date.now() + d.cooldown * 1000;
 
     const power = getPlayerPower();
     const successRate = Math.min(0.95, power / d.powerReq);
     const success = Math.random() < successRate;
+    // 战斗伤害：秘境越强、玩家越弱，伤害越高
+    const damageRatio = Math.max(0.05, Math.min(0.4, d.powerReq / Math.max(power, 1) * 0.15));
+    const damage = Math.floor(getMaxHp() * damageRatio * (success ? 0.5 : 1.2));
+    gameState.hp = Math.max(1, gameState.hp - damage);
 
     if (success) {
         const cultGain = d.cultReward * (1 + gameState.realmIndex * 0.3);
@@ -2541,12 +2916,12 @@ function challengeDungeon(dungeonId) {
             msg += `，获得1天赋点`;
         }
         SFX.achievement();
-        addLog(msg, 'breakthrough');
+        addLog(msg + `，受到${damage}点伤害`, 'breakthrough');
     } else {
         const loss = Math.floor(gameState.cultivation * 0.05);
         gameState.cultivation = Math.max(0, gameState.cultivation - loss);
         SFX.error();
-        addLog(`挑战【${d.name}】失败，损失${formatNumber(loss)}修为（成功率${Math.floor(successRate * 100)}%）`, '');
+        addLog(`挑战【${d.name}】失败，损失${formatNumber(loss)}修为，受到${damage}点伤害（成功率${Math.floor(successRate * 100)}%）`, '');
     }
     checkAchievements();
     updateUI();
@@ -2559,7 +2934,31 @@ function scheduleNextEvent() {
     gameState.nextEventTime = Date.now() + delay * 1000;
 }
 
+// 重置每日奇遇计数
+function resetEventDailyCount() {
+    const today = getTodayStr();
+    if (gameState.lastEventDate !== today) {
+        gameState.eventCountToday = 0;
+        gameState.lastEventDate = today;
+    }
+}
+
 function triggerRandomEvent() {
+    resetEventDailyCount();
+    if (gameState.eventCountToday >= CONFIG.eventMaxPerDay) return;
+    // 如果事件弹窗已打开或游戏锁屏，加入队列
+    const modal = document.getElementById('event-modal');
+    if ((modal && !modal.classList.contains('hidden')) || isLocked) {
+        const evt = CONFIG.randomEvents[Math.floor(Math.random() * CONFIG.randomEvents.length)];
+        gameState.eventQueue.push(evt);
+        return;
+    }
+    showEventModal();
+}
+
+function showEventModal() {
+    resetEventDailyCount();
+    if (gameState.eventCountToday >= CONFIG.eventMaxPerDay) return;
     const evt = CONFIG.randomEvents[Math.floor(Math.random() * CONFIG.randomEvents.length)];
     document.getElementById('event-title').textContent = '◈ ' + evt.title + ' ◈';
     document.getElementById('event-desc').textContent = evt.desc;
@@ -2571,13 +2970,22 @@ function triggerRandomEvent() {
         btn.textContent = choice.text;
         btn.addEventListener('click', () => {
             const result = choice.result();
-            choicesContainer.innerHTML = `<div class="event-result">${result}</div><button class="claim-btn" onclick="document.getElementById('event-modal').classList.add('hidden')">继续</button>`;
+            choicesContainer.innerHTML = `<div class="event-result">${result}</div><button class="claim-btn" id="event-continue-btn">继续</button>`;
+            document.getElementById('event-continue-btn').addEventListener('click', () => {
+                document.getElementById('event-modal').classList.add('hidden');
+                // 处理队列中的下一个奇遇
+                if (gameState.eventQueue.length > 0) {
+                    gameState.eventQueue.shift();
+                    setTimeout(() => showEventModal(), 500);
+                }
+            });
             SFX.reward();
             updateUI();
         });
         choicesContainer.appendChild(btn);
     });
     document.getElementById('event-modal').classList.remove('hidden');
+    gameState.eventCountToday++;
     scheduleNextEvent();
 }
 
@@ -2586,37 +2994,89 @@ function checkRandomEvent() {
         scheduleNextEvent();
         return;
     }
+    resetEventDailyCount();
+    if (gameState.eventCountToday >= CONFIG.eventMaxPerDay) return;
     if (Date.now() >= gameState.nextEventTime && gameStarted) {
         triggerRandomEvent();
     }
 }
 
+// ========== 锁屏功能 ==========
+let isLocked = false;
+let autoLockTimer = null;
+let lastActivityTime = Date.now();
+
+function lockScreen() {
+    if (!gameState.settings.lockPassword) {
+        alert('请先在底部『设置』中设置锁屏密码');
+        return;
+    }
+    isLocked = true;
+    document.getElementById('lock-screen').classList.remove('hidden');
+    document.getElementById('lock-password-input').value = '';
+    document.getElementById('lock-error').classList.add('hidden');
+    // 延迟聚焦，避免动画期间输入
+    setTimeout(() => document.getElementById('lock-password-input').focus(), 300);
+    addLog('已锁屏，游戏继续后台挂机', '');
+}
+
+function unlockScreen() {
+    const input = document.getElementById('lock-password-input');
+    const errorEl = document.getElementById('lock-error');
+    if (input.value === gameState.settings.lockPassword) {
+        isLocked = false;
+        document.getElementById('lock-screen').classList.add('hidden');
+        input.value = '';
+        errorEl.classList.add('hidden');
+        lastActivityTime = Date.now();
+        resetAutoLockTimer();
+        addLog('已解锁', 'success');
+        updateFullUI();
+    } else {
+        errorEl.classList.remove('hidden');
+        input.value = '';
+        input.focus();
+    }
+}
+
+function setLockPassword(newPwd) {
+    gameState.settings.lockPassword = newPwd || '';
+    saveGame();
+}
+
+function resetAutoLockTimer() {
+    if (autoLockTimer) {
+        clearTimeout(autoLockTimer);
+        autoLockTimer = null;
+    }
+    const minutes = gameState.settings.autoLockMinutes || 0;
+    if (minutes > 0 && gameStarted && !isLocked) {
+        autoLockTimer = setTimeout(() => {
+            if (!isLocked && gameState.settings.lockPassword) {
+                lockScreen();
+            }
+        }, minutes * 60 * 1000);
+    }
+}
+
+// 用户活动时重置自动锁屏计时
+function onUserActivity() {
+    lastActivityTime = Date.now();
+    if (!isLocked) resetAutoLockTimer();
+}
+
+// ========== 设置弹窗 ==========
+function openSettingsModal() {
+    renderSettings();
+    document.getElementById('settings-modal').classList.remove('hidden');
+}
+
+function closeSettingsModal() {
+    document.getElementById('settings-modal').classList.add('hidden');
+}
+
 // ========== 游戏主循环 ==========
 let lastTickTime = Date.now();
-
-function gameTick() {
-    const now = Date.now();
-    const delta = (now - lastTickTime) / 1000;
-    lastTickTime = now;
-
-    const cultGain = getCultivationPerSecond() * delta;
-    const stoneGain = getStonePerSecond() * delta;
-    gameState.cultivation += cultGain;
-    gameState.spiritStone += stoneGain;
-    gameState.totalCultivation += cultGain;
-    gameState.playTime += delta;
-
-    // 检查历练完成
-    if (gameState.adventure) {
-        const prog = getAdventureProgress();
-        if (prog && prog.remaining <= 0) completeAdventure();
-    }
-
-    // 定期检查成就
-    if (Math.floor(gameState.playTime) % 5 === 0) checkAchievements();
-
-    updateUI();
-}
 
 // ========== 初始化 ==========
 let gameStarted = false;
@@ -2654,14 +3114,39 @@ function init() {
     document.getElementById('start-dir-btn').addEventListener('click', () => SaveManager.requestDirectory());
 
     // 游戏内按钮
-    document.getElementById('meditate-btn').addEventListener('click', meditate);
+    // 打坐冥想功能已移除
+    // document.getElementById('meditate-btn').addEventListener('click', meditate);
     document.getElementById('breakthrough-btn').addEventListener('click', breakthrough);
     document.getElementById('recruit-btn').addEventListener('click', recruitDisciple);
+    document.getElementById('upgrade-toggle-btn').addEventListener('click', () => {
+        upgradesCollapsed = !upgradesCollapsed;
+        renderUpgrades();
+    });
+    // 可折叠面板
+    document.querySelectorAll('.collapsible-header').forEach(header => {
+        header.addEventListener('click', () => {
+            header.parentElement.classList.toggle('collapsed');
+        });
+    });
     document.getElementById('rebirth-btn').addEventListener('click', rebirth);
     document.getElementById('save-btn').addEventListener('click', saveGame);
     document.getElementById('reset-btn').addEventListener('click', resetGame);
     document.getElementById('export-btn').addEventListener('click', exportSave);
     document.getElementById('sound-btn').addEventListener('click', toggleSound);
+    document.getElementById('lock-btn').addEventListener('click', lockScreen);
+    document.getElementById('unlock-btn').addEventListener('click', unlockScreen);
+    document.getElementById('lock-password-input').addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') { e.preventDefault(); unlockScreen(); }
+    });
+    document.getElementById('settings-btn')?.addEventListener('click', openSettingsModal);
+    document.getElementById('close-settings-btn').addEventListener('click', closeSettingsModal);
+    document.getElementById('close-checkin-btn')?.addEventListener('click', () => {
+        document.getElementById('checkin-modal').classList.add('hidden');
+    });
+    document.getElementById('power-display')?.addEventListener('click', showPowerModal);
+    document.getElementById('close-power-btn')?.addEventListener('click', () => {
+        document.getElementById('power-modal').classList.add('hidden');
+    });
     document.getElementById('import-btn').addEventListener('click', () => document.getElementById('import-file').click());
     document.getElementById('import-file').addEventListener('change', (e) => {
         if (e.target.files[0]) importSave(e.target.files[0]);
@@ -2669,7 +3154,7 @@ function init() {
     });
 
     // 标签页切换
-    document.querySelectorAll('.tab-btn').forEach(btn => {
+    document.querySelectorAll('.center-tab-btn').forEach(btn => {
         btn.addEventListener('click', () => switchTab(btn.dataset.tab));
     });
 
@@ -2688,7 +3173,12 @@ function init() {
     });
 
     document.addEventListener('keydown', (e) => {
-        if (e.code === 'Space' && !e.repeat && gameStarted) { e.preventDefault(); meditate(); }
+        // 打坐冥想已移除，空格键不再触发
+    });
+
+    // 用户活动追踪（用于自动锁屏）
+    ['click', 'mousemove', 'keydown', 'touchstart'].forEach(evt => {
+        document.addEventListener(evt, onUserActivity, { passive: true });
     });
 
     // 游戏循环（但只在游戏开始后更新UI）
@@ -2713,6 +3203,12 @@ function gameTick() {
     gameState.totalStoneEarned = (gameState.totalStoneEarned || 0) + stoneGain;
     gameState.playTime += delta;
 
+    // 血量自动恢复
+    const maxHp = getMaxHp();
+    if (gameState.hp < maxHp) {
+        gameState.hp = Math.min(maxHp, gameState.hp + getHpRegenRate() * delta);
+    }
+
     if (gameState.adventure) {
         const prog = getAdventureProgress();
         if (prog && prog.remaining <= 0) completeAdventure();
@@ -2723,7 +3219,7 @@ function gameTick() {
     checkCooldownNotifications();
     updateStageGoal();
     checkTitles();
-    updateUI();
+    if (!isLocked) updateFastUI();
 }
 
 init();

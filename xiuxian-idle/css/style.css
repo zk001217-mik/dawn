@@ -38,7 +38,8 @@ body {
 #app {
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
 }
 
 /* ========== 顶部信息栏 ========== */
@@ -104,6 +105,69 @@ body {
     flex: 1;
 }
 
+.power-display {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    background: var(--bg-panel);
+    border: 1px solid var(--border-gold);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    min-width: 120px;
+    justify-content: center;
+}
+
+.power-display:hover {
+    border-color: var(--border-gold-light);
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+}
+
+.power-icon {
+    font-size: 16px;
+}
+
+.power-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.power-value {
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--text-gold);
+}
+
+.power-total {
+    text-align: center;
+    font-size: 20px;
+    margin: 10px 0 16px;
+    color: var(--text-gold);
+    font-weight: bold;
+}
+
+.power-breakdown-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 16px;
+}
+
+.power-breakdown-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: var(--bg-panel-light);
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+.power-breakdown-value {
+    color: var(--text-gold);
+    font-weight: bold;
+}
+
 .cultivation-bar {
     position: relative;
     height: 24px;
@@ -137,6 +201,8 @@ body {
     flex: 1;
     gap: 16px;
     padding: 16px;
+    min-height: 0;
+    overflow: hidden;
 }
 
 .panel {
@@ -156,11 +222,221 @@ body {
     flex: 1;
     display: flex;
     flex-direction: column;
+    gap: 10px;
+    padding: 12px 16px;
+    min-width: 0;
+}
+
+/* ========== 中心标签栏 ========== */
+.center-tab-bar {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 6px;
+    border: 1px solid rgba(139, 105, 20, 0.3);
+    flex-shrink: 0;
+    overflow-x: auto;
+}
+
+.center-tab-btn {
+    flex: 1;
+    padding: 8px 12px;
+    border: none;
+    background: transparent;
+    color: var(--text-secondary);
+    font-size: 13px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+    white-space: nowrap;
+    letter-spacing: 1px;
+}
+
+.center-tab-btn:hover {
+    color: var(--text-gold-light);
+    background: rgba(212, 175, 55, 0.1);
+}
+
+.center-tab-btn.active {
+    background: linear-gradient(180deg, rgba(212, 175, 55, 0.25) 0%, rgba(212, 175, 55, 0.1) 100%);
+    color: var(--text-gold-light);
+    font-weight: bold;
+    box-shadow: inset 0 -2px 0 var(--border-gold);
+}
+
+/* ========== 中心内容区 ========== */
+.center-tab-content {
+    flex: 1;
+    position: relative;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.center-tab-content .tab-content {
+    display: none;
+    height: 100%;
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.center-tab-content .tab-content.active {
+    display: block;
+}
+
+/* 悟道台特殊布局 */
+#tab-wudao.active {
+    display: flex;
+    flex-direction: column;
+}
+
+#tab-wudao .center-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-height: 0;
+}
+
+#tab-wudao .stats-panel {
+    order: 1;
+    width: 100%;
+}
+
+#tab-wudao .cultivation-area {
+    order: 2;
+    align-self: center;
+    flex: none;
+    padding: 8px 0;
+}
+
+#tab-wudao .stats-extra {
+    order: 3;
+    width: 100%;
+    margin-top: 0;
+}
+
+/* ========== 境界进度横幅 ========== */
+.realm-banner {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 12px 16px;
+    background: linear-gradient(135deg, rgba(212, 175, 55, 0.1) 0%, rgba(13, 10, 8, 0.6) 100%);
+    border: 1px solid var(--border-gold);
+    border-radius: 8px;
+}
+
+.realm-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 100px;
+}
+
+.realm-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    letter-spacing: 1px;
+}
+
+.realm-name {
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--text-gold-light);
+    letter-spacing: 1px;
+}
+
+.realm-progress-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.realm-progress-bar {
+    height: 14px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(139, 105, 20, 0.5);
+    border-radius: 7px;
+    overflow: hidden;
+}
+
+.realm-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent-red) 0%, var(--text-gold) 100%);
+    border-radius: 7px;
+    transition: width 0.3s ease;
+    width: 0%;
+}
+
+.realm-progress-text {
+    font-size: 11px;
+    color: var(--text-secondary);
+    text-align: center;
+}
+
+.breakthrough-banner-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 20px;
+    border: 2px solid var(--border-gold);
+    border-radius: 6px;
+    background: linear-gradient(180deg, rgba(212, 175, 55, 0.2) 0%, rgba(13, 10, 8, 0.8) 100%);
+    color: var(--text-gold-light);
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    min-width: 100px;
+    justify-content: center;
+}
+
+.breakthrough-banner-btn:hover:not(:disabled) {
+    background: linear-gradient(180deg, rgba(212, 175, 55, 0.4) 0%, rgba(13, 10, 8, 0.9) 100%);
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
+}
+
+.breakthrough-banner-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.breakthrough-banner-btn .btn-icon {
+    font-size: 16px;
+}
+
+/* ========== 中部主区域 ========== */
+.center-main {
+    flex: 1;
+    display: flex;
+    gap: 16px;
+    min-height: 0;
+}
+
+/* ========== 中央修炼区 ========== */
+.cultivation-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    flex: 0 0 220px;
+}
+
+.cultivation-circle {
+    position: relative;
+    width: 220px;
+    height: 220px;
 }
 
 .right-panel {
     width: 320px;
     flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 .panel-title {
@@ -217,6 +493,59 @@ body {
 .resource-desc {
     font-size: 11px;
     color: var(--text-muted);
+}
+
+.hp-container {
+    margin-top: 16px;
+    padding: 10px;
+    background: var(--bg-panel-light);
+    border-radius: 6px;
+    border: 1px solid rgba(139, 105, 20, 0.2);
+}
+
+.hp-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+    font-size: 12px;
+}
+
+.hp-icon {
+    color: #e74c3c;
+    font-size: 14px;
+}
+
+.hp-label {
+    color: var(--text-secondary);
+}
+
+.hp-text {
+    margin-left: auto;
+    color: var(--text-primary);
+    font-weight: bold;
+}
+
+.hp-bar {
+    height: 12px;
+    background: var(--bg-panel);
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid rgba(139, 105, 20, 0.3);
+}
+
+.hp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #c0392b, #e74c3c, #ff6b6b);
+    transition: width 0.3s ease;
+    border-radius: 6px;
+}
+
+.hp-regen {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    text-align: right;
 }
 
 .stat-row {
@@ -283,16 +612,16 @@ body {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 120px;
-    height: 120px;
+    width: 140px;
+    height: 140px;
     background: radial-gradient(circle, rgba(212, 175, 55, 0.2) 0%, rgba(13, 10, 8, 0.9) 70%);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
+    font-size: 22px;
     color: var(--text-gold-light);
-    letter-spacing: 2px;
+    letter-spacing: 3px;
     box-shadow: inset 0 0 30px rgba(212, 175, 55, 0.2);
 }
 
@@ -394,11 +723,198 @@ body {
     }
 }
 
+/* ========== 修炼效率面板 ========== */
+.stats-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+}
+
+.stats-panel-title {
+    font-size: 14px;
+    color: var(--text-gold);
+    text-align: center;
+    margin: 0;
+    padding-bottom: 6px;
+    border-bottom: 1px solid rgba(139, 105, 20, 0.3);
+    letter-spacing: 1px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.stat-card {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(139, 105, 20, 0.3);
+    border-radius: 6px;
+    transition: border-color 0.2s;
+}
+
+.stat-card:hover {
+    border-color: var(--border-gold);
+}
+
+.stat-card-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.stat-card-info {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.stat-card-label {
+    font-size: 10px;
+    color: var(--text-secondary);
+    letter-spacing: 0.5px;
+}
+
+.stat-card-value {
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--text-gold-light);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.stats-extra {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 14px;
+    background: rgba(0, 0, 0, 0.25);
+    border-radius: 8px;
+    margin-top: auto;
+    border: 1px solid rgba(139, 105, 20, 0.2);
+}
+
+.stat-extra-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 15px;
+    color: var(--text-secondary);
+    padding: 2px 0;
+}
+
+.stat-extra-item span:last-child {
+    color: var(--text-gold-light);
+    font-weight: bold;
+    font-size: 15px;
+}
+
+/* ========== 可折叠面板 ========== */
+.collapsible-section {
+    margin-bottom: 12px;
+}
+
+.collapsible-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: rgba(212, 175, 55, 0.08);
+    border: 1px solid rgba(139, 105, 20, 0.3);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    user-select: none;
+}
+
+.collapsible-header:hover {
+    background: rgba(212, 175, 55, 0.15);
+    border-color: var(--border-gold);
+}
+
+.collapsible-header .panel-title {
+    margin: 0;
+    padding: 0;
+    border: none;
+    font-size: 15px;
+}
+
+.collapsible-arrow {
+    color: var(--text-gold);
+    font-size: 12px;
+    transition: transform 0.2s;
+}
+
+.collapsible-section.collapsed .collapsible-arrow {
+    transform: rotate(-90deg);
+}
+
+.collapsible-content {
+    padding: 10px 4px 0 4px;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+.collapsible-section.collapsed .collapsible-content {
+    display: none;
+}
+
+/* ========== 批量选择器 ========== */
+.batch-selector {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    padding: 6px 10px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.batch-selector label {
+    color: var(--text-gold);
+    font-weight: bold;
+}
+
+.batch-btns {
+    display: flex;
+    gap: 4px;
+}
+
+.batch-btn {
+    padding: 4px 10px;
+    border: 1px solid rgba(139, 105, 20, 0.4);
+    background: rgba(0, 0, 0, 0.3);
+    color: var(--text-secondary);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: all 0.15s;
+}
+
+.batch-btn:hover {
+    border-color: var(--border-gold);
+    color: var(--text-gold-light);
+}
+
+.batch-btn.active {
+    background: rgba(212, 175, 55, 0.2);
+    border-color: var(--border-gold);
+    color: var(--text-gold-light);
+    font-weight: bold;
+}
+
 /* ========== 日志区 ========== */
 .log-area {
-    margin-top: auto;
     border-top: 1px solid rgba(139, 105, 20, 0.3);
-    padding-top: 12px;
+    padding-top: 8px;
+    flex-shrink: 0;
 }
 
 .log-title {
@@ -409,12 +925,12 @@ body {
 }
 
 .game-log {
-    height: 120px;
+    height: 80px;
     overflow-y: auto;
     font-size: 12px;
     color: var(--text-secondary);
-    line-height: 1.8;
-    padding: 8px;
+    line-height: 1.7;
+    padding: 6px 8px;
     background: rgba(0, 0, 0, 0.3);
     border-radius: 4px;
 }
@@ -451,12 +967,32 @@ body {
 
 /* ========== 升级面板 ========== */
 .upgrade-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    max-height: 300px;
-    overflow-y: auto;
-    padding-right: 4px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    max-height: none;
+    overflow: visible;
+    padding-right: 0;
+}
+
+.upgrade-toggle {
+    display: block;
+    width: 100%;
+    padding: 8px;
+    margin-top: 8px;
+    border: 1px solid rgba(139, 105, 20, 0.4);
+    background: rgba(0, 0, 0, 0.2);
+    color: var(--text-gold);
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 13px;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.upgrade-toggle:hover {
+    border-color: var(--border-gold);
+    background: rgba(212, 175, 55, 0.1);
 }
 
 .upgrade-list::-webkit-scrollbar {
@@ -726,6 +1262,13 @@ body {
     box-shadow: 0 0 40px rgba(196, 30, 58, 0.4);
 }
 
+.settings-modal-content {
+    max-width: 400px;
+    max-height: 80vh;
+    overflow-y: auto;
+    text-align: left;
+}
+
 .new-realm-text {
     font-size: 28px;
     font-weight: bold;
@@ -778,11 +1321,36 @@ body {
     display: none;
 }
 
+.tab-content:not(.active) {
+    display: none !important;
+}
+
 .tab-content.active {
     display: block;
-    max-height: calc(100vh - 220px);
+    flex: 1;
+    min-height: 0;
     overflow-y: auto;
     padding-right: 4px;
+}
+
+/* 功法页：弟子堂固定底部，功法列表可滚动 */
+#tab-cultivation.active {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    padding-right: 0;
+}
+
+#tab-cultivation .upgrade-list {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+    padding-right: 4px;
+}
+
+#tab-cultivation .disciple-area {
+    flex-shrink: 0;
+    padding-top: 8px;
 }
 
 .tab-content.active::-webkit-scrollbar {
@@ -830,12 +1398,12 @@ body {
 
 /* ========== 丹药系统 ========== */
 .pill-list {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    max-height: 400px;
-    overflow-y: auto;
-    padding-right: 4px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    max-height: none;
+    overflow: visible;
+    padding-right: 0;
 }
 
 .pill-list::-webkit-scrollbar {
@@ -888,8 +1456,14 @@ body {
 .pill-desc {
     font-size: 11px;
     color: var(--text-secondary);
-    margin-bottom: 8px;
+    margin-bottom: 4px;
     line-height: 1.5;
+}
+
+.pill-daily-info {
+    font-size: 10px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
 }
 
 .pill-actions {
@@ -934,10 +1508,13 @@ body {
     grid-template-columns: repeat(3, 1fr);
     gap: 8px;
     margin-bottom: 8px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .artifact-slot {
-    aspect-ratio: 1;
+    height: 110px;
     border: 2px dashed var(--border-gold);
     border-radius: 8px;
     display: flex;
@@ -980,10 +1557,10 @@ body {
 
 .artifact-inventory {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 6px;
-    max-height: 200px;
-    overflow-y: auto;
+    max-height: none;
+    overflow: visible;
     padding: 4px;
 }
 
@@ -1084,12 +1661,12 @@ body {
 }
 
 .adventure-list {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: 8px;
-    max-height: 300px;
-    overflow-y: auto;
-    padding-right: 4px;
+    max-height: none;
+    overflow: visible;
+    padding-right: 0;
 }
 
 .adventure-list::-webkit-scrollbar {
@@ -1151,12 +1728,12 @@ body {
 
 /* ========== 成就系统 ========== */
 .achievement-list {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: 8px;
-    max-height: 350px;
-    overflow-y: auto;
-    padding-right: 4px;
+    max-height: none;
+    overflow: visible;
+    padding-right: 0;
 }
 
 .achievement-list::-webkit-scrollbar {
@@ -1410,9 +1987,6 @@ body {
 
 /* ========== 每日签到 ========== */
 .checkin-area {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 6px;
     margin-bottom: 8px;
 }
 
@@ -1450,6 +2024,13 @@ body {
     font-size: 9px;
     color: var(--text-muted);
     margin-top: 2px;
+    width: 100%;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    padding: 0 2px;
+    box-sizing: border-box;
 }
 
 .checkin-day.claimed .day-reward {
@@ -1482,12 +2063,12 @@ body {
 
 /* ========== 任务系统 ========== */
 .task-list {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: 8px;
-    max-height: 250px;
-    overflow-y: auto;
-    padding-right: 4px;
+    max-height: none;
+    overflow: visible;
+    padding-right: 0;
 }
 
 .task-list::-webkit-scrollbar {
@@ -1568,11 +2149,25 @@ body {
 }
 
 .synthesis-list {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
     gap: 6px;
-    max-height: 150px;
-    overflow-y: auto;
+    max-height: none;
+    overflow: visible;
+    padding-right: 0;
+}
+
+.synthesis-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.synthesis-list::-webkit-scrollbar-track {
+    background: var(--bg-panel);
+}
+
+.synthesis-list::-webkit-scrollbar-thumb {
+    background: var(--border-gold);
+    border-radius: 2px;
 }
 
 .synthesis-item {
@@ -1686,10 +2281,10 @@ body {
 
 .pet-inventory {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(4, 1fr);
     gap: 6px;
-    max-height: 200px;
-    overflow-y: auto;
+    max-height: none;
+    overflow: visible;
     padding: 4px;
 }
 
@@ -1755,12 +2350,12 @@ body {
 }
 
 .dungeon-list {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
     gap: 8px;
-    max-height: 350px;
-    overflow-y: auto;
-    padding-right: 4px;
+    max-height: none;
+    overflow: visible;
+    padding-right: 0;
 }
 
 .dungeon-list::-webkit-scrollbar {
@@ -1877,9 +2472,9 @@ body {
 
 /* ========== 炼丹/炼器/阵法通用 ========== */
 .craft-list {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
 }
 
 .craft-item {
@@ -2026,4 +2621,388 @@ body {
     .left-panel, .right-panel {
         width: 100%;
     }
+}
+
+/* ========== 锁屏功能 ========== */
+.lock-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: #0a0806;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 99999;
+    animation: lockFadeIn 0.3s ease;
+}
+
+.lock-screen.hidden {
+    display: none;
+}
+
+@keyframes lockFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.lock-content {
+    text-align: center;
+    padding: 48px 56px;
+    background: var(--bg-panel);
+    border: 2px solid var(--border-gold);
+    border-radius: 12px;
+    box-shadow: 0 0 40px rgba(212, 175, 55, 0.2);
+    max-width: 380px;
+    width: 90%;
+}
+
+.lock-icon {
+    font-size: 56px;
+    margin-bottom: 16px;
+    animation: lockPulse 2s ease-in-out infinite;
+}
+
+@keyframes lockPulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.08); opacity: 0.85; }
+}
+
+.lock-title {
+    font-size: 24px;
+    color: var(--text-gold);
+    letter-spacing: 6px;
+    margin-bottom: 8px;
+    text-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
+}
+
+.lock-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 28px;
+}
+
+.lock-input {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 16px;
+    background: var(--bg-dark);
+    border: 1px solid var(--border-gold);
+    border-radius: 6px;
+    color: var(--text-primary);
+    text-align: center;
+    letter-spacing: 4px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    margin-bottom: 16px;
+}
+
+.lock-input:focus {
+    border-color: var(--border-gold-light);
+    box-shadow: 0 0 10px rgba(212, 175, 55, 0.3);
+}
+
+.lock-input::placeholder {
+    color: var(--text-muted);
+    letter-spacing: 1px;
+}
+
+.lock-unlock-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    letter-spacing: 4px;
+    background: linear-gradient(180deg, var(--bg-panel-light) 0%, var(--bg-panel) 100%);
+    border: 2px solid var(--border-gold);
+    border-radius: 6px;
+    color: var(--text-gold-light);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.lock-unlock-btn:hover {
+    border-color: var(--border-gold-light);
+    box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+    transform: translateY(-1px);
+}
+
+.lock-unlock-btn:active {
+    transform: translateY(0);
+}
+
+.lock-error {
+    color: var(--accent-red-light);
+    font-size: 13px;
+    margin-top: 12px;
+    animation: shake 0.4s ease;
+}
+
+.lock-error.hidden {
+    display: none;
+}
+
+@keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+}
+
+.lock-tip {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 20px;
+    line-height: 1.6;
+}
+
+/* 设置面板中的锁屏相关 */
+.lock-setting-row {
+    margin-bottom: 12px;
+}
+
+.lock-setting-row label {
+    display: block;
+    font-size: 13px;
+    margin-bottom: 4px;
+    color: var(--text-secondary);
+}
+
+.lock-setting-row input {
+    width: 100%;
+    padding: 6px 8px;
+    background: var(--bg-panel);
+    color: var(--text-primary);
+    border: 1px solid var(--border-gold);
+    border-radius: 4px;
+    font-size: 13px;
+    outline: none;
+}
+
+.lock-setting-row input:focus {
+    border-color: var(--border-gold-light);
+}
+
+.lock-setting-btns {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+}
+
+.lock-setting-btns button {
+    flex: 1;
+    padding: 6px;
+    font-size: 12px;
+    background: var(--bg-panel-light);
+    border: 1px solid var(--border-gold);
+    border-radius: 4px;
+    color: var(--text-gold-light);
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.lock-setting-btns button:hover {
+    border-color: var(--border-gold-light);
+    background: rgba(212, 175, 55, 0.1);
+}
+
+/* ========== 主题系统 ========== */
+/* 主题通过 body.theme-xxx 类名切换，覆盖 :root 中的CSS变量 */
+
+/* 青冥 - 青色系 */
+body.theme-cyan {
+    --bg-dark: #080d10;
+    --bg-panel: #101a1e;
+    --bg-panel-light: #16252b;
+    --border-gold: #1a6b7a;
+    --border-gold-light: #2bb5c9;
+    --text-gold: #26c6da;
+    --text-gold-light: #80deea;
+    --text-primary: #c8e6e8;
+    --text-secondary: #7a9e9f;
+    --text-muted: #4a6b6c;
+    --shadow-gold: 0 0 20px rgba(38, 198, 218, 0.15);
+}
+body.theme-cyan { background-image: radial-gradient(ellipse at top, rgba(26, 107, 122, 0.1) 0%, transparent 50%), radial-gradient(ellipse at bottom, rgba(38, 198, 218, 0.05) 0%, transparent 50%); }
+
+/* 紫霞 - 紫色系 */
+body.theme-purple {
+    --bg-dark: #0d0810;
+    --bg-panel: #1a101e;
+    --bg-panel-light: #25162b;
+    --border-gold: #6a1a7a;
+    --border-gold-light: #b52bc9;
+    --text-gold: #c626da;
+    --text-gold-light: #de80ea;
+    --text-primary: #e0c8e8;
+    --text-secondary: #9e7a9f;
+    --text-muted: #6b4a6c;
+    --shadow-gold: 0 0 20px rgba(198, 38, 218, 0.15);
+}
+body.theme-purple { background-image: radial-gradient(ellipse at top, rgba(106, 26, 122, 0.1) 0%, transparent 50%), radial-gradient(ellipse at bottom, rgba(198, 38, 218, 0.05) 0%, transparent 50%); }
+
+/* 碧波 - 蓝色系 */
+body.theme-blue {
+    --bg-dark: #080a10;
+    --bg-panel: #10151e;
+    --bg-panel-light: #161d2b;
+    --border-gold: #1a4a7a;
+    --border-gold-light: #2b7bc9;
+    --text-gold: #2676da;
+    --text-gold-light: #80b0ea;
+    --text-primary: #c8d4e8;
+    --text-secondary: #7a8e9f;
+    --text-muted: #4a5b6c;
+    --shadow-gold: 0 0 20px rgba(38, 118, 218, 0.15);
+}
+body.theme-blue { background-image: radial-gradient(ellipse at top, rgba(26, 74, 122, 0.1) 0%, transparent 50%), radial-gradient(ellipse at bottom, rgba(38, 118, 218, 0.05) 0%, transparent 50%); }
+
+/* 翠林 - 绿色系 */
+body.theme-green {
+    --bg-dark: #08100a;
+    --bg-panel: #101e14;
+    --bg-panel-light: #162b1c;
+    --border-gold: #1a7a3a;
+    --border-gold-light: #2bc95b;
+    --text-gold: #26da5c;
+    --text-gold-light: #80ea9e;
+    --text-primary: #c8e8d0;
+    --text-secondary: #7a9f85;
+    --text-muted: #4a6c54;
+    --shadow-gold: 0 0 20px rgba(38, 218, 92, 0.15);
+}
+body.theme-green { background-image: radial-gradient(ellipse at top, rgba(26, 122, 58, 0.1) 0%, transparent 50%), radial-gradient(ellipse at bottom, rgba(38, 218, 92, 0.05) 0%, transparent 50%); }
+
+/* 赤炎 - 红色系 */
+body.theme-red {
+    --bg-dark: #100808;
+    --bg-panel: #1e1010;
+    --bg-panel-light: #2b1616;
+    --border-gold: #7a1a1a;
+    --border-gold-light: #c92b2b;
+    --text-gold: #da2626;
+    --text-gold-light: #ea8080;
+    --text-primary: #e8c8c8;
+    --text-secondary: #9f7a7a;
+    --text-muted: #6c4a4a;
+    --shadow-gold: 0 0 20px rgba(218, 38, 38, 0.15);
+}
+body.theme-red { background-image: radial-gradient(ellipse at top, rgba(122, 26, 26, 0.1) 0%, transparent 50%), radial-gradient(ellipse at bottom, rgba(218, 38, 38, 0.05) 0%, transparent 50%); }
+
+/* 暗夜 - 纯暗灰 */
+body.theme-dark {
+    --bg-dark: #0a0a0a;
+    --bg-panel: #141414;
+    --bg-panel-light: #1e1e1e;
+    --border-gold: #444444;
+    --border-gold-light: #777777;
+    --text-gold: #aaaaaa;
+    --text-gold-light: #cccccc;
+    --text-primary: #dddddd;
+    --text-secondary: #888888;
+    --text-muted: #555555;
+    --shadow-gold: 0 0 20px rgba(100, 100, 100, 0.1);
+}
+body.theme-dark { background-image: radial-gradient(ellipse at top, rgba(60, 60, 60, 0.08) 0%, transparent 50%), radial-gradient(ellipse at bottom, rgba(30, 30, 30, 0.05) 0%, transparent 50%); }
+
+/* 主题选择器样式 */
+.theme-selector {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 8px;
+}
+.theme-option {
+    padding: 8px 4px;
+    border: 2px solid var(--border-gold);
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: center;
+    font-size: 12px;
+    transition: all 0.2s;
+    background: var(--bg-panel-light);
+}
+.theme-option:hover {
+    border-color: var(--border-gold-light);
+}
+.theme-option.active {
+    border-color: var(--text-gold-light);
+    background: rgba(212, 175, 55, 0.15);
+    font-weight: bold;
+}
+.theme-option .theme-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 4px;
+    vertical-align: middle;
+}
+
+/* ========== 玩法说明弹窗 ========== */
+.help-modal-content {
+    max-width: 720px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+}
+.help-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 12px 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-gold);
+}
+.help-tab {
+    padding: 6px 14px;
+    background: var(--bg-panel-light);
+    border: 1px solid var(--border-gold);
+    border-radius: 4px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 13px;
+    transition: all 0.2s;
+}
+.help-tab:hover {
+    border-color: var(--border-gold-light);
+    color: var(--text-primary);
+}
+.help-tab.active {
+    background: rgba(212, 175, 55, 0.15);
+    border-color: var(--text-gold);
+    color: var(--text-gold);
+    font-weight: bold;
+}
+.help-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px 4px;
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--text-primary);
+}
+.help-content h4 {
+    color: var(--text-gold);
+    margin: 12px 0 6px;
+    font-size: 14px;
+}
+.help-content p {
+    margin-bottom: 8px;
+    color: var(--text-secondary);
+}
+.help-content ul {
+    margin: 6px 0 10px 20px;
+    color: var(--text-secondary);
+}
+.help-content li {
+    margin-bottom: 4px;
+}
+.help-content .tip {
+    background: rgba(212, 175, 55, 0.08);
+    border-left: 3px solid var(--text-gold);
+    padding: 8px 12px;
+    margin: 10px 0;
+    border-radius: 0 4px 4px 0;
+    font-size: 12px;
 }

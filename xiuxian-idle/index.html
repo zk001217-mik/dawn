@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>修仙挂机录 - 放置修仙</title>
-    <link rel="stylesheet" href="css/style.css?v=6">
+    <link rel="stylesheet" href="css/style.css?v=22">
 </head>
 <body>
     <!-- 启动存档选择界面 -->
@@ -42,6 +42,11 @@
                         <span id="cultivation-text" class="cultivation-text">0 / 100</span>
                     </div>
                 </div>
+                <div class="power-display" id="power-display" title="点击查看战力详情">
+                    <span class="power-icon">⚔</span>
+                    <span class="power-label">战力</span>
+                    <span id="power-value" class="power-value">0</span>
+                </div>
             </div>
         </header>
 
@@ -77,6 +82,18 @@
                     </div>
                 </div>
 
+                <div class="hp-container">
+                    <div class="hp-header">
+                        <span class="hp-icon">❤</span>
+                        <span class="hp-label">生命值</span>
+                        <span id="hp-text" class="hp-text">100 / 100</span>
+                    </div>
+                    <div class="hp-bar">
+                        <div id="hp-fill" class="hp-fill"></div>
+                    </div>
+                    <div class="hp-regen">每秒恢复 <span id="hp-regen-rate">1</span></div>
+                </div>
+
                 <h2 class="panel-title" style="margin-top: 24px;">◈ 修炼统计 ◈</h2>
                 <div class="stat-row">
                     <span>修炼时长</span>
@@ -103,51 +120,121 @@
 
             <!-- 中间：主修炼区 -->
             <section class="panel center-panel">
-                <h2 class="panel-title">◈ 悟道台 ◈</h2>
-                <div class="cultivation-area">
-                    <div class="cultivation-circle">
-                        <div class="circle-outer"></div>
-                        <div class="circle-inner"></div>
-                        <div class="circle-core">
-                            <span id="core-text">打坐中</span>
+                <!-- 境界进度横幅 -->
+                <div class="realm-banner">
+                    <div class="realm-info">
+                        <span class="realm-label">当前境界</span>
+                        <span id="realm-name-banner" class="realm-name">练气期 1层</span>
+                    </div>
+                    <div class="realm-progress-wrap">
+                        <div class="realm-progress-bar">
+                            <div id="realm-progress-fill" class="realm-progress-fill"></div>
+                        </div>
+                        <span id="realm-progress-text" class="realm-progress-text">0 / 5000</span>
+                    </div>
+                    <button id="breakthrough-btn" class="breakthrough-banner-btn" disabled>
+                        <span class="btn-icon">⇧</span>
+                        <span id="breakthrough-cost" class="btn-text">突破</span>
+                    </button>
+                </div>
+
+                <!-- 中心标签栏 -->
+                <div class="center-tab-bar">
+                    <button class="center-tab-btn active" data-tab="wudao">悟道台</button>
+                    <button class="center-tab-btn" data-tab="cultivation">功法</button>
+                    <button class="center-tab-btn" data-tab="pills">丹药</button>
+                    <button class="center-tab-btn" data-tab="artifacts">法宝</button>
+                    <button class="center-tab-btn" data-tab="pets">灵宠</button>
+                    <button class="center-tab-btn" data-tab="formation">阵法</button>
+                    <button class="center-tab-btn" data-tab="outing">外出</button>
+                    <button class="center-tab-btn" data-tab="activity">活动</button>
+                </div>
+
+                <!-- 中心内容区 -->
+                <div class="center-tab-content">
+                <!-- 悟道台标签页 -->
+                <div class="tab-content active" id="tab-wudao">
+                <!-- 中部：悟道台 + 数据面板 -->
+                <div class="center-main">
+                    <div class="stats-panel">
+                        <h3 class="stats-panel-title">◈ 修炼效率 ◈</h3>
+                        <div class="stats-grid">
+                            <div class="stat-card">
+                                <span class="stat-card-icon">✨</span>
+                                <div class="stat-card-info">
+                                    <span class="stat-card-label">修为/秒</span>
+                                    <span id="center-cult-rate" class="stat-card-value">0</span>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-card-icon">💎</span>
+                                <div class="stat-card-info">
+                                    <span class="stat-card-label">灵石/秒</span>
+                                    <span id="center-stone-rate" class="stat-card-value">0</span>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-card-icon">⚔</span>
+                                <div class="stat-card-info">
+                                    <span class="stat-card-label">战力</span>
+                                    <span id="center-power" class="stat-card-value">0</span>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-card-icon">❤</span>
+                                <div class="stat-card-info">
+                                    <span class="stat-card-label">生命</span>
+                                    <span id="center-hp" class="stat-card-value">0/0</span>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-card-icon">👥</span>
+                                <div class="stat-card-info">
+                                    <span class="stat-card-label">弟子</span>
+                                    <span id="center-disciple" class="stat-card-value">0</span>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <span class="stat-card-icon">🔮</span>
+                                <div class="stat-card-info">
+                                    <span class="stat-card-label">道韵</span>
+                                    <span id="center-dao" class="stat-card-value">0</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="action-buttons">
-                        <button id="meditate-btn" class="action-btn meditate-btn">
-                            <span class="btn-icon">☯</span>
-                            <span class="btn-text">打坐冥想</span>
-                            <span class="btn-sub">点击获得修为</span>
-                        </button>
-                        <button id="breakthrough-btn" class="action-btn breakthrough-btn" disabled>
-                            <span class="btn-icon">⇧</span>
-                            <span class="btn-text">突破境界</span>
-                            <span id="breakthrough-cost" class="btn-sub">修为不足</span>
-                        </button>
+
+                    <div class="cultivation-area">
+                        <div class="cultivation-circle">
+                            <div class="circle-outer"></div>
+                            <div class="circle-inner"></div>
+                            <div class="circle-core">
+                                <span id="core-text">修炼中</span>
+                            </div>
+                        </div>
+                        <div id="floating-texts" class="floating-texts"></div>
                     </div>
-                    <div id="floating-texts" class="floating-texts"></div>
-                </div>
 
-                <!-- 日志区 -->
-                <div class="log-area">
-                    <h3 class="log-title">◈ 修炼日志 ◈</h3>
-                    <div id="game-log" class="game-log"></div>
+                    <div class="stats-extra">
+                        <div class="stat-extra-item">
+                            <span>修炼时长</span>
+                            <span id="center-playtime">00:00:00</span>
+                        </div>
+                        <div class="stat-extra-item">
+                            <span>生效Buff</span>
+                            <span id="center-buff-count">0</span>
+                        </div>
+                        <div class="stat-extra-item">
+                            <span>累计修为</span>
+                            <span id="center-total-cult">0</span>
+                        </div>
+                    </div>
                 </div>
-            </section>
-
-            <!-- 右侧：标签页面板 -->
-            <aside class="panel right-panel">
-                <div class="tab-bar">
-                    <button class="tab-btn active" data-tab="cultivation">功法</button>
-                    <button class="tab-btn" data-tab="pills">丹药</button>
-                    <button class="tab-btn" data-tab="artifacts">法宝</button>
-                    <button class="tab-btn" data-tab="pets">灵宠</button>
-                    <button class="tab-btn" data-tab="formation">阵法</button>
-                    <button class="tab-btn" data-tab="outing">外出</button>
-                    <button class="tab-btn" data-tab="activity">活动</button>
                 </div>
+                <!-- end tab-wudao -->
 
                 <!-- 功法标签页 -->
-                <div class="tab-content active" id="tab-cultivation">
+                <div class="tab-content" id="tab-cultivation">
                     <div class="upgrade-list" id="upgrade-list"></div>
                     <h2 class="panel-title" style="margin-top: 16px;">◈ 弟子堂 ◈</h2>
                     <div class="disciple-area">
@@ -155,24 +242,53 @@
                             <span class="btn-text">招募弟子</span>
                             <span id="recruit-cost" class="btn-cost">花费：100 灵石</span>
                         </button>
-                        <p class="disciple-tip">每名弟子提供 +3% 修为产出和 +2% 灵石产出</p>
+                        <p class="disciple-tip">每名弟子提供 +1.5% 修为产出和 +1% 灵石产出</p>
                     </div>
                 </div>
 
                 <!-- 丹药标签页 -->
                 <div class="tab-content" id="tab-pills">
-                    <h2 class="panel-title">◈ 丹药坊 ◈</h2>
-                    <div class="pill-list" id="pill-list"></div>
-                    <h2 class="panel-title" style="margin-top: 16px;">◈ 丹炉合成 ◈</h2>
-                    <div class="synthesis-area" id="synthesis-area">
-                        <p class="disciple-tip">消耗3颗同类丹药，合成1颗强化版（效果翻倍）</p>
-                        <div class="synthesis-list" id="synthesis-list"></div>
+                    <div class="collapsible-section" data-section="pill-shop">
+                        <div class="collapsible-header">
+                            <h2 class="panel-title">◈ 丹药坊 ◈</h2>
+                            <span class="collapsible-arrow">▼</span>
+                        </div>
+                        <div class="collapsible-content">
+                            <div class="pill-list" id="pill-list"></div>
+                        </div>
                     </div>
-                    <h2 class="panel-title" style="margin-top: 16px;">◈ 炼丹炉 ◈</h2>
-                    <div class="craft-list" id="alchemy-list"></div>
-                    <h2 class="panel-title" style="margin-top: 16px;">◈ 天材地宝 ◈</h2>
-                    <p class="disciple-tip">服用后永久增加属性，有服用上限</p>
-                    <div class="craft-list" id="heavenly-list"></div>
+                    <div class="collapsible-section collapsed" data-section="synthesis">
+                        <div class="collapsible-header">
+                            <h2 class="panel-title">◈ 丹炉合成 ◈</h2>
+                            <span class="collapsible-arrow">▼</span>
+                        </div>
+                        <div class="collapsible-content">
+                            <div class="synthesis-area" id="synthesis-area">
+                                <p class="disciple-tip">消耗3颗同类丹药，合成1颗强化版（效果翻倍）</p>
+                                <div class="synthesis-list" id="synthesis-list"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="collapsible-section collapsed" data-section="alchemy">
+                        <div class="collapsible-header">
+                            <h2 class="panel-title">◈ 炼丹炉 ◈</h2>
+                            <span class="collapsible-arrow">▼</span>
+                        </div>
+                        <div class="collapsible-content">
+                            <div class="batch-selector" id="alchemy-batch-selector"></div>
+                            <div class="craft-list" id="alchemy-list"></div>
+                        </div>
+                    </div>
+                    <div class="collapsible-section collapsed" data-section="heavenly">
+                        <div class="collapsible-header">
+                            <h2 class="panel-title">◈ 天材地宝 ◈</h2>
+                            <span class="collapsible-arrow">▼</span>
+                        </div>
+                        <div class="collapsible-content">
+                            <p class="disciple-tip">服用后永久增加属性，有服用上限</p>
+                            <div class="craft-list" id="heavenly-list"></div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- 法宝标签页 -->
@@ -182,6 +298,7 @@
                     <h2 class="panel-title" style="margin-top: 16px;">◈ 法宝背包 ◈</h2>
                     <div class="artifact-inventory" id="artifact-inventory"></div>
                     <h2 class="panel-title" style="margin-top: 16px;">◈ 炼器炉 ◈</h2>
+                    <div class="batch-selector" id="forge-batch-selector"></div>
                     <div class="craft-list" id="forge-list"></div>
                 </div>
 
@@ -199,7 +316,7 @@
 
                 <!-- 阵法标签页 -->
                 <div class="tab-content" id="tab-formation">
-                    <h2 class="panel-title">◈ 活跃阵法 ◈</h2>
+                    <h2 class="panel-title">◈ 活跃阵法 ◈ <span style="font-size:11px;color:var(--text-muted);font-weight:normal">（同时只能生效一个）</span></h2>
                     <div class="formation-active-list" id="active-formations"></div>
                     <h2 class="panel-title" style="margin-top: 16px;">◈ 阵法阁 ◈</h2>
                     <div class="craft-list" id="formation-list"></div>
@@ -237,10 +354,17 @@
                     <div class="craft-list" id="titles-list"></div>
                     <h2 class="panel-title" style="margin-top: 20px;">◈ 数据统计 ◈</h2>
                     <div id="stats-panel"></div>
-                    <h2 class="panel-title" style="margin-top: 20px;">◈ 设置 ◈</h2>
-                    <div id="settings-panel"></div>
                 </div>
-            </aside>
+
+                </div>
+                <!-- end center-tab-content -->
+
+                <!-- 日志区 -->
+                <div class="log-area">
+                    <h3 class="log-title">◈ 修炼日志 ◈</h3>
+                    <div id="game-log" class="game-log"></div>
+                </div>
+            </section>
         </main>
 
         <!-- 底部操作栏 -->
@@ -249,7 +373,10 @@
             <button id="export-btn" class="footer-btn">📤 导出存档</button>
             <button id="import-btn" class="footer-btn">📥 导入存档</button>
             <button id="sound-btn" class="footer-btn">🔊 音效开</button>
+            <button id="lock-btn" class="footer-btn">🔒 锁屏</button>
             <button id="reset-btn" class="footer-btn danger">🔄 重置游戏</button>
+            <button id="settings-btn" class="footer-btn">⚙ 设置</button>
+            <button id="help-btn" class="footer-btn">📖 玩法说明</button>
             <input type="file" id="import-file" accept=".json" style="display:none">
             <span id="save-status" class="save-status">自动存档中...</span>
         </footer>
@@ -297,8 +424,83 @@
         <div id="production-modal" class="modal hidden">
             <div class="modal-content" id="production-modal-content"></div>
         </div>
+
+        <!-- 战力详情弹窗 -->
+        <div id="power-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>◈ 战力详情 ◈</h2>
+                <div class="power-total">总战力：<span id="power-total-value">0</span></div>
+                <div id="power-breakdown-list" class="power-breakdown-list"></div>
+                <button id="close-power-btn" class="claim-btn">关闭</button>
+            </div>
+        </div>
+
+        <!-- 签到奖励弹窗 -->
+        <div id="checkin-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>◈ 签到成功 ◈</h2>
+                <p id="checkin-streak-text" class="modal-desc">连续签到第 1 天</p>
+                <div class="offline-rewards">
+                    <div class="reward-item">
+                        <span id="checkin-reward-icon" style="font-size:28px">🎁</span>
+                        <span id="checkin-reward-text" class="reward-value">奖励</span>
+                    </div>
+                </div>
+                <button id="close-checkin-btn" class="claim-btn">收下奖励</button>
+            </div>
+        </div>
+
+        <!-- 设置弹窗 -->
+        <div id="settings-modal" class="modal hidden">
+            <div class="modal-content settings-modal-content">
+                <h2>◈ 设置 ◈</h2>
+                <div id="settings-panel-modal"></div>
+                <button id="close-settings-btn" class="claim-btn" style="margin-top:20px">关闭</button>
+            </div>
+        </div>
+
+        <!-- 玩法说明弹窗 -->
+        <div id="help-modal" class="modal hidden">
+            <div class="modal-content help-modal-content">
+                <h2>◈ 玩法说明 ◈</h2>
+                <div class="help-tabs">
+                    <button class="help-tab active" data-help="basic">基础</button>
+                    <button class="help-tab" data-help="cultivation">功法</button>
+                    <button class="help-tab" data-help="pills">丹药</button>
+                    <button class="help-tab" data-help="artifact">法宝</button>
+                    <button class="help-tab" data-help="pet">灵宠</button>
+                    <button class="help-tab" data-help="formation">阵法</button>
+                    <button class="help-tab" data-help="adventure">外出</button>
+                    <button class="help-tab" data-help="activity">活动</button>
+                    <button class="help-tab" data-help="rebirth">转世</button>
+                </div>
+                <div id="help-content" class="help-content"></div>
+                <button id="close-help-btn" class="claim-btn" style="margin-top:16px">关闭</button>
+            </div>
+        </div>
     </div>
 
-    <script src="js/game.js?v=11"></script>
+    <!-- 锁屏遮罩 -->
+    <div id="lock-screen" class="lock-screen hidden">
+        <div class="lock-content">
+            <div class="lock-icon">🔒</div>
+            <h2 class="lock-title">已锁屏</h2>
+            <p class="lock-desc">努力工作中，请输入密码解锁</p>
+            <input type="password" id="lock-password-input" class="lock-input" placeholder="请输入锁屏密码" autocomplete="off">
+            <button id="unlock-btn" class="lock-unlock-btn">解锁</button>
+            <p id="lock-error" class="lock-error hidden">密码错误，请重试</p>
+            <p class="lock-tip">未设置密码？请先在底部「设置」中设置锁屏密码</p>
+        </div>
+    </div>
+
+    <!-- JS模块（按依赖顺序加载） -->
+    <script src="js/config.js?v=26"></script>
+    <script src="js/state.js?v=26"></script>
+    <script src="js/core.js?v=26"></script>
+    <script src="js/gameplay.js?v=26"></script>
+    <script src="js/storage.js?v=26"></script>
+    <script src="js/ui.js?v=26"></script>
+    <script src="js/lock.js?v=26"></script>
+    <script src="js/main.js?v=26"></script>
 </body>
 </html>
