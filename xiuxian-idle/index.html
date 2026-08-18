@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>修仙挂机录 - 放置修仙</title>
-    <link rel="stylesheet" href="css/style.css?v=2">
+    <link rel="stylesheet" href="css/style.css?v=6">
 </head>
 <body>
     <!-- 启动存档选择界面 -->
@@ -46,6 +46,7 @@
         </header>
 
         <!-- 主体三栏布局 -->
+        <div class="goal-bar" id="current-goal">🎯 加载中...</div>
         <main class="main-content">
             <!-- 左侧：资源面板 -->
             <aside class="panel left-panel">
@@ -57,6 +58,7 @@
                         <span id="cultivation-amount" class="resource-value">0</span>
                         <span id="cultivation-rate" class="resource-rate">+0/秒</span>
                     </div>
+                    <button class="detail-btn" id="detail-btn" title="产出详情">📊</button>
                 </div>
                 <div class="resource-item">
                     <div class="resource-icon">◆</div>
@@ -139,10 +141,9 @@
                     <button class="tab-btn" data-tab="pills">丹药</button>
                     <button class="tab-btn" data-tab="artifacts">法宝</button>
                     <button class="tab-btn" data-tab="pets">灵宠</button>
-                    <button class="tab-btn" data-tab="adventure">历练</button>
-                    <button class="tab-btn" data-tab="dungeon">秘境</button>
-                    <button class="tab-btn" data-tab="daily">日常</button>
-                    <button class="tab-btn" data-tab="achievements">成就</button>
+                    <button class="tab-btn" data-tab="formation">阵法</button>
+                    <button class="tab-btn" data-tab="outing">外出</button>
+                    <button class="tab-btn" data-tab="activity">活动</button>
                 </div>
 
                 <!-- 功法标签页 -->
@@ -154,7 +155,7 @@
                             <span class="btn-text">招募弟子</span>
                             <span id="recruit-cost" class="btn-cost">花费：100 灵石</span>
                         </button>
-                        <p class="disciple-tip">每名弟子提供 +5% 修为产出和 +3% 灵石产出</p>
+                        <p class="disciple-tip">每名弟子提供 +3% 修为产出和 +2% 灵石产出</p>
                     </div>
                 </div>
 
@@ -167,6 +168,11 @@
                         <p class="disciple-tip">消耗3颗同类丹药，合成1颗强化版（效果翻倍）</p>
                         <div class="synthesis-list" id="synthesis-list"></div>
                     </div>
+                    <h2 class="panel-title" style="margin-top: 16px;">◈ 炼丹炉 ◈</h2>
+                    <div class="craft-list" id="alchemy-list"></div>
+                    <h2 class="panel-title" style="margin-top: 16px;">◈ 天材地宝 ◈</h2>
+                    <p class="disciple-tip">服用后永久增加属性，有服用上限</p>
+                    <div class="craft-list" id="heavenly-list"></div>
                 </div>
 
                 <!-- 法宝标签页 -->
@@ -175,6 +181,8 @@
                     <div class="artifact-slots" id="artifact-slots"></div>
                     <h2 class="panel-title" style="margin-top: 16px;">◈ 法宝背包 ◈</h2>
                     <div class="artifact-inventory" id="artifact-inventory"></div>
+                    <h2 class="panel-title" style="margin-top: 16px;">◈ 炼器炉 ◈</h2>
+                    <div class="craft-list" id="forge-list"></div>
                 </div>
 
                 <!-- 灵宠标签页 -->
@@ -183,35 +191,39 @@
                     <div id="pet-active" class="pet-active"></div>
                     <h2 class="panel-title" style="margin-top: 16px;">◈ 灵宠背包 ◈</h2>
                     <div class="pet-inventory" id="pet-inventory"></div>
+                    <h2 class="panel-title" style="margin-top: 16px;">◈ 灵宠图鉴 ◈</h2>
+                    <div id="pet-collection"></div>
+                    <h2 class="panel-title" style="margin-top: 12px;">◈ 灵宠羁绊 ◈</h2>
+                    <div id="pet-bonds"></div>
                 </div>
 
-                <!-- 历练标签页 -->
-                <div class="tab-content" id="tab-adventure">
+                <!-- 阵法标签页 -->
+                <div class="tab-content" id="tab-formation">
+                    <h2 class="panel-title">◈ 活跃阵法 ◈</h2>
+                    <div class="formation-active-list" id="active-formations"></div>
+                    <h2 class="panel-title" style="margin-top: 16px;">◈ 阵法阁 ◈</h2>
+                    <div class="craft-list" id="formation-list"></div>
+                </div>
+
+                <!-- 外出标签页（历练+秘境） -->
+                <div class="tab-content" id="tab-outing">
                     <h2 class="panel-title">◈ 历练台 ◈</h2>
                     <div id="adventure-status" class="adventure-status"></div>
                     <div class="adventure-list" id="adventure-list"></div>
-                </div>
-
-                <!-- 秘境标签页 -->
-                <div class="tab-content" id="tab-dungeon">
-                    <h2 class="panel-title">◈ 秘境挑战 ◈</h2>
+                    <h2 class="panel-title" style="margin-top: 20px;">◈ 秘境挑战 ◈</h2>
                     <div class="dungeon-power">当前战力：<span id="player-power">0</span></div>
                     <div class="dungeon-list" id="dungeon-list"></div>
                 </div>
 
-                <!-- 日常标签页 -->
-                <div class="tab-content" id="tab-daily">
+                <!-- 活动标签页（签到+日常+成就+转世） -->
+                <div class="tab-content" id="tab-activity">
                     <h2 class="panel-title">◈ 每日签到 ◈</h2>
                     <div class="checkin-area" id="checkin-area"></div>
                     <h2 class="panel-title" style="margin-top: 16px;">◈ 日常任务 ◈</h2>
                     <div class="task-list" id="task-list"></div>
-                </div>
-
-                <!-- 成就标签页 -->
-                <div class="tab-content" id="tab-achievements">
-                    <h2 class="panel-title">◈ 成就殿 ◈</h2>
+                    <h2 class="panel-title" style="margin-top: 20px;">◈ 成就殿 ◈</h2>
                     <div class="achievement-list" id="achievement-list"></div>
-                    <h2 class="panel-title" style="margin-top: 16px;">◈ 轮回殿 ◈</h2>
+                    <h2 class="panel-title" style="margin-top: 20px;">◈ 轮回殿 ◈</h2>
                     <div class="rebirth-area">
                         <button id="rebirth-btn" class="rebirth-btn">
                             <span class="btn-text">转世重修</span>
@@ -219,6 +231,14 @@
                         </button>
                         <p class="disciple-tip">重置修为与灵石，保留道韵永久加成（每1点道韵+1%全产出）</p>
                     </div>
+                    <h2 class="panel-title" style="margin-top: 20px;">◈ 成就商店 ◈</h2>
+                    <div id="achievement-shop"></div>
+                    <h2 class="panel-title" style="margin-top: 20px;">◈ 称号 ◈</h2>
+                    <div class="craft-list" id="titles-list"></div>
+                    <h2 class="panel-title" style="margin-top: 20px;">◈ 数据统计 ◈</h2>
+                    <div id="stats-panel"></div>
+                    <h2 class="panel-title" style="margin-top: 20px;">◈ 设置 ◈</h2>
+                    <div id="settings-panel"></div>
                 </div>
             </aside>
         </main>
@@ -272,8 +292,13 @@
                 <div id="event-choices" class="event-choices"></div>
             </div>
         </div>
+
+        <!-- 产出详情弹窗 -->
+        <div id="production-modal" class="modal hidden">
+            <div class="modal-content" id="production-modal-content"></div>
+        </div>
     </div>
 
-    <script src="js/game.js?v=7"></script>
+    <script src="js/game.js?v=11"></script>
 </body>
 </html>

@@ -483,7 +483,7 @@ body {
 
 .upgrade-item:hover:not(.locked):not(.cant-afford) {
     border-color: var(--border-gold-light);
-    box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+    background: rgba(212, 175, 55, 0.08);
 }
 
 .upgrade-item.cant-afford {
@@ -780,6 +780,18 @@ body {
 
 .tab-content.active {
     display: block;
+    max-height: calc(100vh - 220px);
+    overflow-y: auto;
+    padding-right: 4px;
+}
+
+.tab-content.active::-webkit-scrollbar {
+    width: 4px;
+}
+
+.tab-content.active::-webkit-scrollbar-thumb {
+    background: var(--border-gold);
+    border-radius: 2px;
 }
 
 /* ========== 活跃Buff ========== */
@@ -845,7 +857,7 @@ body {
 
 .pill-item:hover:not(.cant-afford) {
     border-color: var(--border-gold-light);
-    box-shadow: 0 0 10px rgba(212, 175, 55, 0.2);
+    background: rgba(212, 175, 55, 0.08);
 }
 
 .pill-item.cant-afford {
@@ -1100,7 +1112,7 @@ body {
 
 .adventure-item:hover:not(.locked):not(.cant-go) {
     border-color: var(--border-gold-light);
-    box-shadow: 0 0 8px rgba(212, 175, 55, 0.2);
+    background: rgba(212, 175, 55, 0.08);
 }
 
 .adventure-item.locked, .adventure-item.cant-go {
@@ -1770,7 +1782,7 @@ body {
 
 .dungeon-item:hover:not(.locked):not(.cooling) {
     border-color: var(--border-gold-light);
-    box-shadow: 0 0 8px rgba(212, 175, 55, 0.2);
+    background: rgba(212, 175, 55, 0.08);
     cursor: pointer;
 }
 
@@ -1861,6 +1873,144 @@ body {
     font-size: 13px;
     color: var(--text-gold-light);
     text-align: center;
+}
+
+/* ========== 炼丹/炼器/阵法通用 ========== */
+.craft-list {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.craft-item {
+    padding: 10px;
+    background: var(--bg-panel-light);
+    border: 1px solid rgba(139, 105, 20, 0.3);
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.craft-item:hover:not(.disabled) {
+    border-color: var(--border-gold-light);
+    background: rgba(212, 175, 55, 0.08);
+}
+
+.craft-item.disabled {
+    opacity: 0.5;
+}
+
+.craft-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+}
+
+.craft-name {
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--text-gold-light);
+}
+
+.craft-rate {
+    font-size: 11px;
+    color: var(--accent-cyan);
+}
+
+.craft-desc {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+
+.craft-info {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+}
+
+.craft-btn {
+    width: 100%;
+    padding: 6px;
+    border: 1px solid var(--border-gold);
+    border-radius: 4px;
+    background: var(--bg-panel);
+    color: var(--text-gold-light);
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.craft-btn:hover:not(:disabled) {
+    background: rgba(212, 175, 55, 0.15);
+    border-color: var(--border-gold-light);
+}
+
+.craft-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.craft-cooldown {
+    text-align: center;
+    font-size: 11px;
+    color: var(--accent-cyan);
+    padding: 4px;
+}
+
+/* ========== 阵法系统 ========== */
+.formation-active-list {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 8px;
+}
+
+.formation-active {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: var(--bg-panel-light);
+    border: 1px solid var(--border-gold);
+    border-radius: 4px;
+    font-size: 13px;
+    color: var(--text-gold-light);
+}
+
+.formation-time {
+    color: var(--accent-cyan);
+    font-size: 12px;
+}
+
+/* ========== 阶段目标条 ========== */
+.goal-bar {
+    text-align: center;
+    padding: 6px 16px;
+    background: linear-gradient(90deg, rgba(139,105,20,0.1), rgba(212,175,55,0.15), rgba(139,105,20,0.1));
+    border-bottom: 1px solid var(--border-gold);
+    font-size: 13px;
+    color: var(--text-gold-light);
+    letter-spacing: 1px;
+}
+
+/* ========== 产出详情按钮 ========== */
+.detail-btn {
+    background: none;
+    border: none;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.detail-btn:hover {
+    background: rgba(212, 175, 55, 0.15);
+}
+
+.resource-item {
+    position: relative;
 }
 
 /* ========== 响应式 ========== */
