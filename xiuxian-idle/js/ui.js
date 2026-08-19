@@ -8,11 +8,165 @@
 // ========== UI 渲染 ==========
 let currentTab = 'cultivation';
 
+// ========== 法宝对比弹窗 ==========
+function showArtifactCompare(newUid) {
+    const newArt = gameState.artifactInventory.find(a => a.uid === newUid);
+    if (!newArt) return;
+    const list = document.getElementById('artifact-compare-list');
+    list.innerHTML = '';
+    gameState.equippedArtifacts.forEach((oldArt, i) => {
+        if (!oldArt) return;
+        const newCult = newArt.effect === 'cultivation' || newArt.effect === 'both' ? newArt.bonus : 0;
+        const newStone = newArt.effect === 'stone' || newArt.effect === 'both' ? newArt.bonus : 0;
+        const oldCult = oldArt.effect === 'cultivation' || oldArt.effect === 'both' ? oldArt.bonus : 0;
+        const oldStone = oldArt.effect === 'stone' || oldArt.effect === 'both' ? oldArt.bonus : 0;
+        const cultDiff = newCult - oldCult;
+        const stoneDiff = newStone - oldStone;
+        const cultColor = cultDiff > 0 ? 'var(--success)' : cultDiff < 0 ? 'var(--accent-red)' : 'var(--text-muted)';
+        const stoneColor = stoneDiff > 0 ? 'var(--success)' : stoneDiff < 0 ? 'var(--accent-red)' : 'var(--text-muted)';
+        const row = document.createElement('div');
+        row.style.cssText = 'display:flex;justify-content:space-between;align-items:center;padding:8px;border:1px solid var(--border-gold);border-radius:6px;margin-bottom:8px;cursor:pointer';
+        row.innerHTML = `
+            <div style="flex:1">
+                <div style="font-weight:bold">槽位${i + 1}: ${oldArt.icon} ${oldArt.name}</div>
+                <div style="font-size:11px;color:var(--text-muted)">修为+${formatNumber(oldCult)}/秒 灵石+${formatNumber(oldStone)}/秒</div>
+            </div>
+            <div style="text-align:right;font-size:12px">
+                <div style="color:${cultColor}">修为 ${cultDiff >= 0 ? '+' : ''}${formatNumber(cultDiff)}</div>
+                <div style="color:${stoneColor}">灵石 ${stoneDiff >= 0 ? '+' : ''}${formatNumber(stoneDiff)}</div>
+            </div>`;
+        row.addEventListener('click', () => {
+            equipArtifact(newUid, i);
+            document.getElementById('artifact-compare-modal').classList.add('hidden');
+        });
+        list.appendChild(row);
+    });
+    document.getElementById('artifact-compare-modal').classList.remove('hidden');
+}
+
+// ========== 标签页红点提醒 ==========
+function updateTabDots() {
+    const now = Date.now();
+    // 丹药：炼丹冷却结束且有灵石
+    const alchemyReady = now >= (gameState.alchemyCooldownEnd || 0) && gameState.spiritStone >= 50;
+    document.getElementById('dot-pills')?.classList.toggle('hidden', !alchemyReady || currentTab === 'pills');
+    // 法宝：炼器冷却结束且有灵石
+    const forgeReady = now >= (gameState.forgeCooldownEnd || 0) && gameState.spiritStone >= 100;
+    document.getElementById('dot-artifacts')?.classList.toggle('hidden', !forgeReady || currentTab === 'artifacts');
+    // 外出：历练完成或秘境冷却结束
+    const adventureDone = gameState.adventure && gameState.adventure.endTime <= now;
+    let dungeonReady = false;
+    if (gameState.dungeonCooldowns) {
+        for (const id in gameState.dungeonCooldowns) {
+            if (now >= gameState.dungeonCooldowns[id]) { dungeonReady = true; break; }
+        }
+    }
+    const outingReady = adventureDone || dungeonReady;
+    document.getElementById('dot-outing')?.classList.toggle('hidden', !outingReady || currentTab === 'outing');
+}
+
+// ========== 批量选择模式 ==========
+let artifactBatchMode = false;
+let selectedArtifactUids = [];
+let petBatchMode = false;
+let selectedPetUids = [];
+
+function toggleArtifactBatch() {
+    artifactBatchMode = !artifactBatchMode;
+    selectedArtifactUids = [];
+    document.getElementById('artifact-batch-actions')?.classList.toggle('hidden', !artifactBatchMode);
+    document.getElementById('artifact-batch-btn').textContent = artifactBatchMode ? '退出多选' : '多选';
+    updateUI();
+}
+
+function togglePetBatch() {
+    petBatchMode = !petBatchMode;
+    selectedPetUids = [];
+    document.getElementById('pet-batch-actions')?.classList.toggle('hidden', !petBatchMode);
+    document.getElementById('pet-batch-btn').textContent = petBatchMode ? '退出多选' : '多选';
+    updateUI();
+}
+
+function toggleArtifactSelect(uid) {
+    const idx = selectedArtifactUids.indexOf(uid);
+    if (idx > -1) selectedArtifactUids.splice(idx, 1);
+    else selectedArtifactUids.push(uid);
+    document.getElementById('artifact-selected-count').textContent = `已选${selectedArtifactUids.length}件`;
+    updateUI();
+}
+
+function togglePetSelect(uid) {
+    const idx = selectedPetUids.indexOf(uid);
+    if (idx > -1) selectedPetUids.splice(idx, 1);
+    else selectedPetUids.push(uid);
+    document.getElementById('pet-selected-count').textContent = `已选${selectedPetUids.length}只`;
+    updateUI();
+}
+
+function batchDecomposeArtifacts() {
+    if (selectedArtifactUids.length === 0) { addLog('请先选择要分解的法宝', ''); return; }
+    if (!confirm(`确定分解选中的${selectedArtifactUids.length}件法宝？`)) return;
+    let totalStone = 0;
+    selectedArtifactUids.forEach(uid => {
+        const art = gameState.artifactInventory.find(a => a.uid === uid);
+        if (art) {
+            const sellPrice = Math.floor(art.bonus * 5 * (art.qualityIndex + 1));
+            gameState.spiritStone += sellPrice;
+            totalStone += sellPrice;
+            gameState.artifactInventory = gameState.artifactInventory.filter(a => a.uid !== uid);
+        }
+    });
+    addLog(`批量分解${selectedArtifactUids.length}件法宝，获得${formatNumber(totalStone)}灵石`, 'success');
+    SFX.reward();
+    selectedArtifactUids = [];
+    artifactBatchMode = false;
+    document.getElementById('artifact-batch-actions')?.classList.add('hidden');
+    document.getElementById('artifact-batch-btn').textContent = '多选';
+    updateUI();
+}
+
+function batchReleasePets() {
+    if (selectedPetUids.length === 0) { addLog('请先选择要放生的灵宠', ''); return; }
+    if (!confirm(`确定放生选中的${selectedPetUids.length}只灵宠？`)) return;
+    let totalStone = 0;
+    selectedPetUids.forEach(uid => {
+        const pet = gameState.petInventory.find(p => p.uid === uid);
+        if (pet) {
+            const reward = Math.floor((pet.qualityIndex + 1) * 50 * pet.level);
+            gameState.spiritStone += reward;
+            totalStone += reward;
+            gameState.petInventory = gameState.petInventory.filter(p => p.uid !== uid);
+        }
+    });
+    addLog(`批量放生${selectedPetUids.length}只灵宠，获得${formatNumber(totalStone)}灵石`, 'success');
+    SFX.reward();
+    selectedPetUids = [];
+    petBatchMode = false;
+    document.getElementById('pet-batch-actions')?.classList.add('hidden');
+    document.getElementById('pet-batch-btn').textContent = '多选';
+    updateUI();
+}
+
+// ========== 标签页滚动位置记忆 ==========
+const tabScrollPositions = {};
+
 function switchTab(tabName) {
+    // 保存当前标签页滚动位置
+    const currentActive = document.querySelector('.tab-content.active');
+    if (currentActive && currentTab) {
+        tabScrollPositions[currentTab] = currentActive.scrollTop;
+    }
+
     currentTab = tabName;
     document.querySelectorAll('.center-tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabName));
     document.querySelectorAll('.center-tab-content .tab-content').forEach(c => c.classList.toggle('active', c.id === 'tab-' + tabName));
     renderActiveTabContent();
+
+    // 恢复目标标签页滚动位置
+    const newActive = document.getElementById('tab-' + tabName);
+    if (newActive && tabScrollPositions[tabName] !== undefined) {
+        newActive.scrollTop = tabScrollPositions[tabName];
+    }
 }
 
 function renderActiveTabContent() {
@@ -26,6 +180,14 @@ function renderActiveTabContent() {
             const dCost = getDiscipleCost();
             document.getElementById('recruit-cost').textContent = `花费：${formatNumber(dCost)} 灵石`;
             document.getElementById('recruit-btn').disabled = gameState.spiritStone < dCost || gameState.discipleCount >= CONFIG.disciple.maxCount;
+            // 弟子分工显示
+            const da = gameState.discipleAssign || { alchemy: 0, forge: 0, farm: 0, patrol: 0 };
+            document.getElementById('disciple-total').textContent = gameState.discipleCount;
+            document.getElementById('disciple-unassigned').textContent = getUnassignedCount();
+            document.getElementById('assign-alchemy').textContent = da.alchemy || 0;
+            document.getElementById('assign-forge').textContent = da.forge || 0;
+            document.getElementById('assign-farm').textContent = da.farm || 0;
+            document.getElementById('assign-patrol').textContent = da.patrol || 0;
             break;
         case 'pills':
             renderPills();
@@ -97,6 +259,13 @@ function updateFastUI() {
     if (gameState.cultivation >= cost) { btBtn.disabled = false; btCost.textContent = `突破 ${successPct}%`; }
     else { btBtn.disabled = true; btCost.textContent = `需${formatNumber(cost)}`; }
 
+    // 境界特权
+    const realm = CONFIG.realms[gameState.realmIndex];
+    const privIcon = document.getElementById('privilege-icon');
+    const privText = document.getElementById('privilege-text');
+    if (privIcon) privIcon.textContent = realm.privilegeIcon || '🌱';
+    if (privText) privText.textContent = realm.privilege || '初入修仙，无特殊能力';
+
     // 境界横幅
     const realmNameEl = document.getElementById('realm-name-banner');
     if (realmNameEl) realmNameEl.textContent = getRealmName();
@@ -137,7 +306,30 @@ function updateFastUI() {
     // 阶段目标
     const goal = getCurrentGoal();
     const goalEl = document.getElementById('current-goal');
-    if (goalEl) goalEl.textContent = goal ? `🎯 ${goal.desc}` : '🎉 所有目标已完成！';
+    if (goalEl) {
+        let progressText = '';
+        if (goal) {
+            if (goal.id.startsWith('g') && goal.desc.includes('突破到')) {
+                const targetRealm = goal.desc.replace('突破到', '').replace('期', '');
+                const realmNames = ['练气', '筑基', '金丹', '元婴', '化神', '炼虚', '合体', '大乘', '渡劫'];
+                const targetIdx = realmNames.findIndex(n => targetRealm.includes(n));
+                if (targetIdx > -1) {
+                    const need = targetIdx - gameState.realmIndex;
+                    progressText = ` (当前${getRealmName()}，还需突破${need}次)`;
+                }
+            } else if (goal.desc.includes('招募')) {
+                progressText = ` (当前${gameState.discipleCount}人)`;
+            } else if (goal.desc.includes('炼丹成功')) {
+                progressText = ` (当前${gameState.alchemySuccessCount || 0}次)`;
+            } else if (goal.desc.includes('炼器成功')) {
+                progressText = ` (当前${gameState.forgeSuccessCount || 0}次)`;
+            } else if (goal.desc.includes('累计修炼')) {
+                const hours = Math.floor(gameState.playTime / 3600);
+                progressText = ` (当前${hours}小时)`;
+            }
+        }
+        goalEl.textContent = goal ? `🎯 ${goal.desc}${progressText}` : '🎉 所有目标已完成！';
+    }
     // 转世
     const daoGain = getRebirthDaoGain();
     const minRebirthRealm = 1;
@@ -239,7 +431,10 @@ function renderUpgrades() {
         const nextEffect = getUpgradeEffectAtLevel(u.id, lv + 1);
         const unlocked = gameState.realmIndex >= u.unlockRealm;
         const canAfford = gameState.spiritStone >= cost;
-        const maxed = lv >= u.maxLevel;
+        const realmMax = getUpgradeMaxLevel(u.id);
+        const trueMaxed = lv >= u.maxLevel;
+        const realmCapped = !trueMaxed && lv >= realmMax;
+        const maxed = trueMaxed || realmCapped;
         const item = document.createElement('div');
         item.className = 'upgrade-item' + (!unlocked ? ' locked' : (!canAfford && !maxed ? ' cant-afford' : ''));
         let effectText = u.effect === 'cultivation' ? `修为 +${formatNumber(effect)}/秒` : u.effect === 'stone' ? `灵石 +${formatNumber(effect)}/秒` : `修为+${formatNumber(effect)}/秒 灵石+${formatNumber(effect)}/秒`;
@@ -248,14 +443,27 @@ function renderUpgrades() {
             const delta = nextEffect - effect;
             previewText = `<div class="upgrade-effect" style="color:var(--success);font-size:11px">升级后 +${formatNumber(delta)}/秒</div>`;
         }
+        let capText = '';
+        if (realmCapped) capText = `<div class="upgrade-desc" style="color:var(--text-gold);font-size:11px">需突破至${CONFIG.realms[gameState.realmIndex + 1]?.name || '更高境界'}才能继续升级</div>`;
+        // 顿悟按钮
+        const enCost = getEnlightenmentCost(u.id);
+        const canEn = canEnlightenment() && !maxed && gameState.spiritStone >= enCost;
+        const enCooldown = !canEnlightenment() ? Math.ceil(((gameState.enlightenmentCooldown || 0) - Date.now()) / 1000) : 0;
+        let enBtn = '';
+        if (unlocked && !maxed) {
+            enBtn = `<button class="upgrade-enlighten-btn" ${!canEn ? 'disabled' : ''} data-id="${u.id}" style="margin-top:6px;width:100%;padding:4px;font-size:11px;background:var(--bg-panel-light);border:1px solid var(--border-gold);border-radius:4px;color:var(--text-gold);cursor:pointer">${enCooldown > 0 ? `顿悟冷却${enCooldown}s` : `顿悟 ${formatNumber(enCost)}灵石`}</button>`;
+        }
         item.innerHTML = `
-            <div class="upgrade-header"><span class="upgrade-name">${u.name}</span><span class="upgrade-level">Lv.${lv}${maxed ? ' (满)' : ''}</span></div>
+            <div class="upgrade-header"><span class="upgrade-name">${u.name}</span><span class="upgrade-level">Lv.${lv}${trueMaxed ? ' (满级)' : realmCapped ? `/${realmMax}` : ''}</span></div>
             <div class="upgrade-desc">${u.desc}</div>
             <div class="upgrade-effect">${effectText}</div>
             ${previewText}
+            ${capText}
             ${maxed ? '' : `<div class="upgrade-cost">花费：${formatNumber(cost)} 灵石</div>`}
+            ${enBtn}
             ${!unlocked ? `<div class="upgrade-desc" style="color:var(--accent-red)">需 ${CONFIG.realms[u.unlockRealm].name} 解锁</div>` : ''}`;
         if (unlocked && !maxed) item.addEventListener('click', () => buyUpgrade(u.id));
+        item.querySelector('.upgrade-enlighten-btn')?.addEventListener('click', (e) => { e.stopPropagation(); enlightenment(u.id); });
         container.appendChild(item);
     });
 }
@@ -263,6 +471,13 @@ function renderUpgrades() {
 function renderPills() {
     const container = document.getElementById('pill-list');
     container.innerHTML = '';
+    // 一键使用按钮
+    const useAllBtn = document.createElement('button');
+    useAllBtn.className = 'pill-btn use-all-btn';
+    useAllBtn.textContent = '一键使用所有丹药';
+    useAllBtn.style.cssText = 'width:100%;margin-bottom:10px;padding:8px;background:var(--bg-panel-light);border:1px solid var(--border-gold);border-radius:6px;color:var(--text-gold);cursor:pointer';
+    useAllBtn.addEventListener('click', useAllPills);
+    container.appendChild(useAllBtn);
     resetPillDailyUsage();
     CONFIG.pills.forEach(p => {
         const count = gameState.pills[p.id] || 0;
@@ -299,7 +514,7 @@ function renderArtifacts() {
     // 装备槽
     const slotsContainer = document.getElementById('artifact-slots');
     slotsContainer.innerHTML = '';
-    for (let i = 0; i < CONFIG.artifactSlots; i++) {
+    for (let i = 0; i < getArtifactSlots(); i++) {
         const art = gameState.equippedArtifacts[i];
         const slot = document.createElement('div');
         slot.className = 'artifact-slot' + (art ? ` equipped quality-${art.qualityColor}` : '');
@@ -318,21 +533,50 @@ function renderArtifacts() {
     if (gameState.artifactInventory.length === 0) {
         invContainer.innerHTML = '<p class="no-buff" style="grid-column:1/-1">背包空空如也，去历练获取法宝吧</p>';
     }
-    gameState.artifactInventory.forEach(art => {
+    // 排序
+    const sortBy = document.getElementById('artifact-sort')?.value || 'quality';
+    let sortedArtifacts = [...gameState.artifactInventory];
+    if (sortBy === 'quality') {
+        sortedArtifacts.sort((a, b) => (b.qualityIndex || 0) - (a.qualityIndex || 0));
+    } else if (sortBy === 'bonus') {
+        sortedArtifacts.sort((a, b) => (b.bonus || 0) - (a.bonus || 0));
+    } else if (sortBy === 'type') {
+        sortedArtifacts.sort((a, b) => (a.typeId || '').localeCompare(b.typeId || ''));
+    } else if (sortBy === 'level') {
+        sortedArtifacts.sort((a, b) => (b.level || 0) - (a.level || 0));
+    }
+    sortedArtifacts.forEach(art => {
         const item = document.createElement('div');
-        item.className = `artifact-inv-item quality-${art.qualityColor}`;
+        const isSelected = selectedArtifactUids.includes(art.uid);
+        item.className = `artifact-inv-item quality-${art.qualityColor}` + (isSelected ? ' batch-selected' : '');
         const lvl = art.level || 0;
         const enhanceCost = Math.floor(CONFIG.artifactEnhance.costBase * Math.pow(CONFIG.artifactEnhance.costMult, lvl));
         const enhanceRate = CONFIG.artifactEnhance.successRate[lvl] || 0.2;
-        item.title = `${art.name}${lvl > 0 ? ' +' + lvl : ''}\n效果: +${formatNumber(art.bonus)} ${art.effect === 'cultivation' ? '修为' : art.effect === 'stone' ? '灵石' : '全属性'}/秒\n左键装备 | 右键分解 | 双击强化(${enhanceRate*100}%)`;
-        item.innerHTML = `<span class="inv-icon">${art.icon}</span><span class="inv-name">${art.name}${lvl > 0 ? ' +' + lvl : ''}</span>`;
-        item.addEventListener('click', () => {
-            const emptySlot = gameState.equippedArtifacts.findIndex(s => s === null);
-            if (emptySlot !== -1) equipArtifact(art.uid, emptySlot);
-            else addLog('法宝槽位已满，请先卸下一个', '');
-        });
-        item.addEventListener('contextmenu', (e) => { e.preventDefault(); sellArtifact(art.uid); });
-        item.addEventListener('dblclick', () => { if (lvl < CONFIG.artifactEnhance.maxLevel) enhanceArtifact(art.uid); else addLog('已达最高强化等级', ''); });
+        let affixText = '';
+        if (art.affixes && art.affixes.length > 0) {
+            affixText = art.affixes.map(a => `<span class="affix-tag" style="color:${a.color}">${a.name}</span>`).join(' ');
+        }
+        item.title = `${art.name}${lvl > 0 ? ' +' + lvl : ''}\n效果: +${formatNumber(art.bonus)} ${art.effect === 'cultivation' ? '修为' : art.effect === 'stone' ? '灵石' : '全属性'}/秒${art.affixes && art.affixes.length > 0 ? '\n词条: ' + art.affixes.map(a => a.name).join(', ') : ''}\n左键装备 | 右键分解 | 双击强化(${enhanceRate*100}%)`;
+        item.innerHTML = `<span class="inv-icon">${art.icon}</span><span class="inv-name">${art.name}${lvl > 0 ? ' +' + lvl : ''}</span>${affixText ? `<div class="inv-affixes">${affixText}</div>` : ''}${isSelected ? '<span class="batch-check">✓</span>' : ''}`;
+        if (artifactBatchMode) {
+            item.addEventListener('click', () => toggleArtifactSelect(art.uid));
+        } else {
+            item.addEventListener('click', () => {
+                // 查找空槽位（null或undefined都算空）
+                const slots = getArtifactSlots();
+                let emptySlot = -1;
+                for (let i = 0; i < slots; i++) {
+                    if (!gameState.equippedArtifacts[i]) { emptySlot = i; break; }
+                }
+                if (emptySlot !== -1) {
+                    equipArtifact(art.uid, emptySlot);
+                } else {
+                    showArtifactCompare(art.uid);
+                }
+            });
+            item.addEventListener('contextmenu', (e) => { e.preventDefault(); sellArtifact(art.uid); });
+            item.addEventListener('dblclick', () => { if (lvl < CONFIG.artifactEnhance.maxLevel) enhanceArtifact(art.uid); else addLog('已达最高强化等级', ''); });
+        }
         invContainer.appendChild(item);
     });
 }
@@ -582,7 +826,9 @@ function renderPets() {
                 <button class="pet-btn" ${gameState.spiritStone < 30 ? 'disabled' : ''} id="pet-feed-btn">喂养 30灵石</button>
                 <button class="pet-btn" id="pet-unequip-btn">收回</button>
                 <button class="pet-btn" id="pet-release-btn" style="color:var(--accent-red)">放生</button>
-            </div>`;
+            </div>
+            ${getActiveSynergies().length > 0 ? `<div class="pet-synergy">✨ 羁绊：${getActiveSynergies().map(s => s.name).join('、')}</div>` : ''}
+            ${(() => { const skill = getActivePetSkill(); return skill ? `<div class="pet-skill">⚡ 技能：${skill.name} - ${skill.desc}</div>` : ''; })()}`;
         document.getElementById('pet-upgrade-btn')?.addEventListener('click', () => upgradePet(pet.uid));
         document.getElementById('pet-feed-btn')?.addEventListener('click', feedPet);
         document.getElementById('pet-unequip-btn')?.addEventListener('click', unequipPet);
@@ -590,6 +836,40 @@ function renderPets() {
     } else {
         activeContainer.className = 'pet-active empty';
         activeContainer.innerHTML = `<div class="pet-active-icon">❓</div><div class="pet-active-name">未出战灵宠</div><div class="pet-active-info">从下方选择一只灵宠出战</div>`;
+    }
+
+    // 副灵宠槽（化神期解锁）
+    const secContainer = document.getElementById('pet-secondary');
+    if (secContainer) {
+        const petSlots = getPetSlots();
+        if (petSlots >= 2) {
+            if (gameState.secondaryPet) {
+                const pet = gameState.secondaryPet;
+                const bonus = getPetBonus(pet);
+                const quality = CONFIG.petQualities[pet.qualityIndex];
+                secContainer.className = 'pet-active quality-' + pet.qualityColor;
+                secContainer.style.opacity = '0.8';
+                secContainer.innerHTML = `
+                    <div class="pet-active-icon">${pet.icon}</div>
+                    <div class="pet-active-name">副宠：${pet.name}</div>
+                    <div class="pet-active-info">
+                        Lv.${pet.level} | 提供50%加成<br>
+                        修为+${formatNumber(bonus.cultivation * 0.5)}/秒 灵石+${formatNumber(bonus.stone * 0.5)}/秒
+                    </div>
+                    <div class="pet-actions">
+                        <button class="pet-btn" id="pet-sec-unequip-btn">收回副宠</button>
+                    </div>`;
+                document.getElementById('pet-sec-unequip-btn')?.addEventListener('click', unequipSecondaryPet);
+            } else {
+                secContainer.className = 'pet-active empty';
+                secContainer.style.opacity = '0.6';
+                secContainer.innerHTML = `<div class="pet-active-icon">➕</div><div class="pet-active-name">副灵宠槽（已解锁）</div><div class="pet-active-info">从背包选择灵宠设为副宠，提供50%加成</div>`;
+            }
+        } else {
+            secContainer.className = 'pet-active empty';
+            secContainer.style.opacity = '0.4';
+            secContainer.innerHTML = `<div class="pet-active-icon">🔒</div><div class="pet-active-name">副灵宠槽（未解锁）</div><div class="pet-active-info">突破至化神期解锁副灵宠槽</div>`;
+        }
     }
 
     const invContainer = document.getElementById('pet-inventory');
@@ -603,13 +883,35 @@ function renderPets() {
     if (gameState.petInventory.length === 0) {
         invContainer.innerHTML += '<p class="no-buff" style="grid-column:1/-1">暂无灵宠，去秘境或奇遇中获取吧</p>';
     }
-    gameState.petInventory.forEach(pet => {
+    // 排序
+    const sortBy = document.getElementById('pet-sort')?.value || 'quality';
+    let sortedPets = [...gameState.petInventory];
+    if (sortBy === 'quality') {
+        sortedPets.sort((a, b) => (b.qualityIndex || 0) - (a.qualityIndex || 0));
+    } else if (sortBy === 'bonus') {
+        sortedPets.sort((a, b) => {
+            const ba = getPetBonus(a), bb = getPetBonus(b);
+            return (bb.cultivation + bb.stone) - (ba.cultivation + ba.stone);
+        });
+    } else if (sortBy === 'type') {
+        sortedPets.sort((a, b) => (a.typeId || '').localeCompare(b.typeId || ''));
+    } else if (sortBy === 'level') {
+        sortedPets.sort((a, b) => (b.level || 0) - (a.level || 0));
+    }
+    sortedPets.forEach(pet => {
         const item = document.createElement('div');
-        item.className = `pet-inv-item quality-${pet.qualityColor}`;
+        const isSelected = selectedPetUids.includes(pet.uid);
+        const canSecondary = getPetSlots() >= 2;
+        item.className = `pet-inv-item quality-${pet.qualityColor}` + (isSelected ? ' batch-selected' : '');
         item.title = `${pet.name}\nLv.${pet.level} 好感度${pet.affection}\n点击出战，右键放生`;
-        item.innerHTML = `<span class="pet-icon">${pet.icon}</span><span class="pet-name">${pet.name}</span><span class="pet-level">Lv.${pet.level}</span>`;
-        item.addEventListener('click', () => equipPet(pet.uid));
-        item.addEventListener('contextmenu', (e) => { e.preventDefault(); if (confirm(`放生${pet.name}？获得灵石奖励`)) releasePet(pet.uid); });
+        item.innerHTML = `<span class="pet-icon">${pet.icon}</span><span class="pet-name">${pet.name}</span><span class="pet-level">Lv.${pet.level}</span>${isSelected ? '<span class="batch-check">✓</span>' : ''}${canSecondary ? '<button class="pet-sec-equip-btn" style="font-size:10px;padding:1px 4px;margin-left:4px;background:var(--bg-panel-light);border:1px solid var(--border-gold);border-radius:3px;color:var(--text-gold);cursor:pointer">副宠</button>' : ''}`;
+        if (petBatchMode) {
+            item.addEventListener('click', () => togglePetSelect(pet.uid));
+        } else {
+            item.addEventListener('click', () => equipPet(pet.uid));
+            item.addEventListener('contextmenu', (e) => { e.preventDefault(); if (confirm(`放生${pet.name}？获得灵石奖励`)) releasePet(pet.uid); });
+        }
+        item.querySelector('.pet-sec-equip-btn')?.addEventListener('click', (e) => { e.stopPropagation(); equipSecondaryPet(pet.uid); });
         invContainer.appendChild(item);
     });
 }
@@ -628,7 +930,22 @@ function renderDungeons() {
         const cooling = Date.now() < cd;
         const canAfford = gameState.spiritStone >= d.cost;
         const power = getPlayerPower();
-        const successRate = Math.min(95, Math.floor(power / d.powerReq * 100));
+        // 与challengeDungeon一致的成功率计算（含灵宠加成）
+        const successBonus = getPetSkillBonus('dungeonSuccess');
+        const successRate = Math.min(95, Math.floor(power / d.powerReq * (1 + successBonus) * 100));
+        // 预计伤害预览
+        const damageRatio = Math.max(0.05, Math.min(0.4, d.powerReq / Math.max(power, 1) * 0.15));
+        const dungeonHpReduction = getFormationOutingBonus('dungeonHp') + getPetSkillBonus('dungeonHp');
+        const damageMult = Math.max(0.3, 1 + dungeonHpReduction);
+        const estDamageSuccess = Math.floor(getMaxHp() * damageRatio * 0.5 * damageMult);
+        const estDamageFail = Math.floor(getMaxHp() * damageRatio * 1.2 * damageMult);
+        // 预计奖励预览（含阵法/灵宠/Buff加成）
+        const cultBonus = getFormationOutingBonus('adventureCult') + getFormationOutingBonus('all') + getPetSkillBonus('adventureCult') + getPetSkillBonus('all');
+        const stoneBonus = getFormationOutingBonus('adventureStone') + getFormationOutingBonus('all') + getPetSkillBonus('adventureStone') + getPetSkillBonus('all');
+        const estCult = Math.floor(d.cultReward * (1 + gameState.realmIndex * 0.3) * (1 + cultBonus) * getBuffMultiplier('cultivation'));
+        const estStone = Math.floor(d.stoneReward * (1 + gameState.realmIndex * 0.3) * (1 + stoneBonus) * getBuffMultiplier('stone'));
+        const artChanceBonus = getFormationOutingBonus('artifactChance') + getFormationOutingBonus('all') + getPetSkillBonus('artifactChance') + getPetSkillBonus('all');
+        const estArtChance = Math.min(100, Math.floor(d.artifactChance * (1 + artChanceBonus) * 100));
 
         const item = document.createElement('div');
         item.className = 'dungeon-item' + (!unlocked ? ' locked' : (cooling ? ' cooling' : ''));
@@ -639,8 +956,16 @@ function renderDungeons() {
             </div>
             <div class="dungeon-desc">${d.desc}</div>
             <div class="dungeon-info">
-                <span class="dungeon-power-req">推荐战力:${formatNumber(d.powerReq)} (成功率${successRate}%)</span>
+                <span class="dungeon-power-req">推荐战力:${formatNumber(d.powerReq)} | 成功率:${successRate}%</span>
                 <span class="dungeon-reward">消耗:${formatNumber(d.cost)}灵石</span>
+            </div>
+            <div class="dungeon-info" style="font-size:11px;color:var(--text-muted)">
+                <span>预计奖励:${formatNumber(estCult)}修为 ${formatNumber(estStone)}灵石</span>
+                <span>法宝掉率:${estArtChance}%</span>
+            </div>
+            <div class="dungeon-info" style="font-size:11px;color:var(--text-muted)">
+                <span>预计伤害:成功-${estDamageSuccess} / 失败-${estDamageFail}</span>
+                <span>当前生命:${Math.floor(gameState.hp)}/${getMaxHp()}</span>
             </div>
             ${cooling ? `<div class="dungeon-cooldown" data-cd-end="${cd}">冷却中: ${formatCountdown((cd - Date.now()) / 1000)}</div>` : ''}
             ${!unlocked ? `<div class="dungeon-desc" style="color:var(--accent-red)">境界不足，无法挑战</div>` : ''}`;
@@ -748,43 +1073,51 @@ function renderFormations() {
     listContainer.innerHTML = '';
     CONFIG.formations.forEach(formation => {
         const canAfford = gameState.spiritStone >= formation.cost;
+        const lv = getFormationLevel(formation.id);
+        const lvMult = getFormationLevelMult(formation.id);
+        const upCost = getFormationUpgradeCost(formation.id);
+        const canUpgrade = lv < 5 && gameState.spiritStone >= upCost;
         const item = document.createElement('div');
         item.className = 'craft-item' + (!canAfford ? ' disabled' : '');
         item.innerHTML = `
-            <div class="craft-header"><span class="craft-name">${formation.icon} ${formation.name}</span><span class="craft-rate">+${Math.floor(formation.value*100)}%</span></div>
+            <div class="craft-header"><span class="craft-name">${formation.icon} ${formation.name} ${lv > 0 ? `<span style="color:var(--text-gold)">Lv.${lv}</span>` : ''}</span><span class="craft-rate">+${Math.floor(formation.value*lvMult*100)}%</span></div>
             <div class="craft-desc">${formation.desc}</div>
             <div class="craft-info">消耗:${formation.cost}灵石 | 持续:${Math.floor(formation.duration/60)}分钟</div>
-            <button class="craft-btn" ${!canAfford ? 'disabled' : ''}>布置阵法</button>`;
+            <div style="display:flex;gap:6px">
+                <button class="craft-btn" ${!canAfford ? 'disabled' : ''} style="flex:1">布置阵法</button>
+                <button class="craft-btn formation-upgrade-btn" ${!canUpgrade ? 'disabled' : ''} style="flex:1;font-size:11px">${lv >= 5 ? '已满级' : `升级 ${formatNumber(upCost)}`}</button>
+            </div>`;
         if (canAfford) {
             item.querySelector('.craft-btn').addEventListener('click', (e) => { e.stopPropagation(); activateFormation(formation.id); });
         }
+        item.querySelector('.formation-upgrade-btn')?.addEventListener('click', (e) => { e.stopPropagation(); upgradeFormation(formation.id); });
         listContainer.appendChild(item);
     });
 }
 
 // ========== 产出详情 ==========
 function getProductionBreakdown() {
-    const cultPerSec = getCultivationPerSecond();
-    const stonePerSec = getStonePerSecond();
-    const upgradeBonus = CONFIG.upgrades.reduce((sum, u) => {
-        if (u.effect === 'cultivation' || u.effect === 'both') return sum + getUpgradeEffect(u.id);
-        return sum;
-    }, 0);
-    const artBonus = getArtifactBonus('cultivation');
-    const petBonus = gameState.activePet ? getPetBonus(gameState.activePet).cultivation : 0;
+    const cult = getCultivationBreakdown();
+    const stone = getStoneBreakdown();
     return {
-        cultPerSec, stonePerSec,
-        base: CONFIG.baseCultivation,
-        upgrades: upgradeBonus,
-        artifacts: artBonus,
-        pets: petBonus,
-        realmMult: 1 + getCurrentRealm().cultBonus,
-        discipleMult: 1 + gameState.discipleCount * CONFIG.disciple.cultBonus,
-        daoMult: 1 + gameState.dao * 0.01,
-        formationMult: 1 + getFormationBonus('cultivation'),
-        bondMult: 1 + getPetBondBonus('cultivation'),
-        titleMult: 1 + getTitleBonus('cultivation'),
-        eventMult: 1 + getEventBonus('cultivation'),
+        cultPerSec: cult.total,
+        stonePerSec: stone.total,
+        base: cult.base,
+        upgrades: cult.upgradeBonus,
+        artifacts: cult.artBonus,
+        pets: cult.petBonus,
+        realmMult: cult.realmMult,
+        discipleMult: cult.discipleMult,
+        daoMult: cult.daoMult,
+        buffMult: cult.buffMult,
+        formationMult: cult.formationMult,
+        bondMult: cult.bondMult,
+        titleMult: cult.titleMult,
+        eventMult: cult.eventMult,
+        privilegeMult: cult.privilegeMult,
+        synergyMult: cult.synergyMult,
+        affixMult: cult.affixMult,
+        heavenlyMult: cult.heavenlyMult,
     };
 }
 
@@ -801,10 +1134,15 @@ function showProductionDetails() {
             <div style="display:flex;justify-content:space-between"><span>境界倍率</span><span>×${b.realmMult.toFixed(2)}</span></div>
             <div style="display:flex;justify-content:space-between"><span>弟子倍率</span><span>×${b.discipleMult.toFixed(2)}</span></div>
             <div style="display:flex;justify-content:space-between"><span>道韵倍率</span><span>×${b.daoMult.toFixed(2)}</span></div>
+            <div style="display:flex;justify-content:space-between"><span>丹药Buff</span><span>×${b.buffMult.toFixed(2)}</span></div>
             <div style="display:flex;justify-content:space-between"><span>阵法倍率</span><span>×${b.formationMult.toFixed(2)}</span></div>
-            <div style="display:flex;justify-content:space-between"><span>羁绊倍率</span><span>×${b.bondMult.toFixed(2)}</span></div>
+            <div style="display:flex;justify-content:space-between"><span>灵宠图鉴</span><span>×${b.bondMult.toFixed(2)}</span></div>
+            <div style="display:flex;justify-content:space-between"><span>法宝羁绊</span><span>×${b.synergyMult.toFixed(2)}</span></div>
+            <div style="display:flex;justify-content:space-between"><span>法宝词条</span><span>×${b.affixMult.toFixed(2)}</span></div>
             <div style="display:flex;justify-content:space-between"><span>称号倍率</span><span>×${b.titleMult.toFixed(2)}</span></div>
+            <div style="display:flex;justify-content:space-between"><span>天赐加成</span><span>×${b.heavenlyMult.toFixed(2)}</span></div>
             <div style="display:flex;justify-content:space-between"><span>活动倍率</span><span>×${b.eventMult.toFixed(2)}</span></div>
+            <div style="display:flex;justify-content:space-between"><span>境界特权</span><span>×${b.privilegeMult.toFixed(2)}</span></div>
             <hr style="border-color:var(--border-gold);margin:8px 0">
             <div style="display:flex;justify-content:space-between;font-weight:bold;color:var(--text-gold-light)"><span>最终修为</span><span>${formatNumber(b.cultPerSec)}/秒</span></div>
             <div style="display:flex;justify-content:space-between;font-weight:bold;color:var(--text-gold-light)"><span>最终灵石</span><span>${formatNumber(b.stonePerSec)}/秒</span></div>

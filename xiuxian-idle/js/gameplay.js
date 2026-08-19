@@ -64,6 +64,44 @@ function usePill(id) {
     return true;
 }
 
+function useAllPills() {
+    let usedCount = 0;
+    let usedNames = [];
+    CONFIG.pills.forEach(p => {
+        const count = gameState.pills[p.id] || 0;
+        if (count <= 0) return;
+        const used = gameState.pillDailyUsage[p.id] || 0;
+        if (used >= p.dailyLimit) return;
+        // 跳过buff类丹药（避免冲突），只使用即时类和治疗类
+        if (p.effect === 'buff_cult' || p.effect === 'buff_stone' || p.effect === 'buff_both') return;
+        // 使用一颗
+        gameState.pills[p.id]--;
+        gameState.pillsUsedCount++;
+        gameState.pillDailyUsage[p.id] = used + 1;
+        usedCount++;
+        usedNames.push(p.name);
+        if (p.effect === 'instant_cult') {
+            const gain = getCultivationPerSecond() * p.value;
+            gameState.cultivation += gain;
+            gameState.totalCultivation += gain;
+        } else if (p.effect === 'instant_stone') {
+            const gain = getStonePerSecond() * p.value;
+            gameState.spiritStone += gain;
+        } else if (p.effect === 'heal') {
+            const healAmount = Math.floor(getMaxHp() * p.value);
+            gameState.hp = Math.min(getMaxHp(), gameState.hp + healAmount);
+        }
+    });
+    if (usedCount > 0) {
+        SFX.pill();
+        addLog(`一键使用${usedCount}颗丹药：${usedNames.join('、')}`, 'success');
+        checkAchievements();
+        updateUI();
+    } else {
+        addLog('没有可使用的丹药（Buff类丹药需手动服用）', '');
+    }
+}
+
 // 重置每日丹药服用记录
 function resetPillDailyUsage() {
     const today = getTodayStr();
@@ -102,7 +140,15 @@ function generateArtifact(forceQuality = null) {
         qualityColor: quality.color,
         bonus: Math.floor(type.base * quality.mult * (1 + Math.random() * 0.5)),
         level: 0,
+        affixes: [],
     };
+    // 随机词条
+    const affixCount = CONFIG.artifactAffixCount[qualityIndex] || 0;
+    const availableAffixes = [...CONFIG.artifactAffixes];
+    for (let i = 0; i < affixCount && availableAffixes.length > 0; i++) {
+        const idx = Math.floor(Math.random() * availableAffixes.length);
+        artifact.affixes.push(availableAffixes.splice(idx, 1)[0]);
+    }
     return artifact;
 }
 
@@ -149,9 +195,14 @@ function startAdventure(locationId) {
     if (gameState.adventure) { addLog('正在历练中，无法再次出发', ''); SFX.error(); return false; }
     const loc = CONFIG.adventures.find(a => a.id === locationId);
     if (!loc || gameState.realmIndex < loc.unlockRealm) return false;
-    gameState.adventure = { locationId, startTime: Date.now(), duration: loc.duration * 1000 };
+    // 灵宠技能：仙鹤疾风 - 历练时间减少
+    const speedBonus = getPetSkillBonus('adventureSpeed');
+    const duration = Math.max(1, loc.duration * (1 - speedBonus));
+    gameState.adventure = { locationId, startTime: Date.now(), duration: duration * 1000 };
     SFX.adventure();
-    addLog(`出发前往 ${loc.name} 历练`, 'success');
+    let msg = `出发前往 ${loc.name} 历练`;
+    if (speedBonus > 0) msg += `（灵宠技能：历练时间-${Math.floor(speedBonus*100)}%）`;
+    addLog(msg, 'success');
     updateUI();
     return true;
 }
@@ -160,7 +211,8 @@ function completeAdventure() {
     if (!gameState.adventure) return;
     const loc = CONFIG.adventures.find(a => a.id === gameState.adventure.locationId);
     const elapsed = (Date.now() - gameState.adventure.startTime) / 1000;
-    if (elapsed < loc.duration) return;
+    const totalDuration = gameState.adventure.duration / 1000;
+    if (elapsed < totalDuration) return;
 
     // 奇遇事件判定
     let eventMult = { cult: 1, stone: 1 };
@@ -174,8 +226,13 @@ function completeAdventure() {
         }
     }
 
-    const cultGain = loc.cultReward * (1 + gameState.realmIndex * 0.5) * eventMult.cult;
-    const stoneGain = loc.stoneReward * (1 + gameState.realmIndex * 0.5) * eventMult.stone;
+    const cultBonus = getFormationOutingBonus('adventureCult') + getFormationOutingBonus('all') + getPetSkillBonus('adventureCult') + getPetSkillBonus('all') + getDiscipleAssignBonus('patrol');
+    const stoneBonus = getFormationOutingBonus('adventureStone') + getFormationOutingBonus('all') + getPetSkillBonus('adventureStone') + getPetSkillBonus('all');
+    // Buff丹药影响历练一次性奖励
+    const cultBuffMult = getBuffMultiplier('cultivation');
+    const stoneBuffMult = getBuffMultiplier('stone');
+    const cultGain = loc.cultReward * (1 + gameState.realmIndex * 0.5) * eventMult.cult * (1 + cultBonus) * cultBuffMult;
+    const stoneGain = loc.stoneReward * (1 + gameState.realmIndex * 0.5) * eventMult.stone * (1 + stoneBonus) * stoneBuffMult;
     gameState.cultivation += cultGain;
     gameState.totalCultivation += cultGain;
     gameState.spiritStone += stoneGain;
@@ -187,7 +244,8 @@ function completeAdventure() {
         gameState.adventureEventCount = (gameState.adventureEventCount || 0) + 1;
     }
 
-    if (Math.random() < loc.artifactChance) {
+    const artChanceBonus = getFormationOutingBonus('artifactChance') + getFormationOutingBonus('all') + getPetSkillBonus('artifactChance') + getPetSkillBonus('all');
+    if (Math.random() < Math.min(1, loc.artifactChance * (1 + artChanceBonus))) {
         const art = generateArtifact();
         gameState.artifactInventory.push(art);
         gameState.artifactFoundCount++;
@@ -213,11 +271,12 @@ function getAdventureProgress() {
     if (!gameState.adventure) return null;
     const loc = CONFIG.adventures.find(a => a.id === gameState.adventure.locationId);
     const elapsed = (Date.now() - gameState.adventure.startTime) / 1000;
+    const totalDuration = gameState.adventure.duration / 1000; // 使用实际存储的时长（可能被灵宠技能缩短）
     return {
         location: loc,
         elapsed,
-        remaining: Math.max(0, loc.duration - elapsed),
-        progress: Math.min(1, elapsed / loc.duration),
+        remaining: Math.max(0, totalDuration - elapsed),
+        progress: Math.min(1, elapsed / totalDuration),
     };
 }
 
@@ -249,6 +308,31 @@ function claimAchievement(id) {
     }
     updateUI();
     return true;
+}
+
+function claimAllAchievements() {
+    let count = 0;
+    let totalDao = 0;
+    let totalPoints = 0;
+    CONFIG.achievements.forEach(ach => {
+        const state = gameState.achievements[ach.id];
+        if (state && state.completed && !state.claimed) {
+            state.claimed = true;
+            count++;
+            if (ach.reward.dao) { gameState.dao += ach.reward.dao; totalDao += ach.reward.dao; }
+            if (ach.reward.points) { gameState.achievementPoints = (gameState.achievementPoints || 0) + ach.reward.points; totalPoints += ach.reward.points; }
+        }
+    });
+    if (count > 0) {
+        SFX.achievement();
+        let msg = `一键领取${count}个成就`;
+        if (totalDao > 0) msg += `，获得${totalDao}道韵`;
+        if (totalPoints > 0) msg += `，${totalPoints}成就点`;
+        addLog(msg, 'success');
+        updateUI();
+    } else {
+        addLog('暂无可领取的成就', '');
+    }
 }
 
 // ========== 每日签到 ==========
@@ -465,6 +549,29 @@ function unequipPet() {
     return true;
 }
 
+function equipSecondaryPet(uid) {
+    if (getPetSlots() < 2) { addLog('需突破至化神期解锁副灵宠槽', ''); SFX.error(); return false; }
+    const idx = gameState.petInventory.findIndex(p => p.uid === uid);
+    if (idx === -1) return false;
+    const pet = gameState.petInventory[idx];
+    if (gameState.secondaryPet) gameState.petInventory.push(gameState.secondaryPet);
+    gameState.secondaryPet = pet;
+    gameState.petInventory.splice(idx, 1);
+    SFX.buy();
+    addLog(`副灵宠：${pet.name}（提供50%加成）`, 'success');
+    updateUI();
+    return true;
+}
+
+function unequipSecondaryPet() {
+    if (!gameState.secondaryPet) return false;
+    gameState.petInventory.push(gameState.secondaryPet);
+    gameState.secondaryPet = null;
+    addLog('收回副灵宠', '');
+    updateUI();
+    return true;
+}
+
 function feedPet() {
     if (!gameState.activePet) return false;
     if (gameState.spiritStone < 30) { addLog('灵石不足，无法喂养', ''); SFX.error(); return false; }
@@ -513,8 +620,9 @@ function alchemyPill(pillId) {
     let successCount = 0;
     let failCount = 0;
     const pill = CONFIG.pills.find(p => p.id === pillId);
+    const alchemyBonus = getRealmPrivilege('alchemy') + getDiscipleAssignBonus('alchemy');
     for (let i = 0; i < batchSize; i++) {
-        if (Math.random() < recipe.successRate) {
+        if (Math.random() < Math.min(1, recipe.successRate + alchemyBonus)) {
             gameState.pills[pillId] = (gameState.pills[pillId] || 0) + 1;
             gameState.alchemySuccessCount = (gameState.alchemySuccessCount || 0) + 1;
             successCount++;
@@ -549,8 +657,9 @@ function forgeArtifact(qualityIndex) {
     let successCount = 0;
     let failCount = 0;
     const quality = CONFIG.artifactQualities[qualityIndex];
+    const forgeBonus = getRealmPrivilege('forge') + getDiscipleAssignBonus('forge');
     for (let i = 0; i < batchSize; i++) {
-        if (Math.random() < recipe.successRate) {
+        if (Math.random() < Math.min(1, recipe.successRate + forgeBonus)) {
             const art = generateArtifact(qualityIndex);
             gameState.artifactInventory.push(art);
             gameState.artifactFoundCount++;
@@ -582,7 +691,9 @@ function getFormationBonus(type) {
     gameState.activeFormations.forEach(f => {
         const formation = CONFIG.formations.find(x => x.id === f.id);
         if (!formation) return;
-        if (formation.effect === type || formation.effect === 'both') bonus += formation.value;
+        if (formation.effect === type || formation.effect === 'both') {
+            bonus += formation.value * getFormationLevelMult(f.id);
+        }
     });
     return bonus;
 }
@@ -608,6 +719,20 @@ function activateFormation(formationId) {
     return true;
 }
 
+// 检测阵法过期并提醒
+function checkFormationExpiry() {
+    if (!gameState.activeFormations || gameState.activeFormations.length === 0) return;
+    const now = Date.now();
+    const expired = gameState.activeFormations.filter(f => f.endTime <= now);
+    if (expired.length > 0) {
+        expired.forEach(f => {
+            const config = CONFIG.formations.find(cf => cf.id === f.id);
+            if (config) addLog(`【${config.name}】已过期，效果失效`, '');
+        });
+        gameState.activeFormations = gameState.activeFormations.filter(f => f.endTime > now);
+    }
+}
+
 // ========== 秘境系统 ==========
 function getPlayerPower() {
     let power = 0;
@@ -615,10 +740,8 @@ function getPlayerPower() {
     CONFIG.upgrades.forEach(u => { power += gameState.upgrades[u.id] * (u.effect === 'both' ? 3 : 2); });
     power += gameState.discipleCount * 5;
     power += getArtifactBonus('cultivation') + getArtifactBonus('stone');
-    if (gameState.activePet) {
-        const b = getPetBonus(gameState.activePet);
-        power += (b.cultivation + b.stone) * 2;
-    }
+    const totalPet = getTotalPetBonus();
+    power += (totalPet.cultivation + totalPet.stone) * 2;
     power += gameState.dao * 10;
     return Math.floor(power);
 }
@@ -690,22 +813,35 @@ function challengeDungeon(dungeonId) {
     gameState.dungeonCooldowns[dungeonId] = Date.now() + d.cooldown * 1000;
 
     const power = getPlayerPower();
-    const successRate = Math.min(0.95, power / d.powerReq);
+    // 灵宠技能：火狐 - 秘境成功率+10%
+    const successBonus = getPetSkillBonus('dungeonSuccess');
+    const successRate = Math.min(0.95, power / d.powerReq * (1 + successBonus));
     const success = Math.random() < successRate;
     // 战斗伤害：秘境越强、玩家越弱，伤害越高
     const damageRatio = Math.max(0.05, Math.min(0.4, d.powerReq / Math.max(power, 1) * 0.15));
-    const damage = Math.floor(getMaxHp() * damageRatio * (success ? 0.5 : 1.2));
+    // 阵法/灵宠：秘境耗血减少（护山大阵、玄龟、青龙）
+    const dungeonHpReduction = getFormationOutingBonus('dungeonHp') + getPetSkillBonus('dungeonHp');
+    const damageMult = Math.max(0.3, 1 + dungeonHpReduction); // 最低30%伤害
+    const damage = Math.floor(getMaxHp() * damageRatio * (success ? 0.5 : 1.2) * damageMult);
     gameState.hp = Math.max(1, gameState.hp - damage);
 
     if (success) {
-        const cultGain = d.cultReward * (1 + gameState.realmIndex * 0.3);
-        const stoneGain = d.stoneReward * (1 + gameState.realmIndex * 0.3);
+        // 阵法/灵宠加成：秘境奖励享受历练类加成
+        const cultBonus = getFormationOutingBonus('adventureCult') + getFormationOutingBonus('all') + getPetSkillBonus('adventureCult') + getPetSkillBonus('all');
+        const stoneBonus = getFormationOutingBonus('adventureStone') + getFormationOutingBonus('all') + getPetSkillBonus('adventureStone') + getPetSkillBonus('all');
+        // Buff丹药影响秘境奖励
+        const cultBuffMult = getBuffMultiplier('cultivation');
+        const stoneBuffMult = getBuffMultiplier('stone');
+        const cultGain = d.cultReward * (1 + gameState.realmIndex * 0.3) * (1 + cultBonus) * cultBuffMult;
+        const stoneGain = d.stoneReward * (1 + gameState.realmIndex * 0.3) * (1 + stoneBonus) * stoneBuffMult;
         gameState.cultivation += cultGain;
         gameState.totalCultivation += cultGain;
         gameState.spiritStone += stoneGain;
         let msg = `挑战【${d.name}】成功！获得${formatNumber(cultGain)}修为，${formatNumber(stoneGain)}灵石`;
 
-        if (Math.random() < d.artifactChance) {
+        // 阵法/灵宠加成：法宝掉落率
+        const artChanceBonus = getFormationOutingBonus('artifactChance') + getFormationOutingBonus('all') + getPetSkillBonus('artifactChance') + getPetSkillBonus('all');
+        if (Math.random() < Math.min(1, d.artifactChance * (1 + artChanceBonus))) {
             const art = generateArtifact();
             gameState.artifactInventory.push(art);
             gameState.artifactFoundCount++;

@@ -77,6 +77,13 @@ function init() {
     // document.getElementById('meditate-btn').addEventListener('click', meditate);
     document.getElementById('breakthrough-btn').addEventListener('click', breakthrough);
     document.getElementById('recruit-btn').addEventListener('click', recruitDisciple);
+    // 弟子分工
+    document.querySelectorAll('.assign-btn.plus').forEach(btn => {
+        btn.addEventListener('click', () => assignDisciple(btn.dataset.type));
+    });
+    document.querySelectorAll('.assign-btn.minus').forEach(btn => {
+        btn.addEventListener('click', () => unassignDisciple(btn.dataset.type));
+    });
     // 可折叠面板
     document.querySelectorAll('.collapsible-header').forEach(header => {
         header.addEventListener('click', () => {
@@ -86,6 +93,15 @@ function init() {
     document.getElementById('rebirth-btn').addEventListener('click', rebirth);
     document.getElementById('save-btn').addEventListener('click', saveGame);
     document.getElementById('reset-btn').addEventListener('click', resetGame);
+    document.getElementById('claim-all-ach-btn')?.addEventListener('click', claimAllAchievements);
+    document.getElementById('artifact-sort')?.addEventListener('change', () => updateUI());
+    document.getElementById('pet-sort')?.addEventListener('change', () => updateUI());
+    document.getElementById('artifact-batch-btn')?.addEventListener('click', toggleArtifactBatch);
+    document.getElementById('artifact-decompose-btn')?.addEventListener('click', batchDecomposeArtifacts);
+    document.getElementById('artifact-cancel-btn')?.addEventListener('click', toggleArtifactBatch);
+    document.getElementById('pet-batch-btn')?.addEventListener('click', togglePetBatch);
+    document.getElementById('pet-release-btn')?.addEventListener('click', batchReleasePets);
+    document.getElementById('pet-cancel-btn')?.addEventListener('click', togglePetBatch);
     document.getElementById('export-btn').addEventListener('click', exportSave);
     document.getElementById('sound-btn').addEventListener('click', toggleSound);
     document.getElementById('lock-btn').addEventListener('click', lockScreen);
@@ -121,6 +137,10 @@ function init() {
 
     // 产出详情
     document.getElementById('detail-btn')?.addEventListener('click', showProductionDetails);
+    document.getElementById('cultivation-rate')?.addEventListener('click', showProductionDetails);
+    document.getElementById('spirit-stone-rate')?.addEventListener('click', showProductionDetails);
+    document.getElementById('center-cult-rate')?.addEventListener('click', showProductionDetails);
+    document.getElementById('center-stone-rate')?.addEventListener('click', showProductionDetails);
 
     document.getElementById('claim-offline-btn').addEventListener('click', () => {
         const e = calculateOfflineEarnings();
@@ -178,9 +198,11 @@ function gameTick() {
     if (Math.floor(gameState.playTime) % 5 === 0) checkAchievements();
     checkRandomEvent();
     checkCooldownNotifications();
+    checkFormationExpiry();
     updateStageGoal();
     checkTitles();
     if (!isLocked) updateFastUI();
+    updateTabDots();
 }
 
 init();

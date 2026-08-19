@@ -146,11 +146,11 @@
                 <div class="center-tab-bar">
                     <button class="center-tab-btn active" data-tab="wudao">悟道台</button>
                     <button class="center-tab-btn" data-tab="cultivation">功法</button>
-                    <button class="center-tab-btn" data-tab="pills">丹药</button>
-                    <button class="center-tab-btn" data-tab="artifacts">法宝</button>
+                    <button class="center-tab-btn" data-tab="pills">丹药<span class="tab-dot hidden" id="dot-pills"></span></button>
+                    <button class="center-tab-btn" data-tab="artifacts">法宝<span class="tab-dot hidden" id="dot-artifacts"></span></button>
                     <button class="center-tab-btn" data-tab="pets">灵宠</button>
                     <button class="center-tab-btn" data-tab="formation">阵法</button>
-                    <button class="center-tab-btn" data-tab="outing">外出</button>
+                    <button class="center-tab-btn" data-tab="outing">外出<span class="tab-dot hidden" id="dot-outing"></span></button>
                     <button class="center-tab-btn" data-tab="activity">活动</button>
                 </div>
 
@@ -208,6 +208,15 @@
                         </div>
                     </div>
 
+                    <!-- 境界特权 -->
+                    <div class="realm-privilege-panel">
+                        <h3 class="stats-panel-title">◈ 境界特权 ◈</h3>
+                        <div class="realm-privilege-content" id="realm-privilege-content">
+                            <span class="privilege-icon" id="privilege-icon">🌱</span>
+                            <span class="privilege-text" id="privilege-text">初入修仙，无特殊能力</span>
+                        </div>
+                    </div>
+
                     <div class="cultivation-area">
                         <div class="cultivation-circle">
                             <div class="circle-outer"></div>
@@ -246,7 +255,58 @@
                             <span class="btn-text">招募弟子</span>
                             <span id="recruit-cost" class="btn-cost">花费：100 灵石</span>
                         </button>
-                        <p class="disciple-tip">每名弟子提供 +1.5% 修为产出和 +1% 灵石产出</p>
+                        <p class="disciple-tip">弟子总数：<span id="disciple-total">0</span> | 未分配：<span id="disciple-unassigned">0</span></p>
+                        <div class="disciple-assign-grid" id="disciple-assign-grid">
+                            <div class="assign-card">
+                                <div class="assign-icon">⚗️</div>
+                                <div class="assign-info">
+                                    <div class="assign-name">炼丹房</div>
+                                    <div class="assign-effect">每人+1%炼丹成功率</div>
+                                </div>
+                                <div class="assign-controls">
+                                    <button class="assign-btn minus" data-type="alchemy">−</button>
+                                    <span class="assign-count" id="assign-alchemy">0</span>
+                                    <button class="assign-btn plus" data-type="alchemy">+</button>
+                                </div>
+                            </div>
+                            <div class="assign-card">
+                                <div class="assign-icon">🔨</div>
+                                <div class="assign-info">
+                                    <div class="assign-name">炼器房</div>
+                                    <div class="assign-effect">每人+1%炼器成功率</div>
+                                </div>
+                                <div class="assign-controls">
+                                    <button class="assign-btn minus" data-type="forge">−</button>
+                                    <span class="assign-count" id="assign-forge">0</span>
+                                    <button class="assign-btn plus" data-type="forge">+</button>
+                                </div>
+                            </div>
+                            <div class="assign-card">
+                                <div class="assign-icon">🌾</div>
+                                <div class="assign-info">
+                                    <div class="assign-name">灵田</div>
+                                    <div class="assign-effect">每人+0.8%灵石产出</div>
+                                </div>
+                                <div class="assign-controls">
+                                    <button class="assign-btn minus" data-type="farm">−</button>
+                                    <span class="assign-count" id="assign-farm">0</span>
+                                    <button class="assign-btn plus" data-type="farm">+</button>
+                                </div>
+                            </div>
+                            <div class="assign-card">
+                                <div class="assign-icon">🗡️</div>
+                                <div class="assign-info">
+                                    <div class="assign-name">巡山</div>
+                                    <div class="assign-effect">每人+0.8%修为产出</div>
+                                </div>
+                                <div class="assign-controls">
+                                    <button class="assign-btn minus" data-type="patrol">−</button>
+                                    <span class="assign-count" id="assign-patrol">0</span>
+                                    <button class="assign-btn plus" data-type="patrol">+</button>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="disciple-tip" style="font-size:11px">未分配弟子每人提供+0.5%修为、+0.3%灵石产出</p>
                     </div>
                 </div>
 
@@ -299,7 +359,12 @@
                 <div class="tab-content" id="tab-artifacts">
                     <h2 class="panel-title">◈ 法宝阁 ◈</h2>
                     <div class="artifact-slots" id="artifact-slots"></div>
-                    <h2 class="panel-title" style="margin-top: 16px;">◈ 法宝背包 ◈</h2>
+                    <h2 class="panel-title" style="margin-top: 16px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">◈ 法宝背包 ◈<span style="display:flex;gap:4px;align-items:center"><select id="artifact-sort" class="sort-select" style="font-size:11px;padding:2px 6px;background:var(--bg-panel);color:var(--text-primary);border:1px solid var(--border-gold);border-radius:4px"><option value="quality">按品质</option><option value="bonus">按加成</option><option value="type">按类型</option><option value="level">按等级</option></select><button id="artifact-batch-btn" class="batch-toggle-btn" style="font-size:11px;padding:2px 8px;background:var(--bg-panel);color:var(--text-primary);border:1px solid var(--border-gold);border-radius:4px;cursor:pointer">多选</button></span></h2>
+                    <div class="batch-actions hidden" id="artifact-batch-actions" style="margin-bottom:8px;display:flex;gap:8px;align-items:center">
+                        <span id="artifact-selected-count" style="font-size:12px;color:var(--text-muted)">已选0件</span>
+                        <button id="artifact-decompose-btn" class="batch-action-btn" style="font-size:12px;padding:4px 12px;background:var(--bg-panel-light);color:var(--danger);border:1px solid var(--danger);border-radius:4px;cursor:pointer">分解选中</button>
+                        <button id="artifact-cancel-btn" class="batch-action-btn" style="font-size:12px;padding:4px 12px;background:var(--bg-panel-light);color:var(--text-secondary);border:1px solid var(--border-gold);border-radius:4px;cursor:pointer">取消</button>
+                    </div>
                     <div class="artifact-inventory" id="artifact-inventory"></div>
                     <h2 class="panel-title" style="margin-top: 16px;">◈ 炼器炉 ◈</h2>
                     <div class="batch-selector" id="forge-batch-selector"></div>
@@ -310,7 +375,13 @@
                 <div class="tab-content" id="tab-pets">
                     <h2 class="panel-title">◈ 灵宠阁 ◈</h2>
                     <div id="pet-active" class="pet-active"></div>
-                    <h2 class="panel-title" style="margin-top: 16px;">◈ 灵宠背包 ◈</h2>
+                    <div id="pet-secondary" class="pet-active" style="margin-top:8px"></div>
+                    <h2 class="panel-title" style="margin-top: 16px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">◈ 灵宠背包 ◈<span style="display:flex;gap:4px;align-items:center"><select id="pet-sort" class="sort-select" style="font-size:11px;padding:2px 6px;background:var(--bg-panel);color:var(--text-primary);border:1px solid var(--border-gold);border-radius:4px"><option value="quality">按品质</option><option value="bonus">按加成</option><option value="type">按类型</option><option value="level">按等级</option></select><button id="pet-batch-btn" class="batch-toggle-btn" style="font-size:11px;padding:2px 8px;background:var(--bg-panel);color:var(--text-primary);border:1px solid var(--border-gold);border-radius:4px;cursor:pointer">多选</button></span></h2>
+                    <div class="batch-actions hidden" id="pet-batch-actions" style="margin-bottom:8px;display:flex;gap:8px;align-items:center">
+                        <span id="pet-selected-count" style="font-size:12px;color:var(--text-muted)">已选0只</span>
+                        <button id="pet-release-btn" class="batch-action-btn" style="font-size:12px;padding:4px 12px;background:var(--bg-panel-light);color:var(--danger);border:1px solid var(--danger);border-radius:4px;cursor:pointer">放生选中</button>
+                        <button id="pet-cancel-btn" class="batch-action-btn" style="font-size:12px;padding:4px 12px;background:var(--bg-panel-light);color:var(--text-secondary);border:1px solid var(--border-gold);border-radius:4px;cursor:pointer">取消</button>
+                    </div>
                     <div class="pet-inventory" id="pet-inventory"></div>
                     <h2 class="panel-title" style="margin-top: 16px;">◈ 灵宠图鉴 ◈</h2>
                     <div id="pet-collection"></div>
@@ -342,7 +413,7 @@
                     <div class="checkin-area" id="checkin-area"></div>
                     <h2 class="panel-title" style="margin-top: 16px;">◈ 日常任务 ◈</h2>
                     <div class="task-list" id="task-list"></div>
-                    <h2 class="panel-title" style="margin-top: 20px;">◈ 成就殿 ◈</h2>
+                    <h2 class="panel-title" style="margin-top: 20px;display:flex;justify-content:space-between;align-items:center">◈ 成就殿 ◈<button id="claim-all-ach-btn" class="claim-all-btn" style="font-size:12px;padding:4px 12px">一键领取</button></h2>
                     <div class="achievement-list" id="achievement-list"></div>
                     <h2 class="panel-title" style="margin-top: 20px;">◈ 轮回殿 ◈</h2>
                     <div class="rebirth-area">
@@ -427,6 +498,16 @@
         <!-- 产出详情弹窗 -->
         <div id="production-modal" class="modal hidden">
             <div class="modal-content" id="production-modal-content"></div>
+        </div>
+
+        <!-- 法宝对比弹窗 -->
+        <div id="artifact-compare-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>◈ 装备法宝 ◈</h2>
+                <p class="modal-desc">选择要替换的槽位：</p>
+                <div id="artifact-compare-list" style="margin:12px 0"></div>
+                <button class="claim-btn" onclick="document.getElementById('artifact-compare-modal').classList.add('hidden')">取消</button>
+            </div>
         </div>
 
         <!-- 战力详情弹窗 -->

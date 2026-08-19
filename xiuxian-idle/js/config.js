@@ -1,4 +1,4 @@
-﻿/**
+/**
  * config.js - 游戏配置数据模块
  * 包含：境界、功法、弟子、丹药、炼丹、炼器、法宝、灵宠、阵法、
  *       历练、秘境、奇遇事件、成就、签到奖励、日常任务、称号、阶段目标等所有配置
@@ -12,15 +12,15 @@
 // ========== 配置数据 ==========
 const CONFIG = {
     realms: [
-        { name: '练气期', baseCost: 5000, multiplier: 1.85, cultBonus: 0, stoneBonus: 0 },
-        { name: '筑基期', baseCost: 50000, multiplier: 1.9, cultBonus: 0.3, stoneBonus: 0.2 },
-        { name: '金丹期', baseCost: 500000, multiplier: 2.0, cultBonus: 0.8, stoneBonus: 0.5 },
-        { name: '元婴期', baseCost: 5000000, multiplier: 2.1, cultBonus: 2.0, stoneBonus: 1.5 },
-        { name: '化神期', baseCost: 50000000, multiplier: 2.2, cultBonus: 5.0, stoneBonus: 4.0 },
-        { name: '炼虚期', baseCost: 500000000, multiplier: 2.3, cultBonus: 12.0, stoneBonus: 10.0 },
-        { name: '合体期', baseCost: 5000000000, multiplier: 2.4, cultBonus: 30.0, stoneBonus: 25.0 },
-        { name: '大乘期', baseCost: 50000000000, multiplier: 2.5, cultBonus: 75.0, stoneBonus: 60.0 },
-        { name: '渡劫期', baseCost: 500000000000, multiplier: 2.6, cultBonus: 200.0, stoneBonus: 150.0 },
+        { name: '练气期', baseCost: 5000, multiplier: 1.85, cultBonus: 0, stoneBonus: 0, privilege: '初入修仙，无特殊能力', privilegeIcon: '🌱' },
+        { name: '筑基期', baseCost: 50000, multiplier: 1.9, cultBonus: 0.3, stoneBonus: 0.2, privilege: '离线收益+10%', privilegeIcon: '🏯', privilegeType: 'offline', privilegeValue: 0.1 },
+        { name: '金丹期', baseCost: 500000, multiplier: 2.0, cultBonus: 0.8, stoneBonus: 0.5, privilege: '炼丹成功率+5%', privilegeIcon: '🔮', privilegeType: 'alchemy', privilegeValue: 0.05 },
+        { name: '元婴期', baseCost: 5000000, multiplier: 2.1, cultBonus: 2.0, stoneBonus: 1.5, privilege: '炼器成功率+5%', privilegeIcon: '👶', privilegeType: 'forge', privilegeValue: 0.05 },
+        { name: '化神期', baseCost: 50000000, multiplier: 2.2, cultBonus: 5.0, stoneBonus: 4.0, privilege: '灵宠携带数量+1', privilegeIcon: '🌩️', privilegeType: 'petSlot', privilegeValue: 1 },
+        { name: '炼虚期', baseCost: 500000000, multiplier: 2.3, cultBonus: 12.0, stoneBonus: 10.0, privilege: '法宝槽位+1', privilegeIcon: '🌌', privilegeType: 'artifactSlot', privilegeValue: 1 },
+        { name: '合体期', baseCost: 5000000000, multiplier: 2.4, cultBonus: 30.0, stoneBonus: 25.0, privilege: '突破成功率+10%', privilegeIcon: '⚔️', privilegeType: 'breakthrough', privilegeValue: 0.1 },
+        { name: '大乘期', baseCost: 50000000000, multiplier: 2.5, cultBonus: 75.0, stoneBonus: 60.0, privilege: '所有产出+10%', privilegeIcon: '🌟', privilegeType: 'allOutput', privilegeValue: 0.1 },
+        { name: '渡劫期', baseCost: 500000000000, multiplier: 2.6, cultBonus: 200.0, stoneBonus: 150.0, privilege: '转世保留50%道韵', privilegeIcon: '⚡', privilegeType: 'rebirth', privilegeValue: 0.5 },
     ],
 
     upgrades: [
@@ -58,6 +58,18 @@ const CONFIG = {
         { name: '极品', mult: 4.0, color: 'epic', weight: 5 },
         { name: '仙品', mult: 7.0, color: 'legendary', weight: 1 },
     ],
+
+    // 法宝词条（随机附加属性）
+    artifactAffixes: [
+        { id: 'cult_pct', name: '修为加成', effect: 'cultivationPct', value: 0.05, color: '#4ade80' },
+        { id: 'stone_pct', name: '灵石加成', effect: 'stonePct', value: 0.05, color: '#60a5fa' },
+        { id: 'hp_pct', name: '生命加成', effect: 'hpPct', value: 0.10, color: '#f87171' },
+        { id: 'power_pct', name: '战力加成', effect: 'powerPct', value: 0.10, color: '#fbbf24' },
+        { id: 'cult_flat', name: '修为强化', effect: 'cultivationFlat', value: 2, color: '#4ade80' },
+        { id: 'stone_flat', name: '灵石强化', effect: 'stoneFlat', value: 1, color: '#60a5fa' },
+    ],
+    // 不同品质法宝的词条数量
+    artifactAffixCount: { 0: 0, 1: 1, 2: 1, 3: 2, 4: 2 },
 
     // 法宝类型
     artifactTypes: [
@@ -150,11 +162,11 @@ const CONFIG = {
 
     // 灵宠配置
     petTypes: [
-        { id: 'firefox', name: '火狐', icon: '🦊', effect: 'cultivation', base: 2, desc: '火系灵宠，提升修为产出' },
-        { id: 'turtle', name: '玄龟', icon: '🐢', effect: 'stone', base: 1.5, desc: '水系灵宠，提升灵石产出' },
-        { id: 'crane', name: '仙鹤', icon: '🦢', effect: 'both', base: 1, desc: '风系灵宠，全方位提升' },
-        { id: 'tiger', name: '白虎', icon: '🐯', effect: 'cultivation', base: 4, desc: '金系灵宠，大幅提升修为' },
-        { id: 'dragon', name: '青龙', icon: '🐉', effect: 'both', base: 3, desc: '神兽后裔，全方位大幅提升' },
+        { id: 'firefox', name: '火狐', icon: '🦊', effect: 'cultivation', base: 2, desc: '火系灵宠，提升修为产出', skill: { name: '烈焰吐息', desc: '秘境成功率+10%，历练修为+10%', effects: [{ type: 'adventureCult', value: 0.10 }, { type: 'dungeonSuccess', value: 0.10 }] } },
+        { id: 'turtle', name: '玄龟', icon: '🐢', effect: 'stone', base: 1.5, desc: '水系灵宠，提升灵石产出', skill: { name: '玄龟护盾', desc: '秘境耗血-30%，历练灵石+10%', effects: [{ type: 'adventureStone', value: 0.10 }, { type: 'dungeonHp', value: -0.30 }] } },
+        { id: 'crane', name: '仙鹤', icon: '🦢', effect: 'both', base: 1, desc: '风系灵宠，全方位提升', skill: { name: '疾风之翼', desc: '历练时间减少15%', effects: [{ type: 'adventureSpeed', value: 0.15 }] } },
+        { id: 'tiger', name: '白虎', icon: '🐯', effect: 'cultivation', base: 4, desc: '金系灵宠，大幅提升修为', skill: { name: '白虎咆哮', desc: '秘境法宝掉率+20%，历练修为+15%', effects: [{ type: 'artifactChance', value: 0.20 }, { type: 'adventureCult', value: 0.15 }] } },
+        { id: 'dragon', name: '青龙', icon: '🐉', effect: 'both', base: 3, desc: '神兽后裔，全方位大幅提升', skill: { name: '青龙恩泽', desc: '全历练奖励+20%，秘境耗血-20%', effects: [{ type: 'all', value: 0.20 }, { type: 'dungeonHp', value: -0.20 }] } },
     ],
     petQualities: [
         { name: '凡品', mult: 1.0, color: 'common', maxLevel: 20 },
@@ -165,6 +177,16 @@ const CONFIG = {
     ],
     petUpgradeCostBase: 50,
     petUpgradeCostMult: 1.2,
+
+    // 法宝灵宠羁绊：特定法宝类型+特定灵宠类型触发
+    artifactPetSynergies: [
+        { artifactType: 'sword', petType: 'firefox', name: '剑狐合鸣', bonus: { type: 'cultivation', value: 0.10 }, desc: '飞剑+火狐，修为+10%' },
+        { artifactType: 'shield', petType: 'turtle', name: '盾龟守山', bonus: { type: 'stone', value: 0.12 }, desc: '护盾+玄龟，灵石+12%' },
+        { artifactType: 'mirror', petType: 'crane', name: '镜鹤双清', bonus: { type: 'both', value: 0.08 }, desc: '宝镜+仙鹤，全属性+8%' },
+        { artifactType: 'seal', petType: 'tiger', name: '印虎镇岳', bonus: { type: 'cultivation', value: 0.15 }, desc: '法印+白虎，修为+15%' },
+        { artifactType: 'bell', petType: 'turtle', name: '钟龟通灵', bonus: { type: 'stone', value: 0.10 }, desc: '铜钟+玄龟，灵石+10%' },
+        { artifactType: 'pagoda', petType: 'dragon', name: '塔龙擎天', bonus: { type: 'both', value: 0.12 }, desc: '宝塔+青龙，全属性+12%' },
+    ],
 
     // 炼丹配置
     alchemyRecipes: [
@@ -189,11 +211,11 @@ const CONFIG = {
 
     // 阵法配置
     formations: [
-        { id: 'gathering', name: '聚灵阵', icon: '🔮', desc: '汇聚天地灵气，修为产出+15%', cost: 1000, duration: 1800, effect: 'cultivation', value: 0.15 },
-        { id: 'wealth', name: '聚财阵', icon: '💰', desc: '引动财气入体，灵石产出+15%', cost: 1000, duration: 1800, effect: 'stone', value: 0.15 },
-        { id: 'protection', name: '护山大阵', icon: '🛡️', desc: '全方位守护，修为灵石各+10%', cost: 2000, duration: 1800, effect: 'both', value: 0.10 },
-        { id: 'star', name: '周天星斗阵', icon: '⭐', desc: '引星辰之力入体，修为产出+35%', cost: 6000, duration: 1800, effect: 'cultivation', value: 0.35 },
-        { id: 'primordial', name: '混元无极阵', icon: '☯️', desc: '混沌之力环绕，全产出+30%', cost: 10000, duration: 1800, effect: 'both', value: 0.30 },
+        { id: 'gathering', name: '聚灵阵', icon: '🔮', desc: '汇聚天地灵气，修为产出+15%，历练修为+20%', cost: 1000, duration: 1800, effect: 'cultivation', value: 0.15, outingBonus: { type: 'adventureCult', value: 0.20 } },
+        { id: 'wealth', name: '聚财阵', icon: '💰', desc: '引动财气入体，灵石产出+15%，历练灵石+20%', cost: 1000, duration: 1800, effect: 'stone', value: 0.15, outingBonus: { type: 'adventureStone', value: 0.20 } },
+        { id: 'protection', name: '护山大阵', icon: '🛡️', desc: '全方位守护，修为灵石各+10%，秘境耗血-30%', cost: 2000, duration: 1800, effect: 'both', value: 0.10, outingBonus: { type: 'dungeonHp', value: -0.30 } },
+        { id: 'star', name: '周天星斗阵', icon: '⭐', desc: '引星辰之力入体，修为产出+35%，历练法宝掉率+15%', cost: 6000, duration: 1800, effect: 'cultivation', value: 0.35, outingBonus: { type: 'artifactChance', value: 0.15 } },
+        { id: 'primordial', name: '混元无极阵', icon: '☯️', desc: '混沌之力环绕，全产出+30%，全外出奖励+15%', cost: 10000, duration: 1800, effect: 'both', value: 0.30, outingBonus: { type: 'all', value: 0.15 } },
     ],
 
     // 永久丹药（天材地宝）

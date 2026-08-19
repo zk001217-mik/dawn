@@ -1,4 +1,4 @@
-﻿/**
+/**
  * storage.js - 存档与数据持久化模块
  * 包含：保存游戏、加载游戏、重置游戏、离线收益计算、
  *       存档导入/导出、多存档槽位管理
@@ -19,7 +19,10 @@ function loadGame() {
         CONFIG.upgrades.forEach(u => { if (gameState.upgrades[u.id] === undefined) gameState.upgrades[u.id] = 0; });
         CONFIG.pills.forEach(p => { if (gameState.pills[p.id] === undefined) gameState.pills[p.id] = 0; });
         CONFIG.achievements.forEach(a => { if (!gameState.achievements[a.id]) gameState.achievements[a.id] = { completed: false, claimed: false }; });
-        if (!gameState.equippedArtifacts || gameState.equippedArtifacts.length !== 3) gameState.equippedArtifacts = [null, null, null];
+        if (!gameState.equippedArtifacts || !Array.isArray(gameState.equippedArtifacts)) gameState.equippedArtifacts = [];
+        const targetSlots = getArtifactSlots();
+        while (gameState.equippedArtifacts.length < targetSlots) gameState.equippedArtifacts.push(null);
+        if (gameState.equippedArtifacts.length > targetSlots) gameState.equippedArtifacts = gameState.equippedArtifacts.slice(0, targetSlots);
         if (!gameState.artifactInventory) gameState.artifactInventory = [];
         if (!gameState.activeBuffs) gameState.activeBuffs = [];
         if (gameState.maxCombo === undefined) gameState.maxCombo = 0;
@@ -39,10 +42,12 @@ function calculateOfflineEarnings() {
     const offlineSeconds = Math.min((Date.now() - gameState.lastSaveTime) / 1000, CONFIG.maxOfflineHours * 3600);
     if (offlineSeconds < 10) return null;
     const eff = CONFIG.offlineEfficiency || 0.8;
+    // 筑基期特权：离线收益+10%
+    const offlinePrivilege = 1 + getRealmPrivilege('offline');
     return {
         seconds: offlineSeconds,
-        cultivation: getCultivationPerSecond() * offlineSeconds * eff,
-        stones: getStonePerSecond() * offlineSeconds * eff,
+        cultivation: getCultivationPerSecond() * offlineSeconds * eff * offlinePrivilege,
+        stones: getStonePerSecond() * offlineSeconds * eff * offlinePrivilege,
     };
 }
 
@@ -81,7 +86,10 @@ function importSave(file) {
             CONFIG.upgrades.forEach(u => { if (gameState.upgrades[u.id] === undefined) gameState.upgrades[u.id] = 0; });
             CONFIG.pills.forEach(p => { if (gameState.pills[p.id] === undefined) gameState.pills[p.id] = 0; });
             CONFIG.achievements.forEach(a => { if (!gameState.achievements[a.id]) gameState.achievements[a.id] = { completed: false, claimed: false }; });
-            if (!gameState.equippedArtifacts || gameState.equippedArtifacts.length !== 3) gameState.equippedArtifacts = [null, null, null];
+            if (!gameState.equippedArtifacts || !Array.isArray(gameState.equippedArtifacts)) gameState.equippedArtifacts = [];
+        const targetSlots = getArtifactSlots();
+        while (gameState.equippedArtifacts.length < targetSlots) gameState.equippedArtifacts.push(null);
+        if (gameState.equippedArtifacts.length > targetSlots) gameState.equippedArtifacts = gameState.equippedArtifacts.slice(0, targetSlots);
             if (!gameState.artifactInventory) gameState.artifactInventory = [];
             if (!gameState.activeBuffs) gameState.activeBuffs = [];
             saveGame();
@@ -164,7 +172,10 @@ const SaveManager = {
         CONFIG.upgrades.forEach(u => { if (gameState.upgrades[u.id] === undefined) gameState.upgrades[u.id] = 0; });
         CONFIG.pills.forEach(p => { if (gameState.pills[p.id] === undefined) gameState.pills[p.id] = 0; });
         CONFIG.achievements.forEach(a => { if (!gameState.achievements[a.id]) gameState.achievements[a.id] = { completed: false, claimed: false }; });
-        if (!gameState.equippedArtifacts || gameState.equippedArtifacts.length !== 3) gameState.equippedArtifacts = [null, null, null];
+        if (!gameState.equippedArtifacts || !Array.isArray(gameState.equippedArtifacts)) gameState.equippedArtifacts = [];
+        const targetSlots = getArtifactSlots();
+        while (gameState.equippedArtifacts.length < targetSlots) gameState.equippedArtifacts.push(null);
+        if (gameState.equippedArtifacts.length > targetSlots) gameState.equippedArtifacts = gameState.equippedArtifacts.slice(0, targetSlots);
         if (!gameState.artifactInventory) gameState.artifactInventory = [];
         if (!gameState.activeBuffs) gameState.activeBuffs = [];
         if (gameState.maxCombo === undefined) gameState.maxCombo = 0;
@@ -192,6 +203,11 @@ const SaveManager = {
         if (gameState.alchemyFailCount === undefined) gameState.alchemyFailCount = 0;
         if (gameState.forgeSuccessCount === undefined) gameState.forgeSuccessCount = 0;
         if (gameState.forgeFailCount === undefined) gameState.forgeFailCount = 0;
+        if (gameState.discipleAssign === undefined) gameState.discipleAssign = { alchemy: 0, forge: 0, farm: 0, patrol: 0 };
+        if (gameState.pillTolerance === undefined) gameState.pillTolerance = {};
+        if (gameState.formationLevels === undefined) gameState.formationLevels = {};
+        if (gameState.enlightenmentCooldown === undefined) gameState.enlightenmentCooldown = 0;
+        if (gameState.secondaryPet === undefined) gameState.secondaryPet = null;
         if (gameState.totalStoneEarned === undefined) gameState.totalStoneEarned = 0;
         if (gameState.totalFormations === undefined) gameState.totalFormations = 0;
         if (gameState.currentGoalIndex === undefined) gameState.currentGoalIndex = 0;

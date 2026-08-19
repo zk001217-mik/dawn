@@ -14,6 +14,8 @@ let gameState = {
     breakthroughCount: 0,
     playTime: 0,
     discipleCount: 0,
+    // 弟子分工
+    discipleAssign: { alchemy: 0, forge: 0, farm: 0, patrol: 0 },
     upgrades: {},
     pills: {},
     activeBuffs: [],
@@ -44,6 +46,7 @@ let gameState = {
     currentSlot: 0,
     // 灵宠
     activePet: null,
+    secondaryPet: null, // 副灵宠（化神期解锁，提供50%加成）
     petInventory: [],
     // 秘境
     dungeonCooldowns: {}, // { dungeonId: timestamp }
@@ -57,6 +60,8 @@ let gameState = {
     forgeCooldowns: {}, // { qualityIndex: timestamp }
     // 阵法
     activeFormations: [], // [{ id, endTime }]
+    formationLevels: {}, // { formationId: level } 阵法等级
+    enlightenmentCooldown: 0, // 功法顿悟冷却结束时间
     // 永久丹药
     heavenlyUsed: {}, // { itemId: count }
     heavenlyBonus: { cultivation: 0, stone: 0, bothMult: 0 },
