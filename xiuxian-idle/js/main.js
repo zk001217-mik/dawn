@@ -97,6 +97,7 @@ function init() {
     document.getElementById('artifact-sort')?.addEventListener('change', () => updateUI());
     document.getElementById('pet-sort')?.addEventListener('change', () => updateUI());
     document.getElementById('artifact-batch-btn')?.addEventListener('click', toggleArtifactBatch);
+    document.getElementById('artifact-auto-equip-btn')?.addEventListener('click', autoEquipArtifacts);
     document.getElementById('artifact-decompose-btn')?.addEventListener('click', batchDecomposeArtifacts);
     document.getElementById('artifact-cancel-btn')?.addEventListener('click', toggleArtifactBatch);
     document.getElementById('pet-batch-btn')?.addEventListener('click', togglePetBatch);
@@ -176,13 +177,19 @@ function gameTick() {
     const delta = (now - lastTickTime) / 1000;
     lastTickTime = now;
 
-    const cultGain = getCultivationPerSecond() * delta;
+    const allocRatio = (gameState.cultivationAllocation || 0) / 100;
+    const cultGain = getCultivationPerSecond() * delta * getEffectiveCultivationGain();
     const stoneGain = getStonePerSecond() * delta;
     gameState.cultivation += cultGain;
     gameState.spiritStone += stoneGain;
     gameState.totalCultivation += cultGain;
     gameState.totalStoneEarned = (gameState.totalStoneEarned || 0) + stoneGain;
     gameState.playTime += delta;
+
+    // 领悟功法（分配比例转化为熟练度）
+    if (allocRatio > 0 && gameState.selectedInsightUpgrade) {
+        processInsight(delta);
+    }
 
     // 血量自动恢复
     const maxHp = getMaxHp();

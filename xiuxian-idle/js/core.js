@@ -85,7 +85,263 @@ function getUpgradeEffect(id) {
     const u = CONFIG.upgrades.find(x => x.id === id);
     const lv = gameState.upgrades[id];
     if (lv === 0) return 0;
-    return u.baseEffect * lv * Math.pow(u.effectMult, lv);
+    const btMult = getUpgradeBreakthroughMult(id);
+    const tierMult = getUpgradeTierEffectMult(id);
+    const profMult = getUpgradeProficiencyMult(id);
+    return u.baseEffect * lv * Math.pow(u.effectMult, lv) * btMult * tierMult * profMult;
+}
+
+// ========== 功法品阶系统 ==========
+function getUpgradeTier(id) {
+    return gameState.upgradeTiers?.[id] || 0;
+}
+
+function getUpgradeTierInfo(id) {
+    const tier = getUpgradeTier(id);
+    const tiers = CONFIG.upgradeTiers || [{ name: '凡品', color: '#9ca3af', effectMult: 1.0, maxLevel: 200, proficiencyMax: 100 }];
+    return tiers[tier] || tiers[0];
+}
+
+function getUpgradeTierEffectMult(id) {
+    return getUpgradeTierInfo(id).effectMult;
+}
+
+// ========== 功法熟练度系统 ==========
+function getUpgradeProficiency(id) {
+    return gameState.upgradeProficiency?.[id] || 0;
+}
+
+function getUpgradeProficiencyLevel(id) {
+    const prof = getUpgradeProficiency(id);
+    const tierInfo = getUpgradeTierInfo(id);
+    return Math.min(CONFIG.upgradeProficiencyMaxLevel, Math.floor(prof / CONFIG.upgradeProficiencyPerLevel));
+}
+
+function getUpgradeProficiencyMult(id) {
+    const lv = getUpgradeProficiencyLevel(id);
+    return 1 + lv * CONFIG.upgradeProficiencyEffectPerLevel;
+}
+
+function getUpgradeProficiencyProgress(id) {
+    const prof = getUpgradeProficiency(id);
+    const tierInfo = getUpgradeTierInfo(id);
+    const currentLvProf = (getUpgradeProficiencyLevel(id)) * CONFIG.upgradeProficiencyPerLevel;
+    const nextLvProf = (getUpgradeProficiencyLevel(id) + 1) * CONFIG.upgradeProficiencyPerLevel;
+    const maxProf = CONFIG.upgradeProficiencyMaxLevel * CONFIG.upgradeProficiencyPerLevel;
+    if (prof >= maxProf) return 1;
+    return (prof - currentLvProf) / (nextLvProf - currentLvProf);
+}
+
+// ========== 功法推演进阶 ==========
+function canEvolveUpgrade(id) {
+    const u = CONFIG.upgrades.find(x => x.id === id);
+    if (!u) return false;
+    const tier = getUpgradeTier(id);
+    if (tier >= CONFIG.upgradeTiers.length - 1) return false; // 已满阶
+    const lv = gameState.upgrades[id] || 0;
+    const tierInfo = getUpgradeTierInfo(id);
+    if (lv < tierInfo.maxLevel) return false; // 未满级
+    const profLv = getUpgradeProficiencyLevel(id);
+    if (profLv < CONFIG.upgradeProficiencyMaxLevel) return false; // 熟练度未满
+    if (getEvolveCooldown(id) > 0) return false; // 冷却中
+    return true;
+}
+
+function getEvolveCost(id) {
+    const tier = getUpgradeTier(id);
+    return Math.floor(CONFIG.upgradeEvolve.baseCost * Math.pow(CONFIG.upgradeEvolve.costMult, tier));
+}
+
+function getEvolveSuccessRate(id) {
+    const tier = getUpgradeTier(id);
+    return Math.max(0.2, CONFIG.upgradeEvolve.baseSuccess - tier * CONFIG.upgradeEvolve.successDecay);
+}
+
+function getEvolveCooldown(id) {
+    const cd = gameState.evolveCooldowns?.[id] || 0;
+    return Math.max(0, Math.ceil((cd - Date.now()) / 1000));
+}
+
+function evolveUpgrade(id) {
+    if (!canEvolveUpgrade(id)) {
+        const cd = getEvolveCooldown(id);
+        if (cd > 0) { addLog(`推演冷却中，还需${cd}秒`, ''); SFX.error(); }
+        else { addLog('功法未满级或熟练度不足，无法推演', ''); SFX.error(); }
+        return false;
+    }
+    const cost = getEvolveCost(id);
+    if (gameState.spiritStone < cost) { addLog('灵石不足，无法推演', ''); SFX.error(); return false; }
+    gameState.spiritStone -= cost;
+    const successRate = getEvolveSuccessRate(id);
+    const success = Math.random() < successRate;
+    const u = CONFIG.upgrades.find(x => x.id === id);
+    if (success) {
+        if (!gameState.upgradeTiers) gameState.upgradeTiers = {};
+        gameState.upgradeTiers[id] = getUpgradeTier(id) + 1;
+        gameState.upgrades[id] = 1; // 等级重置为1
+        if (gameState.upgradeProficiency) gameState.upgradeProficiency[id] = 0; // 熟练度重置
+        const newTier = getUpgradeTierInfo(id);
+        SFX.breakthrough();
+        addLog(`【${u.name}】推演成功！进阶为${newTier.name}，效果大幅提升`, 'breakthrough');
+    } else {
+        if (!gameState.evolveCooldowns) gameState.evolveCooldowns = {};
+        gameState.evolveCooldowns[id] = Date.now() + CONFIG.upgradeEvolve.cooldown * 1000;
+        SFX.error();
+        addLog(`【${u.name}】推演失败！熟练度保留，冷却${CONFIG.upgradeEvolve.cooldown}秒`, '');
+    }
+    updateUI();
+    return true;
+}
+
+// ========== 修炼分配与领悟 ==========
+function setCultivationAllocation(value) {
+    gameState.cultivationAllocation = Math.max(0, Math.min(100, value));
+    updateUI();
+}
+
+function setSelectedInsightUpgrade(id) {
+    gameState.selectedInsightUpgrade = id;
+    updateUI();
+}
+
+function processInsight(deltaSeconds) {
+    if (gameState.cultivationAllocation <= 0) return;
+    if (!gameState.selectedInsightUpgrade) return;
+    const u = CONFIG.upgrades.find(x => x.id === gameState.selectedInsightUpgrade);
+    if (!u) return;
+    if (gameState.upgrades[u.id] === 0) return; // 未学习的功法不能领悟
+    const allocRatio = gameState.cultivationAllocation / 100;
+    const insightGain = getCultivationPerSecond() * allocRatio * CONFIG.cultivationInsightRate * deltaSeconds;
+    if (!gameState.upgradeProficiency) gameState.upgradeProficiency = {};
+    gameState.upgradeProficiency[u.id] = (gameState.upgradeProficiency[u.id] || 0) + insightGain;
+    // 熟练度上限
+    const maxProf = CONFIG.upgradeProficiencyMaxLevel * CONFIG.upgradeProficiencyPerLevel;
+    if (gameState.upgradeProficiency[u.id] > maxProf) gameState.upgradeProficiency[u.id] = maxProf;
+}
+
+// 修炼时实际获得的修为（扣除领悟分配）
+function getEffectiveCultivationGain() {
+    if (gameState.cultivationAllocation <= 0) return 1;
+    return 1 - (gameState.cultivationAllocation / 100) * 0.5; // 最多扣50%修为（领悟不浪费，只是转化）
+}
+
+// ========== 功法突破系统 ==========
+function getUpgradeBreakthrough(id) {
+    return gameState.upgradeBreakthroughs?.[id] || 0;
+}
+
+function getUpgradeBreakthroughMult(id) {
+    const count = getUpgradeBreakthrough(id);
+    return 1 + count * 0.2; // 每次突破+20%效果
+}
+
+function canBreakthroughUpgrade(id) {
+    const u = CONFIG.upgrades.find(x => x.id === id);
+    if (!u) return false;
+    const lv = gameState.upgrades[id] || 0;
+    const btCount = getUpgradeBreakthrough(id);
+    const requiredLv = (btCount + 1) * 10; // 第1次突破需10级，第2次需20级...
+    const tierMax = getUpgradeMaxLevel(id);
+    return lv >= requiredLv && lv < tierMax && btCount < 5; // 最多突破5次
+}
+
+function getUpgradeBreakthroughCost(id) {
+    const u = CONFIG.upgrades.find(x => x.id === id);
+    const btCount = getUpgradeBreakthrough(id);
+    return Math.floor(u.baseCost * 50 * Math.pow(2, btCount));
+}
+
+function breakthroughUpgrade(id) {
+    if (!canBreakthroughUpgrade(id)) { addLog('功法等级不足，无法突破', ''); SFX.error(); return false; }
+    const cost = getUpgradeBreakthroughCost(id);
+    if (gameState.spiritStone < cost) { addLog('灵石不足，无法突破', ''); SFX.error(); return false; }
+    gameState.spiritStone -= cost;
+    if (!gameState.upgradeBreakthroughs) gameState.upgradeBreakthroughs = {};
+    gameState.upgradeBreakthroughs[id] = getUpgradeBreakthrough(id) + 1;
+    const u = CONFIG.upgrades.find(x => x.id === id);
+    SFX.breakthrough();
+    addLog(`【${u.name}】突破成功！效果+20%`, 'breakthrough');
+    updateUI();
+    return true;
+}
+
+// ========== 功法精通系统 ==========
+function isUpgradeMastered(id) {
+    return gameState.upgradeMastery?.[id] === true;
+}
+
+function canMasterUpgrade(id) {
+    const u = CONFIG.upgrades.find(x => x.id === id);
+    if (!u) return false;
+    const lv = gameState.upgrades[id] || 0;
+    const tierMax = getUpgradeMaxLevel(id);
+    return lv >= tierMax && !isUpgradeMastered(id);
+}
+
+function getMasteryCost(id) {
+    const u = CONFIG.upgrades.find(x => x.id === id);
+    return Math.floor(u.baseCost * 200);
+}
+
+function masterUpgrade(id) {
+    if (!canMasterUpgrade(id)) { addLog('功法未满级，无法精通', ''); SFX.error(); return false; }
+    const cost = getMasteryCost(id);
+    if (gameState.spiritStone < cost) { addLog('灵石不足，无法精通', ''); SFX.error(); return false; }
+    gameState.spiritStone -= cost;
+    if (!gameState.upgradeMastery) gameState.upgradeMastery = {};
+    gameState.upgradeMastery[id] = true;
+    const u = CONFIG.upgrades.find(x => x.id === id);
+    SFX.achievement();
+    addLog(`【${u.name}】已精通！获得永久加成`, 'breakthrough');
+    updateUI();
+    return true;
+}
+
+function getMasteryBonus() {
+    let cult = 0, stone = 0;
+    if (!gameState.upgradeMastery) return { cult, stone };
+    CONFIG.upgrades.forEach(u => {
+        if (gameState.upgradeMastery[u.id]) {
+            if (u.effect === 'cultivation') cult += 0.03;
+            else if (u.effect === 'stone') stone += 0.03;
+            else { cult += 0.02; stone += 0.02; }
+        }
+    });
+    return { cult, stone };
+}
+
+// ========== 功法组合效果 ==========
+function getActiveUpgradeSynergies() {
+    const active = [];
+    CONFIG.upgradeSynergies.forEach(syn => {
+        const allMet = syn.req.every(r => (gameState.upgrades[r.id] || 0) >= r.lv);
+        if (allMet) active.push(syn);
+    });
+    return active;
+}
+
+function getUpgradeSynergyBonus(type) {
+    let bonus = 0;
+    getActiveUpgradeSynergies().forEach(syn => {
+        if (syn.bonus.type === type || syn.bonus.type === 'both') bonus += syn.bonus.value;
+    });
+    return bonus;
+}
+
+// ========== 法宝秘境专精 ==========
+function getArtifactDungeonBonus() {
+    const result = { successBonus: 0, hpReduction: 0, rewardBonus: 0, types: [] };
+    gameState.equippedArtifacts.forEach(art => {
+        if (!art) return;
+        const bonus = CONFIG.artifactDungeonBonus[art.typeId];
+        if (bonus) {
+            if (bonus.successBonus) result.successBonus += bonus.successBonus;
+            if (bonus.hpReduction) result.hpReduction += bonus.hpReduction;
+            if (bonus.rewardBonus) result.rewardBonus += bonus.rewardBonus;
+            if (!result.types.includes(bonus.name)) result.types.push(bonus.name);
+        }
+    });
+    return result;
 }
 
 function getDiscipleCost() {
@@ -175,7 +431,10 @@ function getCultivationPerSecond() {
     const synergyMult = 1 + getSynergyBonus('cultivation');
     const affixBonus = getArtifactAffixBonus('cultivation');
     const affixMult = 1 + affixBonus.pct;
-    return (base + bonus + affixBonus.flat) * realmMult * discipleMult * daoMult * buffMult * formationMult * bondMult * titleMult * heavenlyMult * eventMult * privilegeMult * synergyMult * affixMult;
+    const masteryBonus = getMasteryBonus();
+    const masteryMult = 1 + masteryBonus.cult;
+    const upgradeSynMult = 1 + getUpgradeSynergyBonus('cultivation') + getUpgradeSynergyBonus('both');
+    return (base + bonus + affixBonus.flat) * realmMult * discipleMult * daoMult * buffMult * formationMult * bondMult * titleMult * heavenlyMult * eventMult * privilegeMult * synergyMult * affixMult * masteryMult * upgradeSynMult;
 }
 
 function getStonePerSecond() {
@@ -202,7 +461,10 @@ function getStonePerSecond() {
     const synergyMult = 1 + getSynergyBonus('stone');
     const affixBonus = getArtifactAffixBonus('stone');
     const affixMult = 1 + affixBonus.pct;
-    return (base + bonus + affixBonus.flat) * realmMult * discipleMult * daoMult * buffMult * formationMult * bondMult * titleMult * heavenlyMult * eventMult * privilegeMult * synergyMult * affixMult;
+    const masteryBonus = getMasteryBonus();
+    const masteryMult = 1 + masteryBonus.stone;
+    const upgradeSynMult = 1 + getUpgradeSynergyBonus('stone') + getUpgradeSynergyBonus('both');
+    return (base + bonus + affixBonus.flat) * realmMult * discipleMult * daoMult * buffMult * formationMult * bondMult * titleMult * heavenlyMult * eventMult * privilegeMult * synergyMult * affixMult * masteryMult * upgradeSynMult;
 }
 
 // ========== 产出详情 ==========
@@ -234,10 +496,13 @@ function getCultivationBreakdown() {
     const synergyMult = 1 + getSynergyBonus('cultivation');
     const affixBonus = getArtifactAffixBonus('cultivation');
     const affixMult = 1 + affixBonus.pct;
-    const total = (base + upgradeBonus + artBonus + petBonus + affixBonus.flat) * realmMult * discipleMult * daoMult * buffMult * formationMult * bondMult * titleMult * heavenlyMult * eventMult * privilegeMult * synergyMult * affixMult;
+    const masteryBonus = getMasteryBonus();
+    const masteryMult = 1 + masteryBonus.cult;
+    const upgradeSynMult = 1 + getUpgradeSynergyBonus('cultivation') + getUpgradeSynergyBonus('both');
+    const total = (base + upgradeBonus + artBonus + petBonus + affixBonus.flat) * realmMult * discipleMult * daoMult * buffMult * formationMult * bondMult * titleMult * heavenlyMult * eventMult * privilegeMult * synergyMult * affixMult * masteryMult * upgradeSynMult;
     return {
         base, upgradeBonus, upgradeDetails, artBonus, petBonus,
-        realmMult, discipleMult, daoMult, buffMult, formationMult, bondMult, titleMult, heavenlyMult, eventMult, privilegeMult, synergyMult, affixMult,
+        realmMult, discipleMult, daoMult, buffMult, formationMult, bondMult, titleMult, heavenlyMult, eventMult, privilegeMult, synergyMult, affixMult, masteryMult, upgradeSynMult,
         total
     };
 }
@@ -270,10 +535,13 @@ function getStoneBreakdown() {
     const synergyMult = 1 + getSynergyBonus('stone');
     const affixBonus = getArtifactAffixBonus('stone');
     const affixMult = 1 + affixBonus.pct;
-    const total = (base + upgradeBonus + artBonus + petBonus + affixBonus.flat) * realmMult * discipleMult * daoMult * buffMult * formationMult * bondMult * titleMult * heavenlyMult * eventMult * privilegeMult * synergyMult * affixMult;
+    const masteryBonus = getMasteryBonus();
+    const masteryMult = 1 + masteryBonus.stone;
+    const upgradeSynMult = 1 + getUpgradeSynergyBonus('stone') + getUpgradeSynergyBonus('both');
+    const total = (base + upgradeBonus + artBonus + petBonus + affixBonus.flat) * realmMult * discipleMult * daoMult * buffMult * formationMult * bondMult * titleMult * heavenlyMult * eventMult * privilegeMult * synergyMult * affixMult * masteryMult * upgradeSynMult;
     return {
         base, upgradeBonus, upgradeDetails, artBonus, petBonus,
-        realmMult, discipleMult, daoMult, buffMult, formationMult, bondMult, titleMult, heavenlyMult, eventMult, privilegeMult, synergyMult, affixMult,
+        realmMult, discipleMult, daoMult, buffMult, formationMult, bondMult, titleMult, heavenlyMult, eventMult, privilegeMult, synergyMult, affixMult, masteryMult, upgradeSynMult,
         total
     };
 }
@@ -290,9 +558,10 @@ function getRebirthDaoGain() {
 function getUpgradeMaxLevel(upgradeId) {
     const u = CONFIG.upgrades.find(x => x.id === upgradeId);
     if (!u) return 0;
-    // 每个境界允许+10级，练气期10级，筑基期20级...
+    // 品阶决定等级上限，境界每阶+10级
+    const tierMax = getUpgradeTierInfo(upgradeId).maxLevel;
     const realmCap = (gameState.realmIndex + 1) * 10;
-    return Math.min(u.maxLevel, realmCap);
+    return Math.min(tierMax, realmCap);
 }
 
 // ========== 游戏操作 ==========
@@ -572,7 +841,7 @@ function rebirth() {
     }
     const daoGain = getRebirthDaoGain();
     if (daoGain <= 0) { addLog('修为尚浅，转世无法获得道韵', ''); return false; }
-    if (!confirm(`确定转世重修？\n重置修为、灵石、功法、丹药，保留道韵、成就、称号，以及最高品质法宝/灵宠和半数弟子`)) return false;
+    if (!confirm(`确定转世重修？\n重置修为、灵石、功法等级、丹药，保留道韵、成就、称号、功法品阶/熟练度/突破/精通，以及最高品质法宝/灵宠和半数弟子`)) return false;
     gameState.dao += daoGain;
 
     // 保留最高品质法宝

@@ -17,6 +17,14 @@ let gameState = {
     // 弟子分工
     discipleAssign: { alchemy: 0, forge: 0, farm: 0, patrol: 0 },
     upgrades: {},
+    upgradeBreakthroughs: {}, // { upgradeId: count } 功法突破次数
+    upgradeMastery: {}, // { upgradeId: true } 功法精通
+    upgradeTiers: {}, // { upgradeId: tierIndex } 功法品阶
+    upgradeProficiency: {}, // { upgradeId: amount } 功法熟练度
+    cultivationAllocation: 0, // 0=全修炼, 50=半修炼半领悟, 100=全领悟
+    selectedInsightUpgrade: null, // 当前领悟的功法ID
+    evolveCooldowns: {}, // { upgradeId: timestamp } 推演冷却
+    formationPresets: [null, null], // 阵法预设方案 [formationId, formationId]
     pills: {},
     activeBuffs: [],
     artifactInventory: [],

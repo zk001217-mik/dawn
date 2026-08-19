@@ -38,6 +38,37 @@ const CONFIG = {
 
     disciple: { baseCost: 80, costMult: 1.35, cultBonus: 0.015, stoneBonus: 0.01, maxCount: 50 },
 
+    // 功法品阶系统
+    upgradeTiers: [
+        { name: '凡品', color: '#9ca3af', effectMult: 1.0, maxLevel: 50, proficiencyMax: 100 },
+        { name: '良品', color: '#4ade80', effectMult: 1.3, maxLevel: 80, proficiencyMax: 150 },
+        { name: '上品', color: '#60a5fa', effectMult: 1.7, maxLevel: 120, proficiencyMax: 200 },
+        { name: '极品', color: '#c084fc', effectMult: 2.2, maxLevel: 160, proficiencyMax: 300 },
+        { name: '仙品', color: '#fbbf24', effectMult: 3.0, maxLevel: 200, proficiencyMax: 500 },
+    ],
+    // 功法熟练度：每级提升5%效果，共10级
+    upgradeProficiencyPerLevel: 10, // 每级需要的熟练度
+    upgradeProficiencyEffectPerLevel: 0.05, // 每级效果+5%
+    upgradeProficiencyMaxLevel: 10,
+    // 功法推演进阶
+    upgradeEvolve: {
+        baseCost: 5000, // 基础消耗
+        costMult: 3, // 每阶消耗倍率
+        baseSuccess: 0.8, // 基础成功率
+        successDecay: 0.1, // 每阶成功率降低
+        cooldown: 300, // 失败冷却秒数
+    },
+    // 修炼分配：领悟功法的效率系数
+    cultivationInsightRate: 0.5, // 领悟效率 = 修为产出 * 分配比例 * 此系数
+
+    // 功法组合效果（同时达到指定等级触发）
+    upgradeSynergies: [
+        { id: 'basic_pair', name: '基础双修', req: [{ id: 'basic_art', lv: 10 }, { id: 'spirit_vein', lv: 10 }], bonus: { type: 'both', value: 0.05 }, desc: '基础吐纳术+聚灵阵各10级：全产出+5%' },
+        { id: 'turtle_field', name: '龟息灵田', req: [{ id: 'breathing_art', lv: 20 }, { id: 'spirit_field', lv: 20 }], bonus: { type: 'both', value: 0.08 }, desc: '龟息吐纳法+灵田开垦各20级：全产出+8%' },
+        { id: 'alchemy_forge', name: '丹器双绝', req: [{ id: 'alchemy', lv: 30 }, { id: 'artifact_craft', lv: 30 }], bonus: { type: 'both', value: 0.10 }, desc: '炼丹之术+炼器之术各30级：全产出+10%' },
+        { id: 'star_sword', name: '星辰剑意', req: [{ id: 'formation', lv: 20 }, { id: 'spirit_sword', lv: 20 }], bonus: { type: 'cultivation', value: 0.15 }, desc: '周天星斗阵+御剑之术各20级：修为+15%' },
+    ],
+
     // 丹药配置
     pills: [
         { id: 'qi_gathering', name: '聚气丹', desc: '凝聚灵气，修为产出+100%，持续5分钟', icon: '🔴', cost: 300, effect: 'buff_cult', value: 1.0, duration: 300, dailyLimit: 3 },
@@ -82,6 +113,13 @@ const CONFIG = {
     ],
 
     artifactSlots: 3,
+
+    // 法宝秘境专精（装备特定类型法宝对秘境的加成）
+    artifactDungeonBonus: {
+        sword: { name: '飞剑', successBonus: 0.10, desc: '秘境成功率+10%' },
+        mirror: { name: '宝镜', hpReduction: 0.15, desc: '秘境耗血-15%' },
+        pagoda: { name: '宝塔', rewardBonus: 0.10, desc: '秘境奖励+10%' },
+    },
 
     // 历练地点
     adventures: [

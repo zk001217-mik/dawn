@@ -999,6 +999,11 @@ body {
     background: rgba(212, 175, 55, 0.08);
 }
 
+.upgrade-item.insight-selected {
+    border-color: #10b981;
+    box-shadow: 0 0 8px rgba(16, 185, 129, 0.3);
+}
+
 .upgrade-item.cant-afford {
     opacity: 0.5;
 }
@@ -1310,23 +1315,24 @@ body {
     padding-right: 4px;
 }
 
-/* 功法页：弟子堂固定底部，功法列表可滚动 */
+/* 功法页：整体可滚动 */
 #tab-cultivation.active {
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
+    display: block;
+    overflow-y: auto;
     padding-right: 0;
 }
 
 #tab-cultivation .upgrade-list {
-    flex: 1;
-    overflow-y: auto;
-    min-height: 0;
-    padding-right: 4px;
+    overflow: visible;
+    padding-right: 0;
+    margin-bottom: 8px;
+}
+
+#alloc-bar-container {
+    margin-bottom: 8px;
 }
 
 #tab-cultivation .disciple-area {
-    flex-shrink: 0;
     padding-top: 8px;
 }/* ========== 活跃Buff ========== */
 .active-buffs {

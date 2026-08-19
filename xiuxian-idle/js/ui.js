@@ -339,7 +339,9 @@ function updateFastUI() {
         if (gameState.realmIndex < minRebirthRealm) {
             rebirthInfo.textContent = `需达到${CONFIG.realms[minRebirthRealm].name}才能转世`;
         } else {
-            rebirthInfo.textContent = `获得道韵：${daoGain}`;
+            const rebirthPriv = getRealmPrivilege('rebirthDao');
+            const privText = rebirthPriv > 0 ? `（渡劫特权+${Math.floor(rebirthPriv*100)}%）` : '';
+            rebirthInfo.innerHTML = `预计获得：<span style="color:var(--text-gold)">${daoGain}</span> 道韵${privText}<br><span style="font-size:10px;color:var(--text-muted)">累计修为${formatNumber(gameState.totalCultivation)}，转世后保留1法宝+1灵宠+半数弟子</span>`;
         }
     }
     const rebirthBtn = document.getElementById('rebirth-btn');
@@ -417,55 +419,184 @@ function renderActiveBuffs() {
 
 function getUpgradeEffectAtLevel(id, level) {
     const u = CONFIG.upgrades.find(x => x.id === id);
-    if (level === 0) return 0;
-    return u.baseEffect * level * Math.pow(1.02, level);
+    if (!u || level === 0) return 0;
+    const btMult = getUpgradeBreakthroughMult(id);
+    const tierMult = getUpgradeTierEffectMult(id);
+    const profMult = getUpgradeProficiencyMult(id);
+    return u.baseEffect * level * Math.pow(u.effectMult, level) * btMult * tierMult * profMult;
 }
 
 function renderUpgrades() {
     const container = document.getElementById('upgrade-list');
     container.innerHTML = '';
-    CONFIG.upgrades.forEach(u => {
-        const lv = gameState.upgrades[u.id];
-        const cost = getUpgradeCost(u.id);
-        const effect = getUpgradeEffect(u.id);
-        const nextEffect = getUpgradeEffectAtLevel(u.id, lv + 1);
-        const unlocked = gameState.realmIndex >= u.unlockRealm;
-        const canAfford = gameState.spiritStone >= cost;
-        const realmMax = getUpgradeMaxLevel(u.id);
-        const trueMaxed = lv >= u.maxLevel;
-        const realmCapped = !trueMaxed && lv >= realmMax;
-        const maxed = trueMaxed || realmCapped;
-        const item = document.createElement('div');
-        item.className = 'upgrade-item' + (!unlocked ? ' locked' : (!canAfford && !maxed ? ' cant-afford' : ''));
-        let effectText = u.effect === 'cultivation' ? `修为 +${formatNumber(effect)}/秒` : u.effect === 'stone' ? `灵石 +${formatNumber(effect)}/秒` : `修为+${formatNumber(effect)}/秒 灵石+${formatNumber(effect)}/秒`;
-        let previewText = '';
-        if (!maxed && unlocked) {
-            const delta = nextEffect - effect;
-            previewText = `<div class="upgrade-effect" style="color:var(--success);font-size:11px">升级后 +${formatNumber(delta)}/秒</div>`;
-        }
-        let capText = '';
-        if (realmCapped) capText = `<div class="upgrade-desc" style="color:var(--text-gold);font-size:11px">需突破至${CONFIG.realms[gameState.realmIndex + 1]?.name || '更高境界'}才能继续升级</div>`;
-        // 顿悟按钮
-        const enCost = getEnlightenmentCost(u.id);
-        const canEn = canEnlightenment() && !maxed && gameState.spiritStone >= enCost;
-        const enCooldown = !canEnlightenment() ? Math.ceil(((gameState.enlightenmentCooldown || 0) - Date.now()) / 1000) : 0;
-        let enBtn = '';
-        if (unlocked && !maxed) {
-            enBtn = `<button class="upgrade-enlighten-btn" ${!canEn ? 'disabled' : ''} data-id="${u.id}" style="margin-top:6px;width:100%;padding:4px;font-size:11px;background:var(--bg-panel-light);border:1px solid var(--border-gold);border-radius:4px;color:var(--text-gold);cursor:pointer">${enCooldown > 0 ? `顿悟冷却${enCooldown}s` : `顿悟 ${formatNumber(enCost)}灵石`}</button>`;
-        }
-        item.innerHTML = `
-            <div class="upgrade-header"><span class="upgrade-name">${u.name}</span><span class="upgrade-level">Lv.${lv}${trueMaxed ? ' (满级)' : realmCapped ? `/${realmMax}` : ''}</span></div>
-            <div class="upgrade-desc">${u.desc}</div>
-            <div class="upgrade-effect">${effectText}</div>
-            ${previewText}
-            ${capText}
-            ${maxed ? '' : `<div class="upgrade-cost">花费：${formatNumber(cost)} 灵石</div>`}
-            ${enBtn}
-            ${!unlocked ? `<div class="upgrade-desc" style="color:var(--accent-red)">需 ${CONFIG.realms[u.unlockRealm].name} 解锁</div>` : ''}`;
-        if (unlocked && !maxed) item.addEventListener('click', () => buyUpgrade(u.id));
-        item.querySelector('.upgrade-enlighten-btn')?.addEventListener('click', (e) => { e.stopPropagation(); enlightenment(u.id); });
-        container.appendChild(item);
+
+    // 修炼分配控制栏 - 放在upgrade-list外面避免grid布局bug
+    var allocContainer = document.getElementById('alloc-bar-container');
+    allocContainer.innerHTML = '';
+    var alloc = gameState.cultivationAllocation || 0;
+    var selectedInsight = gameState.selectedInsightUpgrade;
+    var insightU = selectedInsight ? CONFIG.upgrades.find(function(x){return x.id === selectedInsight;}) : null;
+    var allocBar = document.createElement('div');
+    allocBar.style.cssText = 'padding:10px 12px;background:var(--bg-panel-light);border:1px solid var(--border-gold);border-radius:6px;margin-bottom:8px';
+    var allocHtml = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">';
+    allocHtml += '<span style="color:var(--text-gold);font-size:12px">◈ 修炼分配 ◈</span>';
+    allocHtml += '<span style="font-size:11px;color:var(--text-secondary)">领悟：' + (insightU ? insightU.name : '未选择') + '</span>';
+    allocHtml += '</div>';
+    allocHtml += '<div style="display:flex;gap:6px">';
+    allocHtml += '<button data-alloc="0" style="flex:1;padding:4px;font-size:11px;background:' + (alloc===0?'var(--border-gold)':'var(--bg-panel)') + ';color:' + (alloc===0?'#000':'var(--text-primary)') + ';border:1px solid var(--border-gold);border-radius:4px;cursor:pointer">全修炼</button>';
+    allocHtml += '<button data-alloc="50" style="flex:1;padding:4px;font-size:11px;background:' + (alloc===50?'var(--border-gold)':'var(--bg-panel)') + ';color:' + (alloc===50?'#000':'var(--text-primary)') + ';border:1px solid var(--border-gold);border-radius:4px;cursor:pointer">半修炼半领悟</button>';
+    allocHtml += '<button data-alloc="100" style="flex:1;padding:4px;font-size:11px;background:' + (alloc===100?'var(--border-gold)':'var(--bg-panel)') + ';color:' + (alloc===100?'#000':'var(--text-primary)') + ';border:1px solid var(--border-gold);border-radius:4px;cursor:pointer">全领悟</button>';
+    allocHtml += '</div>';
+    allocHtml += '<div style="margin-top:6px;font-size:10px;color:var(--text-muted)">领悟可增加功法熟练度，熟练度每级+5%效果；满级后可推演进阶</div>';
+    allocBar.innerHTML = allocHtml;
+    allocBar.querySelectorAll('button[data-alloc]').forEach(function(btn){
+        btn.addEventListener('click', function(){ setCultivationAllocation(parseInt(btn.dataset.alloc)); });
     });
+    allocContainer.appendChild(allocBar);
+
+    // 功法卡片 - 完整功能（紧凑布局）
+    CONFIG.upgrades.forEach(function(u) {
+        var lv = gameState.upgrades[u.id] || 0;
+        var cost = getUpgradeCost(u.id);
+        var effect = getUpgradeEffect(u.id) || 0;
+        var nextEffect = getUpgradeEffectAtLevel(u.id, lv + 1) || 0;
+        var unlocked = gameState.realmIndex >= u.unlockRealm;
+        var canAfford = gameState.spiritStone >= cost;
+        var tierInfo = getUpgradeTierInfo(u.id);
+        var trueMaxed = lv >= tierInfo.maxLevel;
+        var realmMax = getUpgradeMaxLevel(u.id);
+        var realmCapped = !trueMaxed && lv >= realmMax;
+        var maxed = trueMaxed || realmCapped;
+        var tier = getUpgradeTier(u.id);
+        var profLv = getUpgradeProficiencyLevel(u.id);
+        var profProgress = getUpgradeProficiencyProgress(u.id) || 0;
+        var profMult = getUpgradeProficiencyMult(u.id);
+        var isInsightSelected = selectedInsight === u.id;
+        var isMaxTier = tier >= CONFIG.upgradeTiers.length - 1;
+        var btCount = getUpgradeBreakthrough(u.id);
+        var mastered = isUpgradeMastered(u.id);
+
+        // 效果文本
+        var effectText = '';
+        if (u.effect === 'cultivation') effectText = '修为+' + formatNumber(effect) + '/s';
+        else if (u.effect === 'stone') effectText = '灵石+' + formatNumber(effect) + '/s';
+        else effectText = '修为+' + formatNumber(effect) + '/s 灵石+' + formatNumber(effect) + '/s';
+
+        // 构建卡片HTML - 紧凑布局
+        var html = '';
+        // 头部：名称+品阶+等级
+        html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">';
+        html += '<span style="font-size:13px;font-weight:bold;color:var(--text-gold-light)">' + u.name + ' <span style="color:' + tierInfo.color + ';font-size:9px">' + tierInfo.name + '</span>';
+        if (btCount > 0) html += ' <span style="color:#a855f7;font-size:9px">突' + btCount + '</span>';
+        if (mastered) html += ' <span style="color:#f59e0b;font-size:9px">精</span>';
+        html += '</span>';
+        html += '<span style="font-size:11px;color:var(--accent-cyan);background:rgba(74,158,255,0.15);padding:1px 6px;border-radius:8px">Lv' + lv + (trueMaxed ? '满' : (realmCapped ? '/' + realmMax : '')) + '</span>';
+        html += '</div>';
+        // 描述
+        html += '<div style="font-size:10px;color:var(--text-secondary);margin-bottom:3px;line-height:1.3">' + u.desc + '</div>';
+        // 效果+花费同一行
+        html += '<div style="font-size:10px;display:flex;justify-content:space-between;margin-bottom:2px">';
+        html += '<span style="color:var(--success)">' + effectText + '</span>';
+        if (!maxed) html += '<span style="color:var(--text-primary)">' + formatNumber(cost) + '灵石</span>';
+        html += '</div>';
+        // 升级预览
+        if (!maxed && unlocked) {
+            var delta = nextEffect - effect;
+            html += '<div style="font-size:9px;color:var(--success);opacity:0.7">升级+' + formatNumber(delta) + '/s</div>';
+        }
+        // 境界上限提示
+        if (realmCapped) {
+            var nextRealm = CONFIG.realms[gameState.realmIndex + 1] ? CONFIG.realms[gameState.realmIndex + 1].name : '更高';
+            html += '<div style="font-size:9px;color:var(--text-gold)">需突破' + nextRealm + '</div>';
+        }
+        // 熟练度
+        if (unlocked && lv > 0) {
+            html += '<div style="font-size:9px;color:var(--text-muted);margin-top:2px">熟练Lv' + profLv + '/' + CONFIG.upgradeProficiencyMaxLevel + '(+' + Math.floor((profMult-1)*100) + '%)</div>';
+            html += '<div style="height:3px;background:var(--bg-panel);border-radius:2px;margin-top:1px;overflow:hidden">';
+            html += '<div style="height:100%;width:' + Math.floor(profProgress*100) + '%;background:linear-gradient(90deg,#059669,#10b981)"></div>';
+            html += '</div>';
+        }
+        // 解锁提示
+        if (!unlocked) {
+            html += '<div style="font-size:10px;color:var(--accent-red);margin-top:2px">需' + CONFIG.realms[u.unlockRealm].name + '</div>';
+        }
+        // 按钮区 - 2列
+        var btns = [];
+        if (unlocked && !maxed) {
+            var enCost = getEnlightenmentCost(u.id);
+            var canEn = canEnlightenment() && gameState.spiritStone >= enCost;
+            var enCd = !canEnlightenment() ? Math.ceil(((gameState.enlightenmentCooldown || 0) - Date.now()) / 1000) : 0;
+            var enText = enCd > 0 ? ('顿悟' + enCd + 's') : ('顿悟' + formatNumber(enCost));
+            btns.push({cls:'upgrade-enlighten-btn', text:enText, disabled:!canEn});
+        }
+        if (unlocked && lv > 0) {
+            var insightText = isInsightSelected ? '✓领悟' : '设领悟';
+            var insightBg = isInsightSelected ? 'linear-gradient(135deg,#059669,#10b981)' : 'var(--bg-panel-light)';
+            var insightColor = isInsightSelected ? '#fff' : 'var(--text-gold)';
+            btns.push({cls:'insight-btn', text:insightText, disabled:false, bg:insightBg, color:insightColor});
+        }
+        if (canBreakthroughUpgrade(u.id)) {
+            var btCost = getUpgradeBreakthroughCost(u.id);
+            btns.push({cls:'upgrade-bt-btn', text:'突破' + formatNumber(btCost), disabled:false, bg:'linear-gradient(135deg,#7c3aed,#a855f7)', color:'#fff'});
+        }
+        if (canMasterUpgrade(u.id)) {
+            var masterCost = getMasteryCost(u.id);
+            btns.push({cls:'upgrade-master-btn', text:'精通' + formatNumber(masterCost), disabled:false, bg:'linear-gradient(135deg,#d97706,#f59e0b)', color:'#fff'});
+        }
+        var evolveCd = getEvolveCooldown(u.id);
+        if (!isMaxTier && trueMaxed && profLv >= CONFIG.upgradeProficiencyMaxLevel) {
+            if (evolveCd > 0) {
+                btns.push({text:'推演' + evolveCd + 's', disabled:true});
+            } else {
+                var evolveCost = getEvolveCost(u.id);
+                var evolveRate = getEvolveSuccessRate(u.id);
+                btns.push({cls:'evolve-btn', text:'推演' + formatNumber(evolveCost) + '(' + Math.floor(evolveRate*100) + '%)', disabled:false, bg:'linear-gradient(135deg,#dc2626,#ef4444)', color:'#fff'});
+            }
+        }
+        if (btns.length > 0) {
+            html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-top:4px">';
+            btns.forEach(function(b) {
+                var bg = b.bg || 'var(--bg-panel-light)';
+                var color = b.color || 'var(--text-gold)';
+                html += '<button class="' + (b.cls||'') + '" data-id="' + u.id + '" ' + (b.disabled?'disabled':'') + ' style="padding:3px;font-size:9px;background:' + bg + ';color:' + color + ';border:1px solid var(--border-gold);border-radius:3px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + b.text + '</button>';
+            });
+            html += '</div>';
+        }
+
+        var div = document.createElement('div');
+        div.style.cssText = 'padding:8px;background:var(--bg-panel-light);border:1px solid rgba(139,105,20,0.3);border-radius:6px;cursor:pointer' + (!unlocked ? ';opacity:0.3;cursor:not-allowed' : (!canAfford && !maxed ? ';opacity:0.5' : '')) + (isInsightSelected ? ';border-color:#10b981;box-shadow:0 0 6px rgba(16,185,129,0.3)' : '');
+        div.innerHTML = html;
+        if (unlocked && !maxed) {
+            div.addEventListener('click', function(){ buyUpgrade(u.id); });
+        }
+        div.querySelectorAll('.upgrade-enlighten-btn').forEach(function(btn){
+            btn.addEventListener('click', function(e){ e.stopPropagation(); enlightenment(u.id); });
+        });
+        div.querySelectorAll('.upgrade-bt-btn').forEach(function(btn){
+            btn.addEventListener('click', function(e){ e.stopPropagation(); breakthroughUpgrade(u.id); });
+        });
+        div.querySelectorAll('.upgrade-master-btn').forEach(function(btn){
+            btn.addEventListener('click', function(e){ e.stopPropagation(); masterUpgrade(u.id); });
+        });
+        div.querySelectorAll('.insight-btn').forEach(function(btn){
+            btn.addEventListener('click', function(e){ e.stopPropagation(); setSelectedInsightUpgrade(isInsightSelected ? null : u.id); });
+        });
+        div.querySelectorAll('.evolve-btn').forEach(function(btn){
+            btn.addEventListener('click', function(e){ e.stopPropagation(); evolveUpgrade(u.id); });
+        });
+        container.appendChild(div);
+    });
+
+    // 激活的功法组合
+    var activeSyn = getActiveUpgradeSynergies();
+    if (activeSyn.length > 0) {
+        var synDiv = document.createElement('div');
+        synDiv.style.cssText = 'padding:6px 10px;background:var(--bg-panel-light);border:1px solid var(--border-gold);border-radius:6px;margin-top:6px';
+        var synHtml = '<div style="color:var(--text-gold);font-size:11px;margin-bottom:2px">◈ 功法组合 ◈</div>';
+        activeSyn.forEach(function(s){ synHtml += '<div style="font-size:10px;color:var(--text-secondary)">✨ ' + s.desc + '</div>'; });
+        synDiv.innerHTML = synHtml;
+        container.appendChild(synDiv);
+    }
 }
 
 function renderPills() {
@@ -930,20 +1061,21 @@ function renderDungeons() {
         const cooling = Date.now() < cd;
         const canAfford = gameState.spiritStone >= d.cost;
         const power = getPlayerPower();
-        // 与challengeDungeon一致的成功率计算（含灵宠加成）
-        const successBonus = getPetSkillBonus('dungeonSuccess');
+        // 与challengeDungeon一致的成功率计算（含灵宠+法宝专精加成）
+        const artDungeonBonus = getArtifactDungeonBonus();
+        const successBonus = getPetSkillBonus('dungeonSuccess') + artDungeonBonus.successBonus;
         const successRate = Math.min(95, Math.floor(power / d.powerReq * (1 + successBonus) * 100));
         // 预计伤害预览
         const damageRatio = Math.max(0.05, Math.min(0.4, d.powerReq / Math.max(power, 1) * 0.15));
-        const dungeonHpReduction = getFormationOutingBonus('dungeonHp') + getPetSkillBonus('dungeonHp');
+        const dungeonHpReduction = getFormationOutingBonus('dungeonHp') + getPetSkillBonus('dungeonHp') + artDungeonBonus.hpReduction;
         const damageMult = Math.max(0.3, 1 + dungeonHpReduction);
         const estDamageSuccess = Math.floor(getMaxHp() * damageRatio * 0.5 * damageMult);
         const estDamageFail = Math.floor(getMaxHp() * damageRatio * 1.2 * damageMult);
-        // 预计奖励预览（含阵法/灵宠/Buff加成）
+        // 预计奖励预览（含阵法/灵宠/Buff/法宝专精加成）
         const cultBonus = getFormationOutingBonus('adventureCult') + getFormationOutingBonus('all') + getPetSkillBonus('adventureCult') + getPetSkillBonus('all');
         const stoneBonus = getFormationOutingBonus('adventureStone') + getFormationOutingBonus('all') + getPetSkillBonus('adventureStone') + getPetSkillBonus('all');
-        const estCult = Math.floor(d.cultReward * (1 + gameState.realmIndex * 0.3) * (1 + cultBonus) * getBuffMultiplier('cultivation'));
-        const estStone = Math.floor(d.stoneReward * (1 + gameState.realmIndex * 0.3) * (1 + stoneBonus) * getBuffMultiplier('stone'));
+        const estCult = Math.floor(d.cultReward * (1 + gameState.realmIndex * 0.3) * (1 + cultBonus) * getBuffMultiplier('cultivation') * (1 + artDungeonBonus.rewardBonus));
+        const estStone = Math.floor(d.stoneReward * (1 + gameState.realmIndex * 0.3) * (1 + stoneBonus) * getBuffMultiplier('stone') * (1 + artDungeonBonus.rewardBonus));
         const artChanceBonus = getFormationOutingBonus('artifactChance') + getFormationOutingBonus('all') + getPetSkillBonus('artifactChance') + getPetSkillBonus('all');
         const estArtChance = Math.min(100, Math.floor(d.artifactChance * (1 + artChanceBonus) * 100));
 
@@ -967,6 +1099,7 @@ function renderDungeons() {
                 <span>预计伤害:成功-${estDamageSuccess} / 失败-${estDamageFail}</span>
                 <span>当前生命:${Math.floor(gameState.hp)}/${getMaxHp()}</span>
             </div>
+            ${artDungeonBonus.types.length > 0 ? `<div class="dungeon-info" style="font-size:11px;color:var(--text-gold)">法宝专精:${artDungeonBonus.types.join('、')}</div>` : ''}
             ${cooling ? `<div class="dungeon-cooldown" data-cd-end="${cd}">冷却中: ${formatCountdown((cd - Date.now()) / 1000)}</div>` : ''}
             ${!unlocked ? `<div class="dungeon-desc" style="color:var(--accent-red)">境界不足，无法挑战</div>` : ''}`;
         if (unlocked && !cooling && canAfford) {
@@ -1071,6 +1204,20 @@ function renderFormations() {
     const listContainer = document.getElementById('formation-list');
     if (!listContainer) return;
     listContainer.innerHTML = '';
+    // 预设快捷栏
+    if (!gameState.formationPresets) gameState.formationPresets = [null, null];
+    const presetBar = document.createElement('div');
+    presetBar.style.cssText = 'display:flex;gap:8px;margin-bottom:10px;padding:8px;background:var(--bg-panel);border-radius:6px';
+    for (let i = 0; i < 2; i++) {
+        const presetId = gameState.formationPresets[i];
+        const presetF = presetId ? CONFIG.formations.find(x => x.id === presetId) : null;
+        const btn = document.createElement('button');
+        btn.style.cssText = `flex:1;padding:6px;font-size:12px;background:${presetF ? 'var(--bg-panel-light)' : 'var(--bg-panel)'};color:${presetF ? 'var(--text-gold)' : 'var(--text-muted)'};border:1px solid var(--border-gold);border-radius:4px;cursor:${presetF ? 'pointer' : 'default'}`;
+        btn.textContent = presetF ? `预设${i + 1}: ${presetF.icon}${presetF.name}` : `预设${i + 1}: (空)`;
+        if (presetF) btn.addEventListener('click', () => loadFormationPreset(i));
+        presetBar.appendChild(btn);
+    }
+    listContainer.appendChild(presetBar);
     CONFIG.formations.forEach(formation => {
         const canAfford = gameState.spiritStone >= formation.cost;
         const lv = getFormationLevel(formation.id);
@@ -1083,14 +1230,20 @@ function renderFormations() {
             <div class="craft-header"><span class="craft-name">${formation.icon} ${formation.name} ${lv > 0 ? `<span style="color:var(--text-gold)">Lv.${lv}</span>` : ''}</span><span class="craft-rate">+${Math.floor(formation.value*lvMult*100)}%</span></div>
             <div class="craft-desc">${formation.desc}</div>
             <div class="craft-info">消耗:${formation.cost}灵石 | 持续:${Math.floor(formation.duration/60)}分钟</div>
-            <div style="display:flex;gap:6px">
-                <button class="craft-btn" ${!canAfford ? 'disabled' : ''} style="flex:1">布置阵法</button>
-                <button class="craft-btn formation-upgrade-btn" ${!canUpgrade ? 'disabled' : ''} style="flex:1;font-size:11px">${lv >= 5 ? '已满级' : `升级 ${formatNumber(upCost)}`}</button>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <button class="craft-btn" ${!canAfford ? 'disabled' : ''} style="flex:1;min-width:60px">布置</button>
+                <button class="craft-btn formation-upgrade-btn" ${!canUpgrade ? 'disabled' : ''} style="flex:1;min-width:60px;font-size:11px">${lv >= 5 ? '已满级' : `升级`}</button>
+                <button class="craft-btn preset-save-btn" data-fid="${formation.id}" style="flex:1;min-width:50px;font-size:10px;padding:4px;background:var(--bg-panel-light);color:var(--text-gold)">存预设</button>
             </div>`;
         if (canAfford) {
             item.querySelector('.craft-btn').addEventListener('click', (e) => { e.stopPropagation(); activateFormation(formation.id); });
         }
         item.querySelector('.formation-upgrade-btn')?.addEventListener('click', (e) => { e.stopPropagation(); upgradeFormation(formation.id); });
+        item.querySelector('.preset-save-btn')?.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const slot = confirm('保存到预设1？\n点击取消保存到预设2。') ? 0 : 1;
+            saveFormationPreset(slot, formation.id);
+        });
         listContainer.appendChild(item);
     });
 }
@@ -1118,6 +1271,8 @@ function getProductionBreakdown() {
         synergyMult: cult.synergyMult,
         affixMult: cult.affixMult,
         heavenlyMult: cult.heavenlyMult,
+        masteryMult: cult.masteryMult,
+        upgradeSynMult: cult.upgradeSynMult,
     };
 }
 
@@ -1139,6 +1294,8 @@ function showProductionDetails() {
             <div style="display:flex;justify-content:space-between"><span>灵宠图鉴</span><span>×${b.bondMult.toFixed(2)}</span></div>
             <div style="display:flex;justify-content:space-between"><span>法宝羁绊</span><span>×${b.synergyMult.toFixed(2)}</span></div>
             <div style="display:flex;justify-content:space-between"><span>法宝词条</span><span>×${b.affixMult.toFixed(2)}</span></div>
+            <div style="display:flex;justify-content:space-between"><span>功法精通</span><span>×${b.masteryMult.toFixed(2)}</span></div>
+            <div style="display:flex;justify-content:space-between"><span>功法组合</span><span>×${b.upgradeSynMult.toFixed(2)}</span></div>
             <div style="display:flex;justify-content:space-between"><span>称号倍率</span><span>×${b.titleMult.toFixed(2)}</span></div>
             <div style="display:flex;justify-content:space-between"><span>天赐加成</span><span>×${b.heavenlyMult.toFixed(2)}</span></div>
             <div style="display:flex;justify-content:space-between"><span>活动倍率</span><span>×${b.eventMult.toFixed(2)}</span></div>
@@ -1540,6 +1697,25 @@ function showOfflineModal(e) {
     document.getElementById('offline-duration').textContent = formatDuration(e.seconds);
     document.getElementById('offline-cultivation').textContent = '+' + formatNumber(e.cultivation);
     document.getElementById('offline-stones').textContent = '+' + formatNumber(e.stones);
+    // 离线收益明细
+    const bd = document.getElementById('offline-breakdown');
+    if (bd && e.cultBreakdown) {
+        bd.style.display = 'block';
+        const cb = e.cultBreakdown;
+        const sb = e.stoneBreakdown;
+        bd.innerHTML = `
+            <div style="color:var(--text-gold);margin-bottom:6px">产出明细（每秒）</div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>基础+功法+法宝+灵宠</span><span>修为${formatNumber(cb.base)} / 灵石${formatNumber(sb.base)}</span></div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>境界倍率</span><span>×${cb.realmMult.toFixed(2)} / ×${sb.realmMult.toFixed(2)}</span></div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>弟子倍率</span><span>×${cb.discipleMult.toFixed(2)} / ×${sb.discipleMult.toFixed(2)}</span></div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>道韵倍率</span><span>×${cb.daoMult.toFixed(2)} / ×${sb.daoMult.toFixed(2)}</span></div>
+            <div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>阵法倍率</span><span>×${cb.formationMult.toFixed(2)} / ×${sb.formationMult.toFixed(2)}</span></div>
+            ${cb.buffMult > 1 || sb.buffMult > 1 ? `<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>丹药Buff</span><span>×${cb.buffMult.toFixed(2)} / ×${sb.buffMult.toFixed(2)}</span></div>` : ''}
+            ${cb.synergyMult > 1 || sb.synergyMult > 1 ? `<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>法宝羁绊</span><span>×${cb.synergyMult.toFixed(2)} / ×${sb.synergyMult.toFixed(2)}</span></div>` : ''}
+            ${cb.masteryMult > 1 || sb.masteryMult > 1 ? `<div style="display:flex;justify-content:space-between;margin-bottom:4px"><span>功法精通</span><span>×${cb.masteryMult.toFixed(2)} / ×${sb.masteryMult.toFixed(2)}</span></div>` : ''}
+            <div style="display:flex;justify-content:space-between;margin-top:6px;padding-top:6px;border-top:1px solid var(--border-gold)"><span>离线效率×${e.efficiency}${e.privilege > 1 ? ' 筑基特权×' + e.privilege.toFixed(2) : ''}</span><span>修为${formatNumber(e.cultPerSec)}/秒 灵石${formatNumber(e.stonePerSec)}/秒</span></div>
+        `;
+    }
     document.getElementById('offline-modal').classList.remove('hidden');
 }
 

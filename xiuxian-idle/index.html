@@ -248,6 +248,7 @@
 
                 <!-- 功法标签页 -->
                 <div class="tab-content" id="tab-cultivation">
+                    <div id="alloc-bar-container"></div>
                     <div class="upgrade-list" id="upgrade-list"></div>
                     <h2 class="panel-title" style="margin-top: 16px;">◈ 弟子堂 ◈</h2>
                     <div class="disciple-area">
@@ -359,7 +360,7 @@
                 <div class="tab-content" id="tab-artifacts">
                     <h2 class="panel-title">◈ 法宝阁 ◈</h2>
                     <div class="artifact-slots" id="artifact-slots"></div>
-                    <h2 class="panel-title" style="margin-top: 16px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">◈ 法宝背包 ◈<span style="display:flex;gap:4px;align-items:center"><select id="artifact-sort" class="sort-select" style="font-size:11px;padding:2px 6px;background:var(--bg-panel);color:var(--text-primary);border:1px solid var(--border-gold);border-radius:4px"><option value="quality">按品质</option><option value="bonus">按加成</option><option value="type">按类型</option><option value="level">按等级</option></select><button id="artifact-batch-btn" class="batch-toggle-btn" style="font-size:11px;padding:2px 8px;background:var(--bg-panel);color:var(--text-primary);border:1px solid var(--border-gold);border-radius:4px;cursor:pointer">多选</button></span></h2>
+                    <h2 class="panel-title" style="margin-top: 16px;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">◈ 法宝背包 ◈<span style="display:flex;gap:4px;align-items:center"><select id="artifact-sort" class="sort-select" style="font-size:11px;padding:2px 6px;background:var(--bg-panel);color:var(--text-primary);border:1px solid var(--border-gold);border-radius:4px"><option value="quality">按品质</option><option value="bonus">按加成</option><option value="type">按类型</option><option value="level">按等级</option></select><button id="artifact-batch-btn" class="batch-toggle-btn" style="font-size:11px;padding:2px 8px;background:var(--bg-panel);color:var(--text-primary);border:1px solid var(--border-gold);border-radius:4px;cursor:pointer">多选</button><button id="artifact-auto-equip-btn" style="font-size:11px;padding:2px 8px;background:linear-gradient(135deg,#7c3aed,#a855f7);color:#fff;border:none;border-radius:4px;cursor:pointer">一键最优</button></span></h2>
                     <div class="batch-actions hidden" id="artifact-batch-actions" style="margin-bottom:8px;display:flex;gap:8px;align-items:center">
                         <span id="artifact-selected-count" style="font-size:12px;color:var(--text-muted)">已选0件</span>
                         <button id="artifact-decompose-btn" class="batch-action-btn" style="font-size:12px;padding:4px 12px;background:var(--bg-panel-light);color:var(--danger);border:1px solid var(--danger);border-radius:4px;cursor:pointer">分解选中</button>
@@ -471,6 +472,7 @@
                         <span id="offline-stones" class="reward-value">+0</span>
                     </div>
                 </div>
+                <div id="offline-breakdown" style="margin-top:12px;padding:10px;background:var(--bg-panel);border-radius:6px;font-size:12px;color:var(--text-secondary);max-height:200px;overflow-y:auto;display:none"></div>
                 <button id="claim-offline-btn" class="claim-btn">领取收益</button>
             </div>
         </div>
@@ -579,13 +581,13 @@
     </div>
 
     <!-- JS模块（按依赖顺序加载） -->
-    <script src="js/config.js?v=27"></script>
-    <script src="js/state.js?v=27"></script>
-    <script src="js/core.js?v=27"></script>
-    <script src="js/gameplay.js?v=27"></script>
-    <script src="js/storage.js?v=27"></script>
-    <script src="js/ui.js?v=27"></script>
-    <script src="js/lock.js?v=27"></script>
-    <script src="js/main.js?v=27"></script>
+    <script src="js/config.js?v=69"></script>
+    <script src="js/state.js?v=69"></script>
+    <script src="js/core.js?v=69"></script>
+    <script src="js/gameplay.js?v=69"></script>
+    <script src="js/storage.js?v=69"></script>
+    <script src="js/ui.js?v=69"></script>
+    <script src="js/lock.js?v=69"></script>
+    <script src="js/main.js?v=69"></script>
 </body>
 </html>

@@ -44,10 +44,48 @@ function calculateOfflineEarnings() {
     const eff = CONFIG.offlineEfficiency || 0.8;
     // 筑基期特权：离线收益+10%
     const offlinePrivilege = 1 + getRealmPrivilege('offline');
+    const allocRatio = (gameState.cultivationAllocation || 0) / 100;
+    const cultPerSec = getCultivationPerSecond();
+    const cultBd = getCultivationBreakdown();
+    const stoneBd = getStoneBreakdown();
+    // 离线领悟
+    let insightGain = 0;
+    let insightUpgrade = null;
+    if (allocRatio > 0 && gameState.selectedInsightUpgrade && gameState.upgrades[gameState.selectedInsightUpgrade] > 0) {
+        insightGain = cultPerSec * allocRatio * CONFIG.cultivationInsightRate * offlineSeconds * eff;
+        insightUpgrade = gameState.selectedInsightUpgrade;
+    }
+    const effGain = getEffectiveCultivationGain();
     return {
         seconds: offlineSeconds,
-        cultivation: getCultivationPerSecond() * offlineSeconds * eff * offlinePrivilege,
+        cultivation: cultPerSec * offlineSeconds * eff * offlinePrivilege * effGain,
         stones: getStonePerSecond() * offlineSeconds * eff * offlinePrivilege,
+        cultPerSec: cultPerSec * effGain,
+        stonePerSec: getStonePerSecond(),
+        efficiency: eff,
+        privilege: offlinePrivilege,
+        insightGain: insightGain,
+        insightUpgrade: insightUpgrade,
+        cultBreakdown: {
+            base: cultBd.base + cultBd.upgradeBonus + cultBd.artBonus + cultBd.petBonus,
+            realmMult: cultBd.realmMult,
+            discipleMult: cultBd.discipleMult,
+            daoMult: cultBd.daoMult,
+            formationMult: cultBd.formationMult,
+            buffMult: cultBd.buffMult,
+            synergyMult: cultBd.synergyMult,
+            masteryMult: cultBd.masteryMult,
+        },
+        stoneBreakdown: {
+            base: stoneBd.base + stoneBd.upgradeBonus + stoneBd.artBonus + stoneBd.petBonus,
+            realmMult: stoneBd.realmMult,
+            discipleMult: stoneBd.discipleMult,
+            daoMult: stoneBd.daoMult,
+            formationMult: stoneBd.formationMult,
+            buffMult: stoneBd.buffMult,
+            synergyMult: stoneBd.synergyMult,
+            masteryMult: stoneBd.masteryMult,
+        },
     };
 }
 
@@ -55,7 +93,13 @@ function applyOfflineEarnings(e) {
     gameState.cultivation += e.cultivation;
     gameState.spiritStone += e.stones;
     gameState.totalCultivation += e.cultivation;
-    addLog(`闭关 ${formatDuration(e.seconds)}，获得 ${formatNumber(e.cultivation)} 修为，${formatNumber(e.stones)} 灵石`, 'success');
+    // 离线领悟
+    if (e.insightGain > 0 && e.insightUpgrade) {
+        if (!gameState.upgradeProficiency) gameState.upgradeProficiency = {};
+        const maxProf = CONFIG.upgradeProficiencyMaxLevel * CONFIG.upgradeProficiencyPerLevel;
+        gameState.upgradeProficiency[e.insightUpgrade] = Math.min(maxProf, (gameState.upgradeProficiency[e.insightUpgrade] || 0) + e.insightGain);
+    }
+    addLog(`闭关 ${formatDuration(e.seconds)}，获得 ${formatNumber(e.cultivation)} 修为，${formatNumber(e.stones)} 灵石${e.insightGain > 0 ? `，领悟+${formatNumber(e.insightGain)}` : ''}`, 'success');
 }
 
 // ========== 存档导入导出 ==========
@@ -208,6 +252,14 @@ const SaveManager = {
         if (gameState.formationLevels === undefined) gameState.formationLevels = {};
         if (gameState.enlightenmentCooldown === undefined) gameState.enlightenmentCooldown = 0;
         if (gameState.secondaryPet === undefined) gameState.secondaryPet = null;
+        if (gameState.upgradeBreakthroughs === undefined) gameState.upgradeBreakthroughs = {};
+        if (gameState.upgradeMastery === undefined) gameState.upgradeMastery = {};
+        if (gameState.formationPresets === undefined) gameState.formationPresets = [null, null];
+        if (gameState.upgradeTiers === undefined) gameState.upgradeTiers = {};
+        if (gameState.upgradeProficiency === undefined) gameState.upgradeProficiency = {};
+        if (gameState.cultivationAllocation === undefined) gameState.cultivationAllocation = 0;
+        if (gameState.selectedInsightUpgrade === undefined) gameState.selectedInsightUpgrade = null;
+        if (gameState.evolveCooldowns === undefined) gameState.evolveCooldowns = {};
         if (gameState.totalStoneEarned === undefined) gameState.totalStoneEarned = 0;
         if (gameState.totalFormations === undefined) gameState.totalFormations = 0;
         if (gameState.currentGoalIndex === undefined) gameState.currentGoalIndex = 0;

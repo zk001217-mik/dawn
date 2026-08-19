@@ -177,6 +177,35 @@ function unequipArtifact(slotIndex) {
     return true;
 }
 
+// 一键装备最优法宝（按综合评分排序）
+function autoEquipArtifacts() {
+    const allArtifacts = [...gameState.equippedArtifacts.filter(a => a), ...gameState.artifactInventory];
+    if (allArtifacts.length === 0) { addLog('没有可装备的法宝', ''); SFX.error(); return false; }
+    // 评分：基础加成*品质倍率 + 词条加成
+    const scored = allArtifacts.map(art => {
+        const quality = CONFIG.artifactQualities[art.qualityIndex];
+        let score = art.bonus * quality.mult;
+        if (art.affixes) {
+            art.affixes.forEach(af => {
+                if (af.effect === 'cultivationPct' || af.effect === 'stonePct') score += af.value * 100;
+                else if (af.effect === 'cultivationFlat' || af.effect === 'stoneFlat') score += af.value * 2;
+            });
+        }
+        return { art, score };
+    });
+    scored.sort((a, b) => b.score - a.score);
+    const slots = getArtifactSlots();
+    const toEquip = scored.slice(0, slots).map(s => s.art);
+    const toInventory = scored.slice(slots).map(s => s.art);
+    gameState.equippedArtifacts = [];
+    for (let i = 0; i < slots; i++) gameState.equippedArtifacts[i] = toEquip[i] || null;
+    gameState.artifactInventory = toInventory;
+    SFX.upgrade();
+    addLog(`一键装备了 ${toEquip.filter(a => a).length} 件最优法宝`, 'success');
+    updateUI();
+    return true;
+}
+
 function sellArtifact(uid) {
     const idx = gameState.artifactInventory.findIndex(a => a.uid === uid);
     if (idx === -1) return false;
@@ -719,6 +748,24 @@ function activateFormation(formationId) {
     return true;
 }
 
+// 阵法预设方案
+function saveFormationPreset(slotIndex, formationId) {
+    if (!gameState.formationPresets) gameState.formationPresets = [null, null];
+    gameState.formationPresets[slotIndex] = formationId;
+    const f = CONFIG.formations.find(x => x.id === formationId);
+    addLog(`已将【${f?.name || formationId}】保存为预设${slotIndex + 1}`, 'success');
+    SFX.buy();
+    updateUI();
+}
+
+function loadFormationPreset(slotIndex) {
+    if (!gameState.formationPresets || !gameState.formationPresets[slotIndex]) {
+        addLog('该预设槽位为空', ''); SFX.error(); return false;
+    }
+    const formationId = gameState.formationPresets[slotIndex];
+    return activateFormation(formationId);
+}
+
 // 检测阵法过期并提醒
 function checkFormationExpiry() {
     if (!gameState.activeFormations || gameState.activeFormations.length === 0) return;
@@ -814,13 +861,16 @@ function challengeDungeon(dungeonId) {
 
     const power = getPlayerPower();
     // 灵宠技能：火狐 - 秘境成功率+10%
-    const successBonus = getPetSkillBonus('dungeonSuccess');
+    // 法宝秘境专精：飞剑 - 秘境成功率+10%
+    const artDungeonBonus = getArtifactDungeonBonus();
+    const successBonus = getPetSkillBonus('dungeonSuccess') + artDungeonBonus.successBonus;
     const successRate = Math.min(0.95, power / d.powerReq * (1 + successBonus));
     const success = Math.random() < successRate;
     // 战斗伤害：秘境越强、玩家越弱，伤害越高
     const damageRatio = Math.max(0.05, Math.min(0.4, d.powerReq / Math.max(power, 1) * 0.15));
     // 阵法/灵宠：秘境耗血减少（护山大阵、玄龟、青龙）
-    const dungeonHpReduction = getFormationOutingBonus('dungeonHp') + getPetSkillBonus('dungeonHp');
+    // 法宝秘境专精：宝镜 - 秘境耗血-15%
+    const dungeonHpReduction = getFormationOutingBonus('dungeonHp') + getPetSkillBonus('dungeonHp') + artDungeonBonus.hpReduction;
     const damageMult = Math.max(0.3, 1 + dungeonHpReduction); // 最低30%伤害
     const damage = Math.floor(getMaxHp() * damageRatio * (success ? 0.5 : 1.2) * damageMult);
     gameState.hp = Math.max(1, gameState.hp - damage);
@@ -832,8 +882,8 @@ function challengeDungeon(dungeonId) {
         // Buff丹药影响秘境奖励
         const cultBuffMult = getBuffMultiplier('cultivation');
         const stoneBuffMult = getBuffMultiplier('stone');
-        const cultGain = d.cultReward * (1 + gameState.realmIndex * 0.3) * (1 + cultBonus) * cultBuffMult;
-        const stoneGain = d.stoneReward * (1 + gameState.realmIndex * 0.3) * (1 + stoneBonus) * stoneBuffMult;
+        const cultGain = d.cultReward * (1 + gameState.realmIndex * 0.3) * (1 + cultBonus) * cultBuffMult * (1 + artDungeonBonus.rewardBonus);
+        const stoneGain = d.stoneReward * (1 + gameState.realmIndex * 0.3) * (1 + stoneBonus) * stoneBuffMult * (1 + artDungeonBonus.rewardBonus);
         gameState.cultivation += cultGain;
         gameState.totalCultivation += cultGain;
         gameState.spiritStone += stoneGain;
