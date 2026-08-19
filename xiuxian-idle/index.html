@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>修仙挂机录 - 放置修仙</title>
-    <link rel="stylesheet" href="css/style.css?v=22">
+    <link rel="stylesheet" href="css/style.css?v=23">
 </head>
 <body>
     <!-- 启动存档选择界面 -->
@@ -12,8 +12,12 @@
         <div class="start-content">
             <h1 class="start-title">修仙挂机录</h1>
             <p class="start-subtitle">放置修仙 · 悟道飞升</p>
-            <div class="save-slots" id="save-slots">
-                <!-- 存档槽位由JS生成 -->
+            <div class="start-main-buttons">
+                <button id="new-game-btn" class="start-main-btn primary">🆕 新建存档</button>
+                <button id="load-game-btn" class="start-main-btn">📂 读取存档</button>
+            </div>
+            <div class="save-slots hidden" id="save-slots">
+                <!-- 已有存档列表由JS生成 -->
             </div>
             <div class="start-actions">
                 <button id="start-import-btn" class="start-btn">📥 导入存档</button>
@@ -494,13 +498,13 @@
     </div>
 
     <!-- JS模块（按依赖顺序加载） -->
-    <script src="js/config.js?v=26"></script>
-    <script src="js/state.js?v=26"></script>
-    <script src="js/core.js?v=26"></script>
-    <script src="js/gameplay.js?v=26"></script>
-    <script src="js/storage.js?v=26"></script>
-    <script src="js/ui.js?v=26"></script>
-    <script src="js/lock.js?v=26"></script>
-    <script src="js/main.js?v=26"></script>
+    <script src="js/config.js?v=27"></script>
+    <script src="js/state.js?v=27"></script>
+    <script src="js/core.js?v=27"></script>
+    <script src="js/gameplay.js?v=27"></script>
+    <script src="js/storage.js?v=27"></script>
+    <script src="js/ui.js?v=27"></script>
+    <script src="js/lock.js?v=27"></script>
+    <script src="js/main.js?v=27"></script>
 </body>
 </html>

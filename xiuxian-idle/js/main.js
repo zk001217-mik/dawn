@@ -14,6 +14,36 @@ function init() {
     initAudio();
     // 显示启动界面
     renderSaveSlots();
+    // 有存档则直接展开列表
+    const slotsEl = document.getElementById('save-slots');
+    const hasSave = Array.from({ length: CONFIG.saveSlotCount }, (_, i) => SaveManager.getSlotInfo(i)).some(Boolean);
+    if (hasSave) {
+        slotsEl.classList.remove('hidden');
+        document.getElementById('load-game-btn').textContent = '📂 收起存档';
+    }
+
+    // 新建存档按钮
+    document.getElementById('new-game-btn').addEventListener('click', () => {
+        // 找第一个空槽位
+        let emptySlot = -1;
+        for (let i = 0; i < CONFIG.saveSlotCount; i++) {
+            if (!SaveManager.getSlotInfo(i)) { emptySlot = i; break; }
+        }
+        if (emptySlot === -1) {
+            alert('存档位已满，请先删除一个存档再新建。');
+            slotsEl.classList.remove('hidden');
+            renderSaveSlots();
+        } else {
+            startGame(emptySlot);
+        }
+    });
+
+    // 读取存档按钮（折叠/展开切换）
+    document.getElementById('load-game-btn').addEventListener('click', () => {
+        const isHidden = slotsEl.classList.toggle('hidden');
+        document.getElementById('load-game-btn').textContent = isHidden ? '📂 读取存档' : '📂 收起存档';
+        if (!isHidden) renderSaveSlots();
+    });
 
     // 启动界面按钮
     document.getElementById('start-import-btn').addEventListener('click', () => document.getElementById('start-import-file').click());

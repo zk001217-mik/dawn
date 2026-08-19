@@ -398,35 +398,38 @@ function renderSaveSlots() {
     const container = document.getElementById('save-slots');
     if (!container) return;
     container.innerHTML = '';
+    let hasAny = false;
     for (let i = 0; i < CONFIG.saveSlotCount; i++) {
         const info = SaveManager.getSlotInfo(i);
+        if (!info) continue;
+        hasAny = true;
         const slot = document.createElement('div');
-        slot.className = 'save-slot' + (info ? '' : ' empty');
-        if (info) {
-            slot.innerHTML = `
-                <div class="slot-number">存档 ${i + 1}</div>
-                <div class="slot-realm">${info.realm}</div>
-                <div class="slot-info">
-                    修为: ${formatNumber(info.cultivation)}<br>
-                    灵石: ${formatNumber(info.spiritStone)}<br>
-                    道韵: ${info.dao}<br>
-                    时长: ${formatTime(info.playTime)}<br>
-                    ${new Date(info.lastSave).toLocaleString()}
+        slot.className = 'save-slot';
+        slot.innerHTML = `
+                <div class="slot-left">
+                    <div class="slot-number">存档 ${i + 1}</div>
+                    <div class="slot-realm">${info.realm}</div>
+                    <div class="slot-info">
+                        修为: ${formatNumber(info.cultivation)} · 灵石: ${formatNumber(info.spiritStone)} · 道韵: ${info.dao} · 时长: ${formatTime(info.playTime)}<br>
+                        ${new Date(info.lastSave).toLocaleString()}
+                    </div>
                 </div>
                 <div class="slot-actions">
-                    <button class="slot-action-btn" data-action="load" data-slot="${i}">加载</button>
+                    <button class="slot-action-btn" data-action="load" data-slot="${i}">读取</button>
                     <button class="slot-action-btn delete" data-action="delete" data-slot="${i}">删除</button>
                 </div>`;
-        } else {
-            slot.innerHTML = `
-                <div class="slot-number">存档 ${i + 1}</div>
-                <div class="slot-empty-text">➕ 新建存档</div>`;
-        }
         slot.addEventListener('click', (e) => {
             if (e.target.classList.contains('slot-action-btn')) return;
             startGame(i);
         });
         container.appendChild(slot);
+    }
+    if (!hasAny) {
+        container.innerHTML = '<div style="text-align:center;color:var(--text-muted);padding:20px">暂无存档，请点击「新建存档」开始游戏</div>';
+        // 无存档时隐藏列表，重置按钮文字
+        container.classList.add('hidden');
+        const loadBtn = document.getElementById('load-game-btn');
+        if (loadBtn) loadBtn.textContent = '📂 读取存档';
     }
     container.querySelectorAll('.slot-action-btn').forEach(btn => {
         btn.addEventListener('click', (e) => {
