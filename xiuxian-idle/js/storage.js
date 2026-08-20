@@ -17,7 +17,7 @@ function loadGame() {
         const loaded = JSON.parse(data);
         gameState = { ...gameState, ...loaded };
         CONFIG.upgrades.forEach(u => { if (gameState.upgrades[u.id] === undefined) gameState.upgrades[u.id] = 0; });
-        CONFIG.pills.forEach(p => { if (gameState.pills[p.id] === undefined) gameState.pills[p.id] = 0; });
+        CONFIG.pills.forEach(p => { if (gameState.pills[p.id] === undefined) gameState.pills[p.id] = { 0: 0, 1: 0, 2: 0 }; });
         CONFIG.achievements.forEach(a => { if (!gameState.achievements[a.id]) gameState.achievements[a.id] = { completed: false, claimed: false }; });
         if (!gameState.equippedArtifacts || !Array.isArray(gameState.equippedArtifacts)) gameState.equippedArtifacts = [];
         const targetSlots = getArtifactSlots();
@@ -111,7 +111,7 @@ function importSave(file) {
             if (!confirm('确定导入存档？当前进度将被覆盖！')) return;
             gameState = { ...gameState, ...data };
             CONFIG.upgrades.forEach(u => { if (gameState.upgrades[u.id] === undefined) gameState.upgrades[u.id] = 0; });
-            CONFIG.pills.forEach(p => { if (gameState.pills[p.id] === undefined) gameState.pills[p.id] = 0; });
+            CONFIG.pills.forEach(p => { if (gameState.pills[p.id] === undefined) gameState.pills[p.id] = { 0: 0, 1: 0, 2: 0 }; });
             CONFIG.achievements.forEach(a => { if (!gameState.achievements[a.id]) gameState.achievements[a.id] = { completed: false, claimed: false }; });
             if (!gameState.equippedArtifacts || !Array.isArray(gameState.equippedArtifacts)) gameState.equippedArtifacts = [];
         const targetSlots = getArtifactSlots();
@@ -197,7 +197,7 @@ const SaveManager = {
 
     migrateState() {
         CONFIG.upgrades.forEach(u => { if (gameState.upgrades[u.id] === undefined) gameState.upgrades[u.id] = 0; });
-        CONFIG.pills.forEach(p => { if (gameState.pills[p.id] === undefined) gameState.pills[p.id] = 0; });
+        CONFIG.pills.forEach(p => { if (gameState.pills[p.id] === undefined) gameState.pills[p.id] = { 0: 0, 1: 0, 2: 0 }; });
         CONFIG.achievements.forEach(a => { if (!gameState.achievements[a.id]) gameState.achievements[a.id] = { completed: false, claimed: false }; });
         if (!gameState.equippedArtifacts || !Array.isArray(gameState.equippedArtifacts)) gameState.equippedArtifacts = [];
         const targetSlots = getArtifactSlots();
@@ -230,7 +230,7 @@ const SaveManager = {
         if (gameState.alchemyFailCount === undefined) gameState.alchemyFailCount = 0;
         if (gameState.forgeSuccessCount === undefined) gameState.forgeSuccessCount = 0;
         if (gameState.forgeFailCount === undefined) gameState.forgeFailCount = 0;
-        if (gameState.discipleAssign === undefined) gameState.discipleAssign = { alchemy: 0, forge: 0, farm: 0, patrol: 0 };
+        if (gameState.discipleAssign === undefined) gameState.discipleAssign = { alchemy: 0, forge: 0, farm: 0, patrol: 0, scout: 0, guard: 0 };
         if (gameState.pillTolerance === undefined) gameState.pillTolerance = {};
         if (gameState.formationLevels === undefined) gameState.formationLevels = {};
         if (gameState.secondaryPet === undefined) gameState.secondaryPet = null;

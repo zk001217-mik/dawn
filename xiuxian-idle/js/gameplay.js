@@ -11,7 +11,7 @@ function buyPill(id) {
     if (!pill) return false;
     if (gameState.spiritStone < pill.cost) { addLog(`灵石不足，无法购买 ${pill.name}`, ''); SFX.error(); return false; }
     gameState.spiritStone -= pill.cost;
-    gameState.pills[id] = (gameState.pills[id] || 0) + 1;
+    addPill(id, 1, 0); // 购买默认为普通品质
     SFX.buy();
     addLog(`购买了 ${pill.name}`, 'success');
     updateUI();
@@ -20,7 +20,7 @@ function buyPill(id) {
 
 function usePill(id) {
     const pill = CONFIG.pills.find(p => p.id === id);
-    if (!pill || !gameState.pills[id] || gameState.pills[id] <= 0) { SFX.error(); return false; }
+    if (!pill || getPillCount(id) <= 0) { SFX.error(); return false; }
 
     // 每日服用限制
     resetPillDailyUsage();
@@ -34,29 +34,36 @@ function usePill(id) {
         }
     }
 
-    gameState.pills[id]--;
+    // 优先使用低品质丹药
+    let useQuality = 0;
+    for (let q = 0; q <= 2; q++) {
+        if (getPillQualityCount(id, q) > 0) { useQuality = q; break; }
+    }
+    removePill(id, 1);
+    const effectMult = getPillEffectMult(useQuality);
+    const qualityName = CONFIG.pillQualities[useQuality].name;
     gameState.pillsUsedCount++;
     gameState.pillDailyUsage[id] = used + 1;
     SFX.pill();
 
     if (pill.effect === 'buff_cult' || pill.effect === 'buff_stone' || pill.effect === 'buff_both') {
         const type = pill.effect === 'buff_cult' ? 'cultivation' : pill.effect === 'buff_stone' ? 'stone' : 'both';
-        gameState.activeBuffs.push({ type, name: pill.name, value: pill.value, endTime: Date.now() + pill.duration * 1000 });
-        addLog(`服用 ${pill.name}，效果激活！`, 'success');
+        gameState.activeBuffs.push({ type, name: qualityName + pill.name, value: pill.value * effectMult, endTime: Date.now() + pill.duration * 1000 });
+        addLog(`服用 ${qualityName}${pill.name}，效果激活！(效果×${effectMult})`, 'success');
     } else if (pill.effect === 'instant_cult') {
-        const gain = getCultivationPerSecond() * pill.value;
+        const gain = getCultivationPerSecond() * pill.value * effectMult;
         gameState.cultivation += gain;
         gameState.totalCultivation += gain;
-        addLog(`服用 ${pill.name}，获得 ${formatNumber(gain)} 修为`, 'success');
+        addLog(`服用 ${qualityName}${pill.name}，获得 ${formatNumber(gain)} 修为`, 'success');
         showFloatingText(`+${formatNumber(gain)} 修为`);
     } else if (pill.effect === 'instant_stone') {
-        const gain = getStonePerSecond() * pill.value;
+        const gain = getStonePerSecond() * pill.value * effectMult;
         gameState.spiritStone += gain;
-        addLog(`使用 ${pill.name}，获得 ${formatNumber(gain)} 灵石`, 'success');
+        addLog(`使用 ${qualityName}${pill.name}，获得 ${formatNumber(gain)} 灵石`, 'success');
     } else if (pill.effect === 'heal') {
-        const healAmount = Math.floor(getMaxHp() * pill.value);
+        const healAmount = Math.floor(getMaxHp() * pill.value * effectMult);
         gameState.hp = Math.min(getMaxHp(), gameState.hp + healAmount);
-        addLog(`服用 ${pill.name}，恢复 ${healAmount} 生命值`, 'success');
+        addLog(`服用 ${qualityName}${pill.name}，恢复 ${healAmount} 生命值`, 'success');
         showFloatingText(`+${healAmount} HP`);
     }
     checkAchievements();
@@ -68,27 +75,32 @@ function useAllPills() {
     let usedCount = 0;
     let usedNames = [];
     CONFIG.pills.forEach(p => {
-        const count = gameState.pills[p.id] || 0;
+        const count = getPillCount(p.id);
         if (count <= 0) return;
         const used = gameState.pillDailyUsage[p.id] || 0;
         if (used >= p.dailyLimit) return;
         // 跳过buff类丹药（避免冲突），只使用即时类和治疗类
         if (p.effect === 'buff_cult' || p.effect === 'buff_stone' || p.effect === 'buff_both') return;
-        // 使用一颗
-        gameState.pills[p.id]--;
+        // 使用一颗（优先低品质）
+        let useQuality = 0;
+        for (let q = 0; q <= 2; q++) {
+            if (getPillQualityCount(p.id, q) > 0) { useQuality = q; break; }
+        }
+        removePill(p.id, 1);
+        const effectMult = getPillEffectMult(useQuality);
         gameState.pillsUsedCount++;
         gameState.pillDailyUsage[p.id] = used + 1;
         usedCount++;
-        usedNames.push(p.name);
+        usedNames.push(CONFIG.pillQualities[useQuality].name + p.name);
         if (p.effect === 'instant_cult') {
-            const gain = getCultivationPerSecond() * p.value;
+            const gain = getCultivationPerSecond() * p.value * effectMult;
             gameState.cultivation += gain;
             gameState.totalCultivation += gain;
         } else if (p.effect === 'instant_stone') {
-            const gain = getStonePerSecond() * p.value;
+            const gain = getStonePerSecond() * p.value * effectMult;
             gameState.spiritStone += gain;
         } else if (p.effect === 'heal') {
-            const healAmount = Math.floor(getMaxHp() * p.value);
+            const healAmount = Math.floor(getMaxHp() * p.value * effectMult);
             gameState.hp = Math.min(getMaxHp(), gameState.hp + healAmount);
         }
     });
@@ -255,8 +267,8 @@ function completeAdventure() {
         }
     }
 
-    const cultBonus = getFormationOutingBonus('adventureCult') + getFormationOutingBonus('all') + getPetSkillBonus('adventureCult') + getPetSkillBonus('all') + getDiscipleAssignBonus('patrol');
-    const stoneBonus = getFormationOutingBonus('adventureStone') + getFormationOutingBonus('all') + getPetSkillBonus('adventureStone') + getPetSkillBonus('all');
+    const cultBonus = getFormationOutingBonus('adventureCult') + getFormationOutingBonus('all') + getPetSkillBonus('adventureCult') + getPetSkillBonus('all') + getDiscipleAssignBonus('patrol') + getDiscipleAssignBonus('scout');
+    const stoneBonus = getFormationOutingBonus('adventureStone') + getFormationOutingBonus('all') + getPetSkillBonus('adventureStone') + getPetSkillBonus('all') + getDiscipleAssignBonus('scout');
     // Buff丹药影响历练一次性奖励
     const cultBuffMult = getBuffMultiplier('cultivation');
     const stoneBuffMult = getBuffMultiplier('stone');
@@ -284,7 +296,7 @@ function completeAdventure() {
 
     if (Math.random() < loc.pillChance) {
         const pill = CONFIG.pills[Math.floor(Math.random() * CONFIG.pills.length)];
-        gameState.pills[pill.id] = (gameState.pills[pill.id] || 0) + 1;
+        addPill(pill.id, 1, 0);
         rewardMsg += `，获得 ${pill.name} x1`;
     }
 
@@ -397,7 +409,7 @@ function doCheckin() {
     else if (reward.type === 'dao') { rewardAmount = reward.amount; gameState.dao += reward.amount; addLog(`签到获得${reward.amount}道韵`, 'success'); }
     else if (reward.type === 'pill') {
         const pill = CONFIG.pills[Math.floor(Math.random() * CONFIG.pills.length)];
-        gameState.pills[pill.id] = (gameState.pills[pill.id] || 0) + 1;
+        addPill(pill.id, 1, 0);
         rewardExtraName = pill.name;
         addLog(`签到获得 ${pill.name} x1`, 'success');
     }
@@ -460,7 +472,7 @@ function claimTask(taskId) {
 function synthesizePill(pillId) {
     const pill = CONFIG.pills.find(p => p.id === pillId);
     if (!pill) return false;
-    if ((gameState.pills[pillId] || 0) < 3) { addLog('丹药不足，需要3颗', ''); SFX.error(); return false; }
+    if (getPillCount(pillId) < 3) { addLog('丹药不足，需要3颗', ''); SFX.error(); return false; }
 
     // 强化版每日限制（普通丹药dailyLimit的一半，至少1次）
     resetPillDailyUsage();
@@ -475,7 +487,7 @@ function synthesizePill(pillId) {
         }
     }
 
-    gameState.pills[pillId] -= 3;
+    removePill(pillId, 3); // 优先消耗低品质
     gameState.enhancedDailyUsage[pillId] = enhancedUsed + 1;
     // 合成强化版：效果翻倍，持续时间不变（对buff类）或数值翻倍（对即时类）
     if (pill.effect === 'buff_cult' || pill.effect === 'buff_stone' || pill.effect === 'buff_both') {
@@ -648,11 +660,15 @@ function alchemyPill(pillId) {
     // 批量炼制
     let successCount = 0;
     let failCount = 0;
+    let qualityCounts = [0, 0, 0]; // 普通/精良/极品
     const pill = CONFIG.pills.find(p => p.id === pillId);
     const alchemyBonus = getRealmPrivilege('alchemy') + getDiscipleAssignBonus('alchemy');
+    const effectiveSuccess = Math.min(1, recipe.successRate + alchemyBonus);
     for (let i = 0; i < batchSize; i++) {
-        if (Math.random() < Math.min(1, recipe.successRate + alchemyBonus)) {
-            gameState.pills[pillId] = (gameState.pills[pillId] || 0) + 1;
+        if (Math.random() < effectiveSuccess) {
+            const quality = rollPillQuality(effectiveSuccess);
+            addPill(pillId, 1, quality);
+            qualityCounts[quality]++;
             gameState.alchemySuccessCount = (gameState.alchemySuccessCount || 0) + 1;
             successCount++;
         } else {
@@ -664,7 +680,11 @@ function alchemyPill(pillId) {
     gameState.alchemyCooldownEnd = Date.now() + recipe.cooldown * 1000;
     if (successCount > 0) {
         SFX.reward();
-        addLog(`炼丹完成！成功${successCount}次，失败${failCount}次，获得【${pill.name}】x${successCount}`, 'success');
+        let qualityMsg = [];
+        for (let q = 0; q <= 2; q++) {
+            if (qualityCounts[q] > 0) qualityMsg.push(`${CONFIG.pillQualities[q].name}x${qualityCounts[q]}`);
+        }
+        addLog(`炼丹完成！成功${successCount}次，失败${failCount}次，获得【${pill.name}】${qualityMsg.join(' ')}`, 'success');
     } else {
         SFX.error();
         addLog(`炼丹全部失败！${batchSize}颗丹药全部炸炉，损失${formatNumber(totalCost)}灵石`, '');
@@ -870,15 +890,16 @@ function challengeDungeon(dungeonId) {
     const damageRatio = Math.max(0.05, Math.min(0.4, d.powerReq / Math.max(power, 1) * 0.15));
     // 阵法/灵宠：秘境耗血减少（护山大阵、玄龟、青龙）
     // 法宝秘境专精：宝镜 - 秘境耗血-15%
-    const dungeonHpReduction = getFormationOutingBonus('dungeonHp') + getPetSkillBonus('dungeonHp') + artDungeonBonus.hpReduction;
+    // 护卫弟子：秘境耗血减少
+    const dungeonHpReduction = getFormationOutingBonus('dungeonHp') + getPetSkillBonus('dungeonHp') + artDungeonBonus.hpReduction + getDiscipleAssignBonus('guard');
     const damageMult = Math.max(0.3, 1 + dungeonHpReduction); // 最低30%伤害
     const damage = Math.floor(getMaxHp() * damageRatio * (success ? 0.5 : 1.2) * damageMult);
     gameState.hp = Math.max(1, gameState.hp - damage);
 
     if (success) {
         // 阵法/灵宠加成：秘境奖励享受历练类加成
-        const cultBonus = getFormationOutingBonus('adventureCult') + getFormationOutingBonus('all') + getPetSkillBonus('adventureCult') + getPetSkillBonus('all');
-        const stoneBonus = getFormationOutingBonus('adventureStone') + getFormationOutingBonus('all') + getPetSkillBonus('adventureStone') + getPetSkillBonus('all');
+        const cultBonus = getFormationOutingBonus('adventureCult') + getFormationOutingBonus('all') + getPetSkillBonus('adventureCult') + getPetSkillBonus('all') + getDiscipleAssignBonus('scout');
+        const stoneBonus = getFormationOutingBonus('adventureStone') + getFormationOutingBonus('all') + getPetSkillBonus('adventureStone') + getPetSkillBonus('all') + getDiscipleAssignBonus('scout');
         // Buff丹药影响秘境奖励
         const cultBuffMult = getBuffMultiplier('cultivation');
         const stoneBuffMult = getBuffMultiplier('stone');
@@ -914,6 +935,9 @@ function challengeDungeon(dungeonId) {
         SFX.error();
         addLog(`挑战【${d.name}】失败，损失${formatNumber(loss)}修为，受到${damage}点伤害（成功率${Math.floor(successRate * 100)}%）`, '');
     }
+    // 秘境统计
+    gameState.dungeonCompleteCount = (gameState.dungeonCompleteCount || 0) + 1;
+    if (success) gameState.dungeonSuccessCount = (gameState.dungeonSuccessCount || 0) + 1;
     checkAchievements();
     updateUI();
     return true;

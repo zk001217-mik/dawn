@@ -14,26 +14,26 @@ const CONFIG = {
     realms: [
         { name: '练气期', baseCost: 5000, multiplier: 1.85, cultBonus: 0, stoneBonus: 0, privilege: '初入修仙，无特殊能力', privilegeIcon: '🌱' },
         { name: '筑基期', baseCost: 50000, multiplier: 1.9, cultBonus: 0.3, stoneBonus: 0.2, privilege: '离线收益+10%', privilegeIcon: '🏯', privilegeType: 'offline', privilegeValue: 0.1 },
-        { name: '金丹期', baseCost: 500000, multiplier: 2.0, cultBonus: 0.8, stoneBonus: 0.5, privilege: '炼丹成功率+5%', privilegeIcon: '🔮', privilegeType: 'alchemy', privilegeValue: 0.05 },
-        { name: '元婴期', baseCost: 5000000, multiplier: 2.1, cultBonus: 2.0, stoneBonus: 1.5, privilege: '炼器成功率+5%', privilegeIcon: '👶', privilegeType: 'forge', privilegeValue: 0.05 },
-        { name: '化神期', baseCost: 50000000, multiplier: 2.2, cultBonus: 5.0, stoneBonus: 4.0, privilege: '灵宠携带数量+1', privilegeIcon: '🌩️', privilegeType: 'petSlot', privilegeValue: 1 },
-        { name: '炼虚期', baseCost: 500000000, multiplier: 2.3, cultBonus: 12.0, stoneBonus: 10.0, privilege: '法宝槽位+1', privilegeIcon: '🌌', privilegeType: 'artifactSlot', privilegeValue: 1 },
-        { name: '合体期', baseCost: 5000000000, multiplier: 2.4, cultBonus: 30.0, stoneBonus: 25.0, privilege: '突破成功率+10%', privilegeIcon: '⚔️', privilegeType: 'breakthrough', privilegeValue: 0.1 },
-        { name: '大乘期', baseCost: 50000000000, multiplier: 2.5, cultBonus: 75.0, stoneBonus: 60.0, privilege: '所有产出+10%', privilegeIcon: '🌟', privilegeType: 'allOutput', privilegeValue: 0.1 },
-        { name: '渡劫期', baseCost: 500000000000, multiplier: 2.6, cultBonus: 200.0, stoneBonus: 150.0, privilege: '转世保留50%道韵', privilegeIcon: '⚡', privilegeType: 'rebirth', privilegeValue: 0.5 },
+        { name: '金丹期', baseCost: 600000, multiplier: 2.0, cultBonus: 0.8, stoneBonus: 0.5, privilege: '炼丹成功率+5%', privilegeIcon: '🔮', privilegeType: 'alchemy', privilegeValue: 0.05 },
+        { name: '元婴期', baseCost: 8000000, multiplier: 2.1, cultBonus: 2.0, stoneBonus: 1.5, privilege: '炼器成功率+5%', privilegeIcon: '👶', privilegeType: 'forge', privilegeValue: 0.05 },
+        { name: '化神期', baseCost: 120000000, multiplier: 2.2, cultBonus: 5.0, stoneBonus: 4.0, privilege: '灵宠携带数量+1', privilegeIcon: '🌩️', privilegeType: 'petSlot', privilegeValue: 1 },
+        { name: '炼虚期', baseCost: 2000000000, multiplier: 2.3, cultBonus: 12.0, stoneBonus: 10.0, privilege: '法宝槽位+1', privilegeIcon: '🌌', privilegeType: 'artifactSlot', privilegeValue: 1 },
+        { name: '合体期', baseCost: 40000000000, multiplier: 2.4, cultBonus: 30.0, stoneBonus: 25.0, privilege: '突破成功率+10%', privilegeIcon: '⚔️', privilegeType: 'breakthrough', privilegeValue: 0.1 },
+        { name: '大乘期', baseCost: 800000000000, multiplier: 2.5, cultBonus: 75.0, stoneBonus: 60.0, privilege: '所有产出+10%', privilegeIcon: '🌟', privilegeType: 'allOutput', privilegeValue: 0.1 },
+        { name: '渡劫期', baseCost: 20000000000000, multiplier: 2.6, cultBonus: 200.0, stoneBonus: 150.0, privilege: '转世保留50%道韵', privilegeIcon: '⚡', privilegeType: 'rebirth', privilegeValue: 0.5 },
     ],
 
     upgrades: [
-        { id: 'basic_art', name: '基础吐纳术', desc: '最基础的修炼之法，吸纳天地灵气', baseCost: 15, costMult: 1.18, effect: 'cultivation', baseEffect: 0.4, effectMult: 1.02, unlockRealm: 0, maxLevel: 200 },
-        { id: 'spirit_vein', name: '聚灵阵', desc: '布下聚灵阵法，汇聚灵石矿脉', baseCost: 25, costMult: 1.2, effect: 'stone', baseEffect: 0.25, effectMult: 1.02, unlockRealm: 0, maxLevel: 200 },
-        { id: 'breathing_art', name: '龟息吐纳法', desc: '上古吐纳法门，大幅提升修为速度', baseCost: 200, costMult: 1.22, effect: 'cultivation', baseEffect: 2, effectMult: 1.025, unlockRealm: 1, maxLevel: 150 },
-        { id: 'spirit_field', name: '灵田开垦', desc: '开辟灵田种植灵药，换取灵石', baseCost: 300, costMult: 1.22, effect: 'stone', baseEffect: 1.5, effectMult: 1.025, unlockRealm: 1, maxLevel: 150 },
-        { id: 'heart_method', name: '心法要诀', desc: '修炼心法，神识与灵力双修', baseCost: 1000, costMult: 1.24, effect: 'both', baseEffect: 2.5, effectMult: 1.03, unlockRealm: 1, maxLevel: 120 },
-        { id: 'alchemy', name: '炼丹之术', desc: '炼制丹药辅助修炼，修为灵石双增', baseCost: 2500, costMult: 1.25, effect: 'both', baseEffect: 5, effectMult: 1.03, unlockRealm: 2, maxLevel: 100 },
-        { id: 'artifact_craft', name: '炼器之术', desc: '锻造法宝护身，产出更上一层楼', baseCost: 5000, costMult: 1.28, effect: 'both', baseEffect: 12, effectMult: 1.035, unlockRealm: 2, maxLevel: 100 },
-        { id: 'formation', name: '周天星斗阵', desc: '引星辰之力入体，修为暴涨', baseCost: 50000, costMult: 1.3, effect: 'cultivation', baseEffect: 60, effectMult: 1.035, unlockRealm: 3, maxLevel: 80 },
-        { id: 'spirit_sword', name: '御剑之术', desc: '剑修法门，凌厉剑意增加灵石获取', baseCost: 60000, costMult: 1.3, effect: 'stone', baseEffect: 40, effectMult: 1.035, unlockRealm: 3, maxLevel: 80 },
-        { id: 'dao_insight', name: '悟道心得', desc: '参悟天地法则，全方位提升', baseCost: 200000, costMult: 1.32, effect: 'both', baseEffect: 175, effectMult: 1.04, unlockRealm: 4, maxLevel: 60 },
+        { id: 'basic_art', name: '基础吐纳术', desc: '最基础的修炼之法，吸纳天地灵气', baseCost: 15, costMult: 1.2, effect: 'cultivation', baseEffect: 0.4, effectMult: 1.02, unlockRealm: 0, maxLevel: 200 },
+        { id: 'spirit_vein', name: '聚灵阵', desc: '布下聚灵阵法，汇聚灵石矿脉', baseCost: 25, costMult: 1.22, effect: 'stone', baseEffect: 0.25, effectMult: 1.02, unlockRealm: 0, maxLevel: 200 },
+        { id: 'breathing_art', name: '龟息吐纳法', desc: '上古吐纳法门，大幅提升修为速度', baseCost: 200, costMult: 1.24, effect: 'cultivation', baseEffect: 2, effectMult: 1.025, unlockRealm: 1, maxLevel: 150 },
+        { id: 'spirit_field', name: '灵田开垦', desc: '开辟灵田种植灵药，换取灵石', baseCost: 300, costMult: 1.24, effect: 'stone', baseEffect: 1.5, effectMult: 1.025, unlockRealm: 1, maxLevel: 150 },
+        { id: 'heart_method', name: '心法要诀', desc: '修炼心法，神识与灵力双修', baseCost: 1000, costMult: 1.26, effect: 'both', baseEffect: 2.5, effectMult: 1.03, unlockRealm: 1, maxLevel: 120 },
+        { id: 'alchemy', name: '炼丹之术', desc: '炼制丹药辅助修炼，修为灵石双增', baseCost: 2500, costMult: 1.27, effect: 'both', baseEffect: 5, effectMult: 1.03, unlockRealm: 2, maxLevel: 100 },
+        { id: 'artifact_craft', name: '炼器之术', desc: '锻造法宝护身，产出更上一层楼', baseCost: 5000, costMult: 1.3, effect: 'both', baseEffect: 12, effectMult: 1.035, unlockRealm: 2, maxLevel: 100 },
+        { id: 'formation', name: '周天星斗阵', desc: '引星辰之力入体，修为暴涨', baseCost: 50000, costMult: 1.32, effect: 'cultivation', baseEffect: 60, effectMult: 1.035, unlockRealm: 3, maxLevel: 80 },
+        { id: 'spirit_sword', name: '御剑之术', desc: '剑修法门，凌厉剑意增加灵石获取', baseCost: 60000, costMult: 1.32, effect: 'stone', baseEffect: 40, effectMult: 1.035, unlockRealm: 3, maxLevel: 80 },
+        { id: 'dao_insight', name: '悟道心得', desc: '参悟天地法则，全方位提升', baseCost: 200000, costMult: 1.35, effect: 'both', baseEffect: 175, effectMult: 1.04, unlockRealm: 4, maxLevel: 60 },
     ],
 
     disciple: { baseCost: 80, costMult: 1.35, cultBonus: 0.015, stoneBonus: 0.01, maxCount: 50 },
@@ -46,16 +46,23 @@ const CONFIG = {
         { id: 'star_sword', name: '星辰剑意', req: [{ id: 'formation', lv: 20 }, { id: 'spirit_sword', lv: 20 }], bonus: { type: 'cultivation', value: 0.15 }, desc: '周天星斗阵+御剑之术各20级：修为+15%' },
     ],
 
+    // 丹药品质
+    pillQualities: [
+        { name: '普通', color: '#9ca3af', effectMult: 1.0, weight: 60 },
+        { name: '精良', color: '#4ade80', effectMult: 1.5, weight: 30 },
+        { name: '极品', color: '#c084fc', effectMult: 2.0, weight: 10 },
+    ],
+
     // 丹药配置
     pills: [
-        { id: 'qi_gathering', name: '聚气丹', desc: '凝聚灵气，修为产出+100%，持续5分钟', icon: '🔴', cost: 300, effect: 'buff_cult', value: 1.0, duration: 300, dailyLimit: 3 },
-        { id: 'spirit_talisman', name: '聚灵符', desc: '灵石产出+100%，持续5分钟', icon: '🟡', cost: 300, effect: 'buff_stone', value: 1.0, duration: 300, dailyLimit: 3 },
-        { id: 'enlightenment', name: '悟道丹', desc: '立即获得30秒修为产出', icon: '🟣', cost: 250, effect: 'instant_cult', value: 30, dailyLimit: 5 },
-        { id: 'wealth', name: '点石成金符', desc: '立即获得60秒灵石产出', icon: '🟢', cost: 250, effect: 'instant_stone', value: 60, dailyLimit: 5 },
-        { id: 'double_cult', name: '双倍修为丹', desc: '修为产出+200%，持续3分钟', icon: '🟠', cost: 800, effect: 'buff_cult', value: 2.0, duration: 180, dailyLimit: 2 },
-        { id: 'double_stone', name: '聚财符', desc: '灵石产出+200%，持续3分钟', icon: '💎', cost: 800, effect: 'buff_stone', value: 2.0, duration: 180, dailyLimit: 2 },
-        { id: 'universal', name: '混元丹', desc: '修为和灵石产出各+80%，持续10分钟', icon: '🔵', cost: 2500, effect: 'buff_both', value: 0.8, duration: 600, dailyLimit: 1 },
-        { id: 'healing', name: '回春丹', desc: '立即恢复50%最大生命值', icon: '💚', cost: 300, effect: 'heal', value: 0.5, dailyLimit: 5 },
+        { id: 'qi_gathering', name: '聚气丹', desc: '凝聚灵气，修为产出+100%，持续5分钟', icon: '🔴', cost: 350, effect: 'buff_cult', value: 1.0, duration: 300, dailyLimit: 3 },
+        { id: 'spirit_talisman', name: '聚灵符', desc: '灵石产出+100%，持续5分钟', icon: '🟡', cost: 350, effect: 'buff_stone', value: 1.0, duration: 300, dailyLimit: 3 },
+        { id: 'enlightenment', name: '悟道丹', desc: '立即获得30秒修为产出', icon: '🟣', cost: 300, effect: 'instant_cult', value: 30, dailyLimit: 5 },
+        { id: 'wealth', name: '点石成金符', desc: '立即获得60秒灵石产出', icon: '🟢', cost: 300, effect: 'instant_stone', value: 60, dailyLimit: 5 },
+        { id: 'double_cult', name: '双倍修为丹', desc: '修为产出+200%，持续3分钟', icon: '🟠', cost: 1000, effect: 'buff_cult', value: 2.0, duration: 180, dailyLimit: 2 },
+        { id: 'double_stone', name: '聚财符', desc: '灵石产出+200%，持续3分钟', icon: '💎', cost: 1000, effect: 'buff_stone', value: 2.0, duration: 180, dailyLimit: 2 },
+        { id: 'universal', name: '混元丹', desc: '修为和灵石产出各+80%，持续10分钟', icon: '🔵', cost: 3000, effect: 'buff_both', value: 0.8, duration: 600, dailyLimit: 1 },
+        { id: 'healing', name: '回春丹', desc: '立即恢复50%最大生命值', icon: '💚', cost: 350, effect: 'heal', value: 0.5, dailyLimit: 5 },
     ],
 
     // 法宝品质
@@ -150,6 +157,12 @@ const CONFIG = {
         { id: 'rebirth_3', name: '三世轮回', desc: '转世3次', icon: '🔄', condition: s => s.rebirthCount >= 3, reward: { dao: 30, points: 25 } },
         { id: 'play_10h', name: '潜心苦修', desc: '累计修炼10小时', icon: '⏰', condition: s => s.playTime >= 36000, reward: { dao: 10, points: 15 } },
         { id: 'enhance_5', name: '法宝强化', desc: '将任意法宝强化到+5', icon: '⬆️', condition: s => { let max = 0; (s.artifactInventory || []).forEach(a => { if ((a.level || 0) > max) max = a.level; }); (s.equippedArtifacts || []).forEach(a => { if (a && (a.level || 0) > max) max = a.level; }); return max >= 5; }, reward: { dao: 5, points: 10 } },
+        { id: 'dungeon_first', name: '初入秘境', desc: '首次挑战秘境', icon: '🏰', condition: s => (s.dungeonCompleteCount || 0) >= 1, reward: { dao: 3, points: 5 } },
+        { id: 'dungeon_10', name: '秘境探险者', desc: '完成10次秘境挑战', icon: '🗡️', condition: s => (s.dungeonCompleteCount || 0) >= 10, reward: { dao: 8, points: 15 } },
+        { id: 'dungeon_50', name: '秘境征服者', desc: '完成50次秘境挑战', icon: '👑', condition: s => (s.dungeonCompleteCount || 0) >= 50, reward: { dao: 20, points: 40 } },
+        { id: 'dungeon_success_20', name: '百战百胜', desc: '秘境挑战成功20次', icon: '🏆', condition: s => (s.dungeonSuccessCount || 0) >= 20, reward: { dao: 15, points: 30 } },
+        { id: 'checkin_7', name: '七日签到', desc: '连续签到7天', icon: '📅', condition: s => (s.checkinStreak || 0) >= 7, reward: { dao: 5, points: 10 } },
+        { id: 'checkin_30', name: '坚持不懈', desc: '连续签到30天', icon: '🔥', condition: s => (s.checkinStreak || 0) >= 30, reward: { dao: 20, points: 50 } },
     ],
 
     // 每日签到奖励（7天循环）
@@ -285,6 +298,10 @@ const CONFIG = {
         { id: 'cultivator', name: '修炼狂人', desc: '累计修为达100K', condition: s => s.totalCultivation >= 100000, bonus: { cultivation: 0.03 } },
         { id: 'reborn', name: '转世仙人', desc: '转世3次', condition: s => s.rebirthCount >= 3, bonus: { cultivation: 0.05, stone: 0.05 } },
         { id: 'collector', name: '灵宠收藏家', desc: '收集5种不同灵宠', condition: s => (s.petCollection ? Object.keys(s.petCollection).length : 0) >= 5, bonus: { cultivation: 0.02, stone: 0.02 } },
+        { id: 'dungeon_explorer', name: '秘境探险者', desc: '完成10次秘境挑战', condition: s => (s.dungeonCompleteCount || 0) >= 10, bonus: { cultivation: 0.03 } },
+        { id: 'dungeon_conqueror', name: '秘境征服者', desc: '完成50次秘境挑战', condition: s => (s.dungeonCompleteCount || 0) >= 50, bonus: { cultivation: 0.05, stone: 0.05 } },
+        { id: 'checkin_master', name: '签到达人', desc: '连续签到7天', condition: s => (s.checkinStreak || 0) >= 7, bonus: { stone: 0.03 } },
+        { id: 'persistent', name: '坚持不懈', desc: '连续签到30天', condition: s => (s.checkinStreak || 0) >= 30, bonus: { cultivation: 0.05, stone: 0.05 } },
     ],
 
     // 限时活动
@@ -330,7 +347,7 @@ const CONFIG = {
         {
             id: 'merchant', title: '云游商人', desc: '一位神秘商人向你兜售商品，价格优惠但数量有限。',
             choices: [
-                { text: '花200灵石买神秘丹药', result: () => { if (gameState.spiritStone >= 200) { gameState.spiritStone -= 200; const pill = CONFIG.pills[Math.floor(Math.random() * CONFIG.pills.length)]; gameState.pills[pill.id] = (gameState.pills[pill.id] || 0) + 2; return `获得${pill.name} x2！`; } return '灵石不足。'; } },
+                { text: '花200灵石买神秘丹药', result: () => { if (gameState.spiritStone >= 200) { gameState.spiritStone -= 200; const pill = CONFIG.pills[Math.floor(Math.random() * CONFIG.pills.length)]; if (!gameState.pills[pill.id] || typeof gameState.pills[pill.id] === 'number') gameState.pills[pill.id] = { 0: 0, 1: 0, 2: 0 }; gameState.pills[pill.id][0] += 2; return `获得${pill.name} x2！`; } return '灵石不足。'; } },
                 { text: '花500灵石买灵宠蛋', result: () => { if (gameState.spiritStone >= 500) { if (!canAddPet()) return '灵宠背包已满，请先放生。'; gameState.spiritStone -= 500; const pet = generatePet(); gameState.petInventory.push(pet); return `孵化出【${pet.name}】！`; } return '灵石不足。'; } },
                 { text: '不买', result: () => '商人耸耸肩离开了。' },
             ]
@@ -385,5 +402,14 @@ const CONFIG = {
     maxOfflineHours: 48,
     offlineEfficiency: 0.5, // 离线收益效率
     petInventoryMax: 20, // 灵宠背包上限
+
+    // 新手引导步骤
+    tutorialSteps: [
+        { target: '#meditate-circle', title: '打坐修炼', desc: '点击中央修炼圆圈，手动加速修炼，连击可获得更高倍率！', position: 'bottom' },
+        { target: '#tab-cultivation-btn', title: '功法升级', desc: '切换到功法标签页，消耗灵石升级功法，提升修为和灵石产出。', position: 'bottom' },
+        { target: '#breakthrough-btn', title: '突破境界', desc: '修为攒满后，点击突破按钮进入下一境界，解锁更多功法和功能。', position: 'bottom' },
+        { target: '#tab-pill-btn', title: '丹药系统', desc: '购买或炼制丹药，获得临时增益或立即奖励，加速修炼进度。', position: 'bottom' },
+        { target: '#tab-adventure-btn', title: '外出历练', desc: '外出历练和秘境挑战，获得稀有资源、法宝和灵宠。', position: 'bottom' },
+    ],
 };
 

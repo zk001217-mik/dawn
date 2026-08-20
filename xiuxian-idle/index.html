@@ -115,6 +115,10 @@
                     <span>弟子数量</span>
                     <span id="disciple-count">0</span>
                 </div>
+                <div class="stat-row">
+                    <span>下次突破</span>
+                    <span id="next-breakthrough-info">-</span>
+                </div>
 
                 <h2 class="panel-title" style="margin-top: 24px;">◈ 生效Buff ◈</h2>
                 <div id="active-buffs" class="active-buffs">
@@ -303,6 +307,30 @@
                                     <button class="assign-btn minus" data-type="patrol">−</button>
                                     <span class="assign-count" id="assign-patrol">0</span>
                                     <button class="assign-btn plus" data-type="patrol">+</button>
+                                </div>
+                            </div>
+                            <div class="assign-card">
+                                <div class="assign-icon">🔭</div>
+                                <div class="assign-info">
+                                    <div class="assign-name">斥候</div>
+                                    <div class="assign-effect">每人+0.8%外出奖励</div>
+                                </div>
+                                <div class="assign-controls">
+                                    <button class="assign-btn minus" data-type="scout">−</button>
+                                    <span class="assign-count" id="assign-scout">0</span>
+                                    <button class="assign-btn plus" data-type="scout">+</button>
+                                </div>
+                            </div>
+                            <div class="assign-card">
+                                <div class="assign-icon">🛡️</div>
+                                <div class="assign-info">
+                                    <div class="assign-name">护卫</div>
+                                    <div class="assign-effect">每人-1%秘境耗血(最多-30%)</div>
+                                </div>
+                                <div class="assign-controls">
+                                    <button class="assign-btn minus" data-type="guard">−</button>
+                                    <span class="assign-count" id="assign-guard">0</span>
+                                    <button class="assign-btn plus" data-type="guard">+</button>
                                 </div>
                             </div>
                         </div>
@@ -580,13 +608,26 @@
     </div>
 
     <!-- JS模块（按依赖顺序加载） -->
-    <script src="js/config.js?v=71"></script>
-    <script src="js/state.js?v=71"></script>
-    <script src="js/core.js?v=71"></script>
-    <script src="js/gameplay.js?v=71"></script>
-    <script src="js/storage.js?v=71"></script>
-    <script src="js/ui.js?v=71"></script>
-    <script src="js/lock.js?v=71"></script>
-    <script src="js/main.js?v=71"></script>
+    <!-- 新手引导遮罩层 -->
+    <div id="tutorial-overlay" class="tutorial-overlay hidden">
+        <div class="tutorial-highlight" id="tutorial-highlight"></div>
+        <div class="tutorial-tooltip" id="tutorial-tooltip">
+            <div class="tutorial-title" id="tutorial-title"></div>
+            <div class="tutorial-desc" id="tutorial-desc"></div>
+            <div class="tutorial-actions">
+                <button class="tutorial-skip" id="tutorial-skip">跳过引导</button>
+                <button class="tutorial-next" id="tutorial-next">下一步</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/config.js?v=74"></script>
+    <script src="js/state.js?v=74"></script>
+    <script src="js/core.js?v=74"></script>
+    <script src="js/gameplay.js?v=74"></script>
+    <script src="js/storage.js?v=74"></script>
+    <script src="js/ui.js?v=74"></script>
+    <script src="js/lock.js?v=74"></script>
+    <script src="js/main.js?v=74"></script>
 </body>
 </html>

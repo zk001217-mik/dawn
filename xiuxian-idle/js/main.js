@@ -169,6 +169,7 @@ function init() {
     window.addEventListener('beforeunload', () => { if (gameStarted) saveGame(); });
 
     updateSoundButton();
+    initTutorialEvents();
 }
 
 function gameTick() {

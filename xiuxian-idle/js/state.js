@@ -15,12 +15,12 @@ let gameState = {
     playTime: 0,
     discipleCount: 0,
     // 弟子分工
-    discipleAssign: { alchemy: 0, forge: 0, farm: 0, patrol: 0 },
+    discipleAssign: { alchemy: 0, forge: 0, farm: 0, patrol: 0, scout: 0, guard: 0 },
     upgrades: {},
     upgradeBreakthroughs: {}, // { upgradeId: count } 功法突破次数
     upgradeMastery: {}, // { upgradeId: true } 功法精通
     formationPresets: [null, null], // 阵法预设方案 [formationId, formationId]
-    pills: {},
+    pills: {}, // { pillId: { 0: count, 1: count, 2: count } } 丹药各品质数量
     activeBuffs: [],
     artifactInventory: [],
     equippedArtifacts: [null, null, null],
@@ -38,6 +38,8 @@ let gameState = {
     // 签到
     lastCheckinDate: '',
     checkinStreak: 0,
+    dungeonCompleteCount: 0, // 秘境挑战完成次数
+    dungeonSuccessCount: 0, // 秘境挑战成功次数
     checkinClaimedDays: [],
     // 日常任务
     taskProgress: {},
@@ -47,6 +49,8 @@ let gameState = {
     meditateCount: 0,
     upgradeCount: 0,
     currentSlot: 0,
+    tutorialCompleted: false, // 新手引导是否完成
+    tutorialStep: 0, // 当前引导步骤
     // 灵宠
     activePet: null,
     secondaryPet: null, // 副灵宠（化神期解锁，提供50%加成）
@@ -94,7 +98,7 @@ let gameState = {
 };
 
 CONFIG.upgrades.forEach(u => { gameState.upgrades[u.id] = 0; });
-CONFIG.pills.forEach(p => { gameState.pills[p.id] = 0; });
+CONFIG.pills.forEach(p => { gameState.pills[p.id] = { 0: 0, 1: 0, 2: 0 }; });
 CONFIG.achievements.forEach(a => { gameState.achievements[a.id] = { completed: false, claimed: false }; });
 
 // ========== 工具函数 ==========
@@ -175,5 +179,11 @@ const SFX = {
     adventure: () => playTone(330, 0.15, 'sawtooth', 0.08),
     reward: () => playChord([659, 784, 988], 0.2, 'sine', 0.1),
     error: () => playTone(200, 0.15, 'sawtooth', 0.1),
+    forge: () => { playTone(150, 0.1, 'square', 0.08); setTimeout(() => playTone(120, 0.15, 'square', 0.08), 80); },
+    alchemy: () => { playTone(660, 0.08, 'sine', 0.08); setTimeout(() => playTone(880, 0.12, 'sine', 0.08), 60); },
+    formation: () => playChord([392, 494, 587], 0.3, 'sine', 0.08),
+    pet: () => { playTone(1000, 0.06, 'sine', 0.06); setTimeout(() => playTone(1200, 0.08, 'sine', 0.06), 50); },
+    dungeon: () => playTone(180, 0.2, 'sawtooth', 0.08),
+    checkin: () => playChord([523, 659, 784], 0.15, 'triangle', 0.1),
 };
 

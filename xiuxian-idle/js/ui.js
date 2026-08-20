@@ -181,13 +181,15 @@ function renderActiveTabContent() {
             document.getElementById('recruit-cost').textContent = `花费：${formatNumber(dCost)} 灵石`;
             document.getElementById('recruit-btn').disabled = gameState.spiritStone < dCost || gameState.discipleCount >= CONFIG.disciple.maxCount;
             // 弟子分工显示
-            const da = gameState.discipleAssign || { alchemy: 0, forge: 0, farm: 0, patrol: 0 };
+            const da = gameState.discipleAssign || { alchemy: 0, forge: 0, farm: 0, patrol: 0, scout: 0, guard: 0 };
             document.getElementById('disciple-total').textContent = gameState.discipleCount;
             document.getElementById('disciple-unassigned').textContent = getUnassignedCount();
             document.getElementById('assign-alchemy').textContent = da.alchemy || 0;
             document.getElementById('assign-forge').textContent = da.forge || 0;
             document.getElementById('assign-farm').textContent = da.farm || 0;
             document.getElementById('assign-patrol').textContent = da.patrol || 0;
+            document.getElementById('assign-scout').textContent = da.scout || 0;
+            document.getElementById('assign-guard').textContent = da.guard || 0;
             break;
         case 'pills':
             renderPills();
@@ -299,6 +301,24 @@ function updateFastUI() {
     document.getElementById('total-cultivation').textContent = formatNumber(gameState.totalCultivation);
     document.getElementById('breakthrough-count').textContent = gameState.breakthroughCount;
     document.getElementById('disciple-count').textContent = gameState.discipleCount;
+    // 下次突破预估
+    const nextBtCost = getBreakthroughCost();
+    const cultPerSec = getCultivationPerSecond();
+    const remaining = Math.max(0, nextBtCost - gameState.cultivation);
+    const nextBtEl = document.getElementById('next-breakthrough-info');
+    if (nextBtEl) {
+        if (remaining <= 0) {
+            nextBtEl.textContent = '可突破!';
+            nextBtEl.style.color = 'var(--success)';
+        } else if (cultPerSec > 0) {
+            const seconds = Math.ceil(remaining / cultPerSec);
+            nextBtEl.textContent = formatNumber(remaining) + ' (' + formatTime(seconds) + ')';
+            nextBtEl.style.color = '';
+        } else {
+            nextBtEl.textContent = formatNumber(remaining);
+            nextBtEl.style.color = '';
+        }
+    }
 
     // Buff
     renderActiveBuffs();
@@ -407,14 +427,26 @@ function renderActiveBuffs() {
     const container = document.getElementById('active-buffs');
     const now = Date.now();
     gameState.activeBuffs = gameState.activeBuffs.filter(b => b.endTime > now);
-    if (gameState.activeBuffs.length === 0) {
+    gameState.activeFormations = (gameState.activeFormations || []).filter(f => f.endTime > now);
+    let items = [];
+    // 丹药Buff
+    gameState.activeBuffs.forEach(b => {
+        const remain = Math.ceil((b.endTime - now) / 1000);
+        items.push(`<div class="buff-item"><span class="buff-name">${b.name}</span><span class="buff-time">${formatCountdown(remain)}</span></div>`);
+    });
+    // 阵法Buff
+    gameState.activeFormations.forEach(f => {
+        const formation = CONFIG.formations.find(x => x.id === f.id);
+        if (formation) {
+            const remain = Math.ceil((f.endTime - now) / 1000);
+            items.push(`<div class="buff-item"><span class="buff-name" style="color:var(--accent-cyan)">◈${formation.name}</span><span class="buff-time">${formatCountdown(remain)}</span></div>`);
+        }
+    });
+    if (items.length === 0) {
         container.innerHTML = '<p class="no-buff">暂无增益效果</p>';
         return;
     }
-    container.innerHTML = gameState.activeBuffs.map(b => {
-        const remain = Math.ceil((b.endTime - now) / 1000);
-        return `<div class="buff-item"><span class="buff-name">${b.name}</span><span class="buff-time">${formatCountdown(remain)}</span></div>`;
-    }).join('');
+    container.innerHTML = items.join('');
 }
 
 function getUpgradeEffectAtLevel(id, level) {
@@ -776,6 +808,10 @@ function startGame(slotIndex) {
     addLog(info ? `读取存档 ${slotIndex + 1} 成功，当前境界：${getRealmName()}` : '开始新的修仙之旅！', 'success');
     checkAchievements();
     updateUI();
+    // 新游戏启动新手引导
+    if (!info && !gameState.tutorialCompleted) {
+        setTimeout(() => startTutorial(), 1000);
+    }
 }
 
 // ========== 签到渲染 ==========
@@ -1863,6 +1899,83 @@ function showHelpModal() {
 
 function closeHelpModal() {
     document.getElementById('help-modal').classList.add('hidden');
+}
+
+// ========== 新手引导系统 ==========
+function startTutorial() {
+    if (gameState.tutorialCompleted) return;
+    gameState.tutorialStep = 0;
+    showTutorialStep();
+}
+
+function showTutorialStep() {
+    const steps = CONFIG.tutorialSteps;
+    if (gameState.tutorialStep >= steps.length) {
+        completeTutorial();
+        return;
+    }
+    const step = steps[gameState.tutorialStep];
+    const overlay = document.getElementById('tutorial-overlay');
+    const highlight = document.getElementById('tutorial-highlight');
+    const tooltip = document.getElementById('tutorial-tooltip');
+    const title = document.getElementById('tutorial-title');
+    const desc = document.getElementById('tutorial-desc');
+
+    overlay.classList.remove('hidden');
+    title.textContent = '第' + (gameState.tutorialStep + 1) + '/' + steps.length + '步：' + step.title;
+    desc.textContent = step.desc;
+
+    const target = document.querySelector(step.target);
+    if (target) {
+        const rect = target.getBoundingClientRect();
+        highlight.style.display = 'block';
+        highlight.style.left = rect.left + 'px';
+        highlight.style.top = rect.top + 'px';
+        highlight.style.width = rect.width + 'px';
+        highlight.style.height = rect.height + 'px';
+        if (step.position === 'bottom') {
+            tooltip.style.left = rect.left + 'px';
+            tooltip.style.top = (rect.bottom + 10) + 'px';
+        } else {
+            tooltip.style.left = rect.left + 'px';
+            tooltip.style.top = (rect.top - tooltip.offsetHeight - 10) + 'px';
+        }
+    } else {
+        highlight.style.display = 'none';
+        tooltip.style.left = '50%';
+        tooltip.style.top = '50%';
+        tooltip.style.transform = 'translate(-50%, -50%)';
+    }
+
+    const nextBtn = document.getElementById('tutorial-next');
+    nextBtn.textContent = gameState.tutorialStep >= steps.length - 1 ? '完成引导' : '下一步';
+}
+
+function nextTutorialStep() {
+    gameState.tutorialStep++;
+    if (gameState.tutorialStep >= CONFIG.tutorialSteps.length) {
+        completeTutorial();
+    } else {
+        showTutorialStep();
+    }
+}
+
+function completeTutorial() {
+    gameState.tutorialCompleted = true;
+    document.getElementById('tutorial-overlay').classList.add('hidden');
+    addLog('新手引导完成！', 'success');
+    saveGame();
+}
+
+function skipTutorial() {
+    if (confirm('确定跳过新手引导吗？可在设置中重新开启。')) {
+        completeTutorial();
+    }
+}
+
+function initTutorialEvents() {
+    document.getElementById('tutorial-next')?.addEventListener('click', nextTutorialStep);
+    document.getElementById('tutorial-skip')?.addEventListener('click', skipTutorial);
 }
 
 function switchHelpTab(tab) {

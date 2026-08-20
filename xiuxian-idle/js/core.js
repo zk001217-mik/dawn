@@ -7,6 +7,58 @@
 // ========== 核心计算函数 ==========
 function getCurrentRealm() { return CONFIG.realms[gameState.realmIndex]; }
 
+// ========== 丹药品质系统 ==========
+function getPillCount(pillId) {
+    const data = gameState.pills[pillId];
+    if (!data) return 0;
+    if (typeof data === 'number') return data; // 兼容旧存档
+    return (data[0] || 0) + (data[1] || 0) + (data[2] || 0);
+}
+
+function getPillQualityCount(pillId, quality) {
+    const data = gameState.pills[pillId];
+    if (!data) return 0;
+    if (typeof data === 'number') return quality === 0 ? data : 0; // 兼容旧存档
+    return data[quality] || 0;
+}
+
+function addPill(pillId, count, quality) {
+    if (quality === undefined) quality = 0;
+    if (!gameState.pills[pillId] || typeof gameState.pills[pillId] === 'number') {
+        const oldCount = typeof gameState.pills[pillId] === 'number' ? gameState.pills[pillId] : 0;
+        gameState.pills[pillId] = { 0: oldCount, 1: 0, 2: 0 };
+    }
+    gameState.pills[pillId][quality] = (gameState.pills[pillId][quality] || 0) + count;
+}
+
+function removePill(pillId, count) {
+    // 优先使用低品质丹药
+    let remaining = count;
+    for (let q = 0; q <= 2 && remaining > 0; q++) {
+        const available = getPillQualityCount(pillId, q);
+        const toRemove = Math.min(available, remaining);
+        if (toRemove > 0) {
+            gameState.pills[pillId][q] -= toRemove;
+            remaining -= toRemove;
+        }
+    }
+    return count - remaining; // 实际移除数量
+}
+
+function getPillEffectMult(quality) {
+    const q = CONFIG.pillQualities[quality] || CONFIG.pillQualities[0];
+    return q.effectMult;
+}
+
+function rollPillQuality(successRate) {
+    // 成功率越高，出高品质概率越大
+    const rand = Math.random();
+    const qualityBonus = successRate * 0.2; // 成功率贡献品质加成
+    if (rand < 0.1 + qualityBonus * 0.5) return 2; // 极品
+    if (rand < 0.4 + qualityBonus) return 1; // 精良
+    return 0; // 普通
+}
+
 // 获取当前境界特权值
 function getRealmPrivilege(type) {
     // 累积所有已达到境界的同类型特权（突破后低境界特权保留）
@@ -525,8 +577,8 @@ function recruitDisciple() {
 
 // ========== 弟子分工 ==========
 function getAssignedCount() {
-    const a = gameState.discipleAssign || { alchemy: 0, forge: 0, farm: 0, patrol: 0 };
-    return (a.alchemy || 0) + (a.forge || 0) + (a.farm || 0) + (a.patrol || 0);
+    const a = gameState.discipleAssign || { alchemy: 0, forge: 0, farm: 0, patrol: 0, scout: 0, guard: 0 };
+    return (a.alchemy || 0) + (a.forge || 0) + (a.farm || 0) + (a.patrol || 0) + (a.scout || 0) + (a.guard || 0);
 }
 
 function getUnassignedCount() {
@@ -535,7 +587,7 @@ function getUnassignedCount() {
 
 function assignDisciple(type) {
     if (getUnassignedCount() <= 0) { addLog('没有可分配的弟子', ''); SFX.error(); return false; }
-    if (!gameState.discipleAssign) gameState.discipleAssign = { alchemy: 0, forge: 0, farm: 0, patrol: 0 };
+    if (!gameState.discipleAssign) gameState.discipleAssign = { alchemy: 0, forge: 0, farm: 0, patrol: 0, scout: 0, guard: 0 };
     gameState.discipleAssign[type] = (gameState.discipleAssign[type] || 0) + 1;
     SFX.buy();
     updateUI();
@@ -557,6 +609,8 @@ function getDiscipleAssignBonus(type) {
     if (type === 'alchemy' || type === 'forge') return count * 0.01; // 每人+1%成功率
     if (type === 'farm') return count * 0.008; // 每人+0.8%灵石
     if (type === 'patrol') return count * 0.008; // 每人+0.8%修为
+    if (type === 'scout') return count * 0.008; // 斥候：每人+0.8%外出奖励
+    if (type === 'guard') return Math.min(0.3, count * 0.01); // 护卫：每人-1%秘境耗血，最多-30%
     return 0;
 }
 
@@ -690,11 +744,11 @@ function rebirth() {
     gameState.realmIndex = 0;
     gameState.realmLayer = 1;
     gameState.discipleCount = keepDisciples;
-    gameState.discipleAssign = { alchemy: 0, forge: 0, farm: 0, patrol: 0 };
+    gameState.discipleAssign = { alchemy: 0, forge: 0, farm: 0, patrol: 0, scout: 0, guard: 0 };
     gameState.totalCultivation = 0;
     gameState.breakthroughCount = 0;
     gameState.pills = {};
-    CONFIG.pills.forEach(p => { gameState.pills[p.id] = 0; });
+    CONFIG.pills.forEach(p => { gameState.pills[p.id] = { 0: 0, 1: 0, 2: 0 }; });
     gameState.activeBuffs = [];
     gameState.artifactInventory = bestArtifact ? [bestArtifact] : [];
     gameState.equippedArtifacts = [null, null, null];
