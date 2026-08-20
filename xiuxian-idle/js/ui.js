@@ -160,6 +160,7 @@ function switchTab(tabName) {
     currentTab = tabName;
     document.querySelectorAll('.center-tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabName));
     document.querySelectorAll('.center-tab-content .tab-content').forEach(c => c.classList.toggle('active', c.id === 'tab-' + tabName));
+    if (SFX && SFX.click) SFX.click();
     renderActiveTabContent();
 
     // 恢复目标标签页滚动位置
@@ -216,6 +217,7 @@ function renderActiveTabContent() {
             renderCheckin();
             renderTasks();
             renderAchievements();
+            renderTalentTree();
             renderAchievementShop();
             renderStats();
             renderTitles();
@@ -708,6 +710,22 @@ function renderAdventures() {
 function renderAchievements() {
     const container = document.getElementById('achievement-list');
     container.innerHTML = '';
+    // 成就完成率统计
+    const total = CONFIG.achievements.length;
+    const completed = CONFIG.achievements.filter(a => gameState.achievements[a.id]?.completed).length;
+    const claimed = CONFIG.achievements.filter(a => gameState.achievements[a.id]?.claimed).length;
+    const progressHtml = `
+        <div class="achievement-progress-bar">
+            <div class="achievement-progress-info">
+                <span>成就完成率</span>
+                <span>${completed}/${total}（已领取${claimed}）</span>
+            </div>
+            <div class="achievement-progress-track">
+                <div class="achievement-progress-fill" style="width:${(completed/total*100).toFixed(0)}%"></div>
+            </div>
+        </div>
+    `;
+    container.innerHTML = progressHtml;
     CONFIG.achievements.forEach(ach => {
         const state = gameState.achievements[ach.id];
         const claimable = state.completed && !state.claimed;
@@ -1503,6 +1521,17 @@ function renderSettings() {
                 <button class="craft-btn" style="width:80px" id="set-float">${s.showFloatingText ? '开启' : '关闭'}</button>
             </label>
         </div>
+        <div style="margin-bottom:12px;padding:8px;background:var(--bg-card);border-radius:4px">
+            <div style="font-size:13px;font-weight:bold;color:var(--text-gold);margin-bottom:8px">⚙️ 自动修炼</div>
+            <label style="display:flex;justify-content:space-between;align-items:center;font-size:13px;margin-bottom:6px">
+                <span>自动突破</span>
+                <button class="craft-btn" style="width:80px" id="set-autobreak">${(gameState.autoSettings && gameState.autoSettings.autoBreakthrough) ? '开启' : '关闭'}</button>
+            </label>
+            <label style="display:flex;justify-content:space-between;align-items:center;font-size:13px">
+                <span>自动用丹（双倍修为）</span>
+                <button class="craft-btn" style="width:80px" id="set-autopill">${(gameState.autoSettings && gameState.autoSettings.autoUsePills) ? '开启' : '关闭'}</button>
+            </label>
+        </div>
         <div class="lock-setting-row">
             <label>锁屏密码${s.lockPassword ? '（已设置）' : '（未设置）'}</label>
             <input type="password" id="set-lockpwd" placeholder="输入新密码，留空则清除" autocomplete="off">
@@ -1547,6 +1576,8 @@ function renderSettings() {
     document.getElementById('set-autosave').addEventListener('change', (e) => { gameState.settings.autoSaveInterval = parseInt(e.target.value); });
     document.getElementById('set-numfmt').addEventListener('change', (e) => { gameState.settings.numberFormat = e.target.value; updateUI(); });
     document.getElementById('set-float').addEventListener('click', () => { gameState.settings.showFloatingText = !gameState.settings.showFloatingText; renderSettings(); });
+    document.getElementById('set-autobreak').addEventListener('click', () => { if (!gameState.autoSettings) gameState.autoSettings = { autoBreakthrough: false, autoUsePills: false }; gameState.autoSettings.autoBreakthrough = !gameState.autoSettings.autoBreakthrough; renderSettings(); addLog('自动突破已' + (gameState.autoSettings.autoBreakthrough ? '开启' : '关闭'), 'success'); });
+    document.getElementById('set-autopill').addEventListener('click', () => { if (!gameState.autoSettings) gameState.autoSettings = { autoBreakthrough: false, autoUsePills: false }; gameState.autoSettings.autoUsePills = !gameState.autoSettings.autoUsePills; renderSettings(); addLog('自动用丹已' + (gameState.autoSettings.autoUsePills ? '开启' : '关闭'), 'success'); });
     document.getElementById('set-lockpwd-save').addEventListener('click', () => {
         const val = document.getElementById('set-lockpwd').value.trim();
         if (val) {
@@ -1613,6 +1644,12 @@ function renderStats() {
             <div style="display:flex;justify-content:space-between"><span>转世次数</span><span>${gameState.rebirthCount}</span></div>
             <div style="display:flex;justify-content:space-between"><span>灵宠收集</span><span>${Object.keys(gameState.petCollection || {}).length}/${CONFIG.petTypes.length}</span></div>
             <div style="display:flex;justify-content:space-between"><span>当前境界</span><span>${getRealmName()}</span></div>
+            <div style="display:flex;justify-content:space-between"><span>秘境挑战</span><span>${gameState.dungeonCompleteCount || 0}次（成功${gameState.dungeonSuccessCount || 0}次）</span></div>
+            <div style="display:flex;justify-content:space-between"><span>历练完成</span><span>${gameState.adventureCompleteCount || 0}次</span></div>
+            <div style="display:flex;justify-content:space-between"><span>丹药使用</span><span>${gameState.pillsUsedCount || 0}颗</span></div>
+            <div style="display:flex;justify-content:space-between"><span>法宝获得</span><span>${gameState.artifactFoundCount || 0}件</span></div>
+            <div style="display:flex;justify-content:space-between"><span>天赋点</span><span>${gameState.talentPoints || 0}点可用</span></div>
+            <div style="display:flex;justify-content:space-between"><span>成就完成</span><span>${gameState.claimedAchievements ? Object.keys(gameState.claimedAchievements).length : 0}/${CONFIG.achievements.length}</span></div>
         </div>`;
 }
 
@@ -1978,7 +2015,122 @@ function initTutorialEvents() {
     document.getElementById('tutorial-skip')?.addEventListener('click', skipTutorial);
 }
 
+// ========== 天赋树渲染 ==========
+function renderTalentTree() {
+    const panel = document.getElementById('talent-tree-panel');
+    if (!panel || !CONFIG.talentTree) return;
+    const pointsEl = document.getElementById('talent-points-display');
+    if (pointsEl) pointsEl.textContent = gameState.talentPoints || 0;
+
+    let html = '';
+    CONFIG.talentTree.branches.forEach(branch => {
+        const talents = CONFIG.talentTree.talents.filter(t => t.branch === branch.id);
+        html += `<div class="talent-branch" style="border-left:3px solid ${branch.color}">
+            <div class="talent-branch-header" style="color:${branch.color}">${branch.icon} ${branch.name}</div>
+            <div class="talent-list">`;
+        talents.forEach(t => {
+            const lv = getTalentLevel(t.id);
+            const maxed = lv >= t.maxLevel;
+            const canLearn = canLearnTalent(t.id);
+            const preMet = !t.prerequisite || getTalentLevel(t.prerequisite) > 0;
+            const effectText = typeof t.value === 'number' ? `+${(t.value * 100).toFixed(0)}%` : t.value;
+            html += `<div class="talent-card ${maxed ? 'maxed' : ''} ${!preMet ? 'locked' : ''}">
+                <div class="talent-card-header">
+                    <span class="talent-icon">${t.icon}</span>
+                    <span class="talent-name">${t.name}</span>
+                    <span class="talent-level">${lv}/${t.maxLevel}</span>
+                </div>
+                <div class="talent-desc">${t.desc}（每级${effectText}）</div>
+                <div class="talent-footer">
+                    <span class="talent-cost">消耗${t.cost}点</span>
+                    ${maxed ? '<span class="talent-maxed">已满级</span>' :
+                      `<button class="talent-learn-btn" data-talent="${t.id}" ${!canLearn ? 'disabled' : ''}>学习</button>`}
+                </div>
+            </div>`;
+        });
+        html += `</div></div>`;
+    });
+    panel.innerHTML = html;
+
+    // 绑定学习按钮
+    panel.querySelectorAll('.talent-learn-btn').forEach(btn => {
+        btn.addEventListener('click', () => learnTalent(btn.dataset.talent));
+    });
+}
+
 function switchHelpTab(tab) {
     document.querySelectorAll('.help-tab').forEach(b => b.classList.toggle('active', b.dataset.help === tab));
     document.getElementById('help-content').innerHTML = HELP_CONTENTS[tab] || '<p>暂无说明</p>';
 }
+
+// ========== 通知系统 ==========
+let notificationTimer = null;
+
+function showNotification(text, icon = '🔔', duration = 5000) {
+    const bar = document.getElementById('notification-bar');
+    const textEl = document.getElementById('notification-text');
+    const iconEl = document.getElementById('notification-icon');
+    if (!bar || !textEl) return;
+    textEl.textContent = text;
+    iconEl.textContent = icon;
+    bar.classList.remove('hidden');
+    bar.classList.add('notification-show');
+    if (notificationTimer) clearTimeout(notificationTimer);
+    notificationTimer = setTimeout(() => {
+        bar.classList.add('hidden');
+        bar.classList.remove('notification-show');
+    }, duration);
+}
+
+function checkNotifications() {
+    if (!gameState.notificationSettings) return;
+    const now = Date.now();
+    const cooldown = 30000; // 同类通知最小间隔30秒
+
+    // 可以突破通知
+    if (gameState.notificationSettings.breakthroughReady) {
+        const cost = getBreakthroughCost();
+        if (gameState.cultivation >= cost) {
+            const key = 'breakthroughReady';
+            if (!gameState.lastNotificationTime[key] || now - gameState.lastNotificationTime[key] > cooldown) {
+                showNotification('修为已满，可以突破境界！', '⬆️');
+                gameState.lastNotificationTime[key] = now;
+            }
+        }
+    }
+
+    // 历练完成通知
+    if (gameState.notificationSettings.adventureComplete && gameState.adventure) {
+        const prog = getAdventureProgress();
+        if (prog && prog.remaining <= 0) {
+            const key = 'adventureComplete';
+            if (!gameState.lastNotificationTime[key] || now - gameState.lastNotificationTime[key] > cooldown) {
+                showNotification('历练已完成，快去领取奖励！', '🗺️');
+                gameState.lastNotificationTime[key] = now;
+            }
+        }
+    }
+
+    // 生命值过低通知
+    if (gameState.notificationSettings.lowHp) {
+        const maxHp = getMaxHp();
+        if (gameState.hp < maxHp * 0.2) {
+            const key = 'lowHp';
+            if (!gameState.lastNotificationTime[key] || now - gameState.lastNotificationTime[key] > cooldown) {
+                showNotification('生命值过低，建议使用回春丹或等待恢复！', '❤️');
+                gameState.lastNotificationTime[key] = now;
+            }
+        }
+    }
+}
+
+// 通知栏关闭按钮
+document.addEventListener('DOMContentLoaded', () => {
+    const closeBtn = document.getElementById('notification-close');
+    if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+            document.getElementById('notification-bar').classList.add('hidden');
+            if (notificationTimer) clearTimeout(notificationTimer);
+        });
+    }
+});

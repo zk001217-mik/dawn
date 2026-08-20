@@ -51,6 +51,20 @@ let gameState = {
     currentSlot: 0,
     tutorialCompleted: false, // 新手引导是否完成
     tutorialStep: 0, // 当前引导步骤
+    talentPoints: 0, // 天赋点
+    talents: {}, // 已点天赋 {talentId: level}
+    autoSettings: {
+        autoBreakthrough: false, // 自动突破
+        autoUsePills: false, // 自动使用丹药
+    },
+    notificationSettings: {
+        breakthroughReady: true, // 可以突破时通知
+        pillCooldown: true, // 丹药CD好了通知
+        dungeonCooldown: true, // 秘境CD刷新通知
+        adventureComplete: true, // 历练完成通知
+        lowHp: true, // 生命值过低通知
+    },
+    lastNotificationTime: {}, // 上次通知时间（防止频繁通知）
     // 灵宠
     activePet: null,
     secondaryPet: null, // 副灵宠（化神期解锁，提供50%加成）

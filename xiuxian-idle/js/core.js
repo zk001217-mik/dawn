@@ -70,6 +70,53 @@ function getRealmPrivilege(type) {
     return total;
 }
 
+// ========== 天赋树系统 ==========
+function getTalentLevel(talentId) {
+    return (gameState.talents && gameState.talents[talentId]) || 0;
+}
+
+function getTalentBonus(type) {
+    if (!CONFIG.talentTree || !CONFIG.talentTree.talents) return 0;
+    let total = 0;
+    CONFIG.talentTree.talents.forEach(t => {
+        if (t.effect === type) {
+            const lv = getTalentLevel(t.id);
+            total += t.value * lv;
+        }
+    });
+    return total;
+}
+
+function canLearnTalent(talentId) {
+    const talent = CONFIG.talentTree.talents.find(t => t.id === talentId);
+    if (!talent) return false;
+    const lv = getTalentLevel(talentId);
+    if (lv >= talent.maxLevel) return false;
+    if (gameState.talentPoints < talent.cost) return false;
+    if (talent.prerequisite) {
+        const preLv = getTalentLevel(talent.prerequisite);
+        const preTalent = CONFIG.talentTree.talents.find(t => t.id === talent.prerequisite);
+        if (preLv < (preTalent ? preTalent.maxLevel : 1)) return false;
+    }
+    return true;
+}
+
+function learnTalent(talentId) {
+    if (!canLearnTalent(talentId)) return false;
+    const talent = CONFIG.talentTree.talents.find(t => t.id === talentId);
+    gameState.talentPoints -= talent.cost;
+    gameState.talents[talentId] = getTalentLevel(talentId) + 1;
+    addLog(`学习天赋【${talent.name}】Lv.${gameState.talents[talentId]}`, 'success');
+    SFX.upgrade();
+    updateUI();
+    return true;
+}
+
+function getTalentPointsEarned() {
+    // 每次转世获得天赋点 = max(1, floor(道韵收益 / 2))
+    return Math.max(1, Math.floor(getRebirthDaoGain() / 2));
+}
+
 // 获取法宝槽位数（基础3 + 境界特权加成）
 function getArtifactSlots() {
     return CONFIG.artifactSlots + getRealmPrivilege('artifactSlot');
@@ -342,13 +389,14 @@ function getCultivationPerSecond() {
     const heavenlyMult = 1 + (gameState.heavenlyBonus ? gameState.heavenlyBonus.bothMult : 0);
     const eventMult = 1 + getEventBonus('cultivation');
     const privilegeMult = 1 + getRealmPrivilege('allOutput');
+    const talentMult = 1 + getTalentBonus('cultivation') + getTalentBonus('allOutput');
     const synergyMult = 1 + getSynergyBonus('cultivation');
     const affixBonus = getArtifactAffixBonus('cultivation');
     const affixMult = 1 + affixBonus.pct;
     const masteryBonus = getMasteryBonus();
     const masteryMult = 1 + masteryBonus.cult;
     const upgradeSynMult = 1 + getUpgradeSynergyBonus('cultivation') + getUpgradeSynergyBonus('both');
-    return (base + bonus + affixBonus.flat) * realmMult * discipleMult * daoMult * buffMult * formationMult * bondMult * titleMult * heavenlyMult * eventMult * privilegeMult * synergyMult * affixMult * masteryMult * upgradeSynMult;
+    return (base + bonus + affixBonus.flat) * realmMult * discipleMult * daoMult * buffMult * formationMult * bondMult * titleMult * heavenlyMult * eventMult * privilegeMult * talentMult * synergyMult * affixMult * masteryMult * upgradeSynMult;
 }
 
 function getStonePerSecond() {
@@ -372,13 +420,14 @@ function getStonePerSecond() {
     const heavenlyMult = 1 + (gameState.heavenlyBonus ? gameState.heavenlyBonus.bothMult : 0);
     const eventMult = 1 + getEventBonus('stone');
     const privilegeMult = 1 + getRealmPrivilege('allOutput');
+    const talentMult = 1 + getTalentBonus('stone') + getTalentBonus('allOutput');
     const synergyMult = 1 + getSynergyBonus('stone');
     const affixBonus = getArtifactAffixBonus('stone');
     const affixMult = 1 + affixBonus.pct;
     const masteryBonus = getMasteryBonus();
     const masteryMult = 1 + masteryBonus.stone;
     const upgradeSynMult = 1 + getUpgradeSynergyBonus('stone') + getUpgradeSynergyBonus('both');
-    return (base + bonus + affixBonus.flat) * realmMult * discipleMult * daoMult * buffMult * formationMult * bondMult * titleMult * heavenlyMult * eventMult * privilegeMult * synergyMult * affixMult * masteryMult * upgradeSynMult;
+    return (base + bonus + affixBonus.flat) * realmMult * discipleMult * daoMult * buffMult * formationMult * bondMult * titleMult * heavenlyMult * eventMult * privilegeMult * talentMult * synergyMult * affixMult * masteryMult * upgradeSynMult;
 }
 
 // ========== 产出详情 ==========
@@ -507,7 +556,8 @@ function getBreakthroughFailRate() {
     if (r === undefined) r = 0.20;
     // 合体期特权：突破成功率+10%（失败率-10%）
     const bonus = getRealmPrivilege('breakthrough');
-    r = Math.max(0, r - bonus);
+    const talentBonus = getTalentBonus('breakthrough');
+    r = Math.max(0, r - bonus - talentBonus);
     return r;
 }
 
@@ -521,6 +571,11 @@ function breakthrough() {
         const loss = Math.floor(cost * 0.3);
         gameState.cultivation = Math.max(0, gameState.cultivation - loss);
         SFX.error();
+        // 突破失败震动效果
+        document.body.style.animation = 'none';
+        document.body.offsetHeight; // 触发重排
+        document.body.style.animation = 'shake 0.4s ease-in-out';
+        setTimeout(() => { document.body.style.animation = ''; }, 400);
         addLog(`突破失败！走火入魔，损失${formatNumber(loss)}修为（成功率${Math.floor((1-failRate)*100)}%）`, '');
         updateUI();
         return false;
@@ -725,6 +780,9 @@ function rebirth() {
     if (daoGain <= 0) { addLog('修为尚浅，转世无法获得道韵', ''); return false; }
     if (!confirm(`确定转世重修？\n重置修为、灵石、功法等级、丹药，保留道韵、成就、称号、功法突破/精通，以及最高品质法宝/灵宠和半数弟子`)) return false;
     gameState.dao += daoGain;
+    // 转世获得天赋点
+    const talentGain = getTalentPointsEarned();
+    gameState.talentPoints += talentGain;
 
     // 保留最高品质法宝
     const allArtifacts = [...gameState.equippedArtifacts.filter(a => a !== null), ...gameState.artifactInventory];
@@ -771,7 +829,7 @@ function rebirth() {
     gameState.lastTaskReset = '';
     // 重置秘境冷却
     gameState.dungeonCooldowns = {};
-    addLog(`转世重修！获得 ${daoGain} 点道韵，当前共 ${gameState.dao} 点`, 'breakthrough');
+    addLog(`转世重修！获得 ${daoGain} 点道韵，${talentGain} 点天赋点，当前共 ${gameState.dao} 点道韵，${gameState.talentPoints} 点天赋点`, 'breakthrough');
     checkAchievements();
     updateUI();
     return true;

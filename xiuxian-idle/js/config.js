@@ -121,6 +121,9 @@ const CONFIG = {
         { name: '上古洞府', desc: '发现一处上古洞府，收获翻倍！', cultMult: 2.0, stoneMult: 2.0, chance: 0.04 },
         { name: '妖兽袭击', desc: '遭遇妖兽袭击，勉强逃脱损失部分收益', cultMult: 0.6, stoneMult: 0.6, chance: 0.1 },
         { name: '仙人指路', desc: '偶遇高人指点，修为灵石均有斩获', cultMult: 1.5, stoneMult: 1.5, chance: 0.05 },
+        { name: '天降祥瑞', desc: '天空降下祥瑞之光，修为暴涨！', cultMult: 3.0, stoneMult: 1.0, chance: 0.03 },
+        { name: '地脉涌动', desc: '地脉灵气涌动，灵石收获丰厚', cultMult: 1.0, stoneMult: 3.0, chance: 0.03 },
+        { name: '心魔入侵', desc: '心魔入侵心神，走火入魔损失收益', cultMult: 0.4, stoneMult: 0.4, chance: 0.05 },
     ],
 
     // 成就配置
@@ -409,7 +412,48 @@ const CONFIG = {
         { target: '#tab-cultivation-btn', title: '功法升级', desc: '切换到功法标签页，消耗灵石升级功法，提升修为和灵石产出。', position: 'bottom' },
         { target: '#breakthrough-btn', title: '突破境界', desc: '修为攒满后，点击突破按钮进入下一境界，解锁更多功法和功能。', position: 'bottom' },
         { target: '#tab-pill-btn', title: '丹药系统', desc: '购买或炼制丹药，获得临时增益或立即奖励，加速修炼进度。', position: 'bottom' },
+        { target: '#tab-artifact-btn', title: '法宝系统', desc: '炼器获得法宝，点击背包中的法宝即可装备，提升战力和属性。', position: 'bottom' },
+        { target: '#tab-pet-btn', title: '灵宠系统', desc: '外出历练获得灵宠蛋，点击灵宠即可出战，提供持续属性加成。', position: 'bottom' },
         { target: '#tab-adventure-btn', title: '外出历练', desc: '外出历练和秘境挑战，获得稀有资源、法宝和灵宠。', position: 'bottom' },
+        { target: '#rebirth-btn', title: '转世重修', desc: '达到筑基期后可转世重修，重置进度但获得道韵和天赋点永久加成。', position: 'bottom' },
     ],
+
+    // 天赋树配置（5分支）
+    talentTree: {
+        branches: [
+            { id: 'cultivation', name: '修炼之道', icon: '📖', color: '#60a5fa' },
+            { id: 'stone', name: '聚财之道', icon: '💰', color: '#fbbf24' },
+            { id: 'adventure', name: '探险之道', icon: '🗺️', color: '#34d399' },
+            { id: 'craft', name: '匠造之道', icon: '⚗️', color: '#a78bfa' },
+            { id: 'survival', name: '生存之道', icon: '🛡️', color: '#f87171' },
+        ],
+        talents: [
+            // 修炼之道
+            { id: 'cult_1', name: '吐纳专精', desc: '修为产出+5%', icon: '🫁', branch: 'cultivation', cost: 1, maxLevel: 5, effect: 'cultivation', value: 0.05, prerequisite: null },
+            { id: 'cult_2', name: '悟性提升', desc: '打坐基础倍率+10%', icon: '🧠', branch: 'cultivation', cost: 2, maxLevel: 3, effect: 'meditateMult', value: 0.10, prerequisite: 'cult_1' },
+            { id: 'cult_3', name: '心魔不生', desc: '突破成功率+5%', icon: '😌', branch: 'cultivation', cost: 2, maxLevel: 3, effect: 'breakthrough', value: 0.05, prerequisite: 'cult_1' },
+            { id: 'cult_4', name: '道法自然', desc: '所有产出+3%', icon: '🌿', branch: 'cultivation', cost: 3, maxLevel: 3, effect: 'allOutput', value: 0.03, prerequisite: 'cult_2' },
+            // 聚财之道
+            { id: 'stone_1', name: '点石成金', desc: '灵石产出+5%', icon: '💎', branch: 'stone', cost: 1, maxLevel: 5, effect: 'stone', value: 0.05, prerequisite: null },
+            { id: 'stone_2', name: '精打细算', desc: '丹药购买价格-5%', icon: '🧮', branch: 'stone', cost: 2, maxLevel: 3, effect: 'pillDiscount', value: 0.05, prerequisite: 'stone_1' },
+            { id: 'stone_3', name: '聚宝盆', desc: '灵石上限无影响，离线灵石收益+10%', icon: '🏺', branch: 'stone', cost: 2, maxLevel: 3, effect: 'offlineStone', value: 0.10, prerequisite: 'stone_1' },
+            { id: 'stone_4', name: '财通四海', desc: '所有产出+3%', icon: '🌊', branch: 'stone', cost: 3, maxLevel: 3, effect: 'allOutput', value: 0.03, prerequisite: 'stone_2' },
+            // 探险之道
+            { id: 'adv_1', name: '轻身术', desc: '历练时间-5%', icon: '🏃', branch: 'adventure', cost: 1, maxLevel: 5, effect: 'adventureSpeed', value: 0.05, prerequisite: null },
+            { id: 'adv_2', name: '寻宝直觉', desc: '历练法宝掉落率+10%', icon: '🔍', branch: 'adventure', cost: 2, maxLevel: 3, effect: 'artifactChance', value: 0.10, prerequisite: 'adv_1' },
+            { id: 'adv_3', name: '战斗本能', desc: '秘境成功率+5%', icon: '⚔️', branch: 'adventure', cost: 2, maxLevel: 3, effect: 'dungeonSuccess', value: 0.05, prerequisite: 'adv_1' },
+            { id: 'adv_4', name: '探险大师', desc: '外出奖励+10%', icon: '🏆', branch: 'adventure', cost: 3, maxLevel: 3, effect: 'adventureReward', value: 0.10, prerequisite: 'adv_2' },
+            // 匠造之道
+            { id: 'craft_1', name: '巧手', desc: '炼丹成功率+5%', icon: '✋', branch: 'craft', cost: 1, maxLevel: 5, effect: 'alchemy', value: 0.05, prerequisite: null },
+            { id: 'craft_2', name: '匠心', desc: '炼器成功率+5%', icon: '🔨', branch: 'craft', cost: 1, maxLevel: 5, effect: 'forge', value: 0.05, prerequisite: null },
+            { id: 'craft_3', name: '材料节约', desc: '炼丹炼器消耗-5%', icon: '♻️', branch: 'craft', cost: 2, maxLevel: 3, effect: 'craftDiscount', value: 0.05, prerequisite: 'craft_1' },
+            { id: 'craft_4', name: '神匠', desc: '炼丹炼器出高品质概率+10%', icon: '🌟', branch: 'craft', cost: 3, maxLevel: 3, effect: 'qualityBonus', value: 0.10, prerequisite: 'craft_3' },
+            // 生存之道
+            { id: 'surv_1', name: '强身健体', desc: '生命上限+10%', icon: '💪', branch: 'survival', cost: 1, maxLevel: 5, effect: 'maxHp', value: 0.10, prerequisite: null },
+            { id: 'surv_2', name: '快速恢复', desc: '生命恢复速度+20%', icon: '❤️‍🩹', branch: 'survival', cost: 2, maxLevel: 3, effect: 'hpRegen', value: 0.20, prerequisite: 'surv_1' },
+            { id: 'surv_3', name: '铜皮铁骨', desc: '秘境耗血-10%', icon: '🛡️', branch: 'survival', cost: 2, maxLevel: 3, effect: 'dungeonHp', value: 0.10, prerequisite: 'surv_1' },
+            { id: 'surv_4', name: '不死之身', desc: '秘境失败不损失修为', icon: '♾️', branch: 'survival', cost: 3, maxLevel: 1, effect: 'noCultLoss', value: 1, prerequisite: 'surv_3' },
+        ],
+    },
 };
 

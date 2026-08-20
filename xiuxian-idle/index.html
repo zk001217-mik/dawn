@@ -4,7 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>修仙挂机录 - 放置修仙</title>
-    <link rel="stylesheet" href="css/style.css?v=23">
+    <link rel="stylesheet" href="css/base.css?v=1">
+    <link rel="stylesheet" href="css/layout.css?v=1">
+    <link rel="stylesheet" href="css/components.css?v=1">
+    <link rel="stylesheet" href="css/modules.css?v=1">
+    <link rel="stylesheet" href="css/animations.css?v=1">
+    <link rel="stylesheet" href="css/themes.css?v=1">
+    <link rel="stylesheet" href="css/responsive.css?v=1">
+    <link rel="stylesheet" href="css/lock.css?v=1">
 </head>
 <body>
     <!-- 启动存档选择界面 -->
@@ -53,6 +60,13 @@
                 </div>
             </div>
         </header>
+
+        <!-- 顶部通知栏 -->
+        <div id="notification-bar" class="notification-bar hidden">
+            <span id="notification-icon" class="notification-icon">🔔</span>
+            <span id="notification-text" class="notification-text"></span>
+            <button id="notification-close" class="notification-close">×</button>
+        </div>
 
         <!-- 主体三栏布局 -->
         <div class="goal-bar" id="current-goal">🎯 加载中...</div>
@@ -451,6 +465,8 @@
                         </button>
                         <p class="disciple-tip">重置修为与灵石，保留道韵永久加成（每1点道韵+1%全产出）</p>
                     </div>
+                    <h2 class="panel-title" style="margin-top: 20px;display:flex;justify-content:space-between;align-items:center">◈ 天赋树 ◈<span style="font-size:13px;color:var(--text-gold)">天赋点：<span id="talent-points-display">0</span></span></h2>
+                    <div id="talent-tree-panel" class="talent-tree-panel"></div>
                     <h2 class="panel-title" style="margin-top: 20px;">◈ 成就商店 ◈</h2>
                     <div id="achievement-shop"></div>
                     <h2 class="panel-title" style="margin-top: 20px;">◈ 称号 ◈</h2>
@@ -621,13 +637,13 @@
         </div>
     </div>
 
-    <script src="js/config.js?v=74"></script>
-    <script src="js/state.js?v=74"></script>
-    <script src="js/core.js?v=74"></script>
-    <script src="js/gameplay.js?v=74"></script>
-    <script src="js/storage.js?v=74"></script>
-    <script src="js/ui.js?v=74"></script>
-    <script src="js/lock.js?v=74"></script>
-    <script src="js/main.js?v=74"></script>
+    <script src="js/config.js?v=75"></script>
+    <script src="js/state.js?v=75"></script>
+    <script src="js/core.js?v=75"></script>
+    <script src="js/gameplay.js?v=75"></script>
+    <script src="js/storage.js?v=75"></script>
+    <script src="js/ui.js?v=75"></script>
+    <script src="js/lock.js?v=75"></script>
+    <script src="js/main.js?v=75"></script>
 </body>
 </html>

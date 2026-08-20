@@ -1,0 +1,133 @@
+/* ========== 主题系统 ========== */
+/* 主题通过 body.theme-xxx 类名切换，覆盖 :root 中的CSS变量 */
+
+/* 青冥 - 青色系 */
+body.theme-cyan {
+    --bg-dark: #080d10;
+    --bg-panel: #101a1e;
+    --bg-panel-light: #16252b;
+    --border-gold: #1a6b7a;
+    --border-gold-light: #2bb5c9;
+    --text-gold: #26c6da;
+    --text-gold-light: #80deea;
+    --text-primary: #c8e6e8;
+    --text-secondary: #7a9e9f;
+    --text-muted: #4a6b6c;
+    --shadow-gold: 0 0 20px rgba(38, 198, 218, 0.15);
+}
+body.theme-cyan { background-image: radial-gradient(ellipse at top, rgba(26, 107, 122, 0.1) 0%, transparent 50%), radial-gradient(ellipse at bottom, rgba(38, 198, 218, 0.05) 0%, transparent 50%); }
+
+/* 紫霞 - 紫色系 */
+body.theme-purple {
+    --bg-dark: #0d0810;
+    --bg-panel: #1a101e;
+    --bg-panel-light: #25162b;
+    --border-gold: #6a1a7a;
+    --border-gold-light: #b52bc9;
+    --text-gold: #c626da;
+    --text-gold-light: #de80ea;
+    --text-primary: #e0c8e8;
+    --text-secondary: #9e7a9f;
+    --text-muted: #6b4a6c;
+    --shadow-gold: 0 0 20px rgba(198, 38, 218, 0.15);
+}
+body.theme-purple { background-image: radial-gradient(ellipse at top, rgba(106, 26, 122, 0.1) 0%, transparent 50%), radial-gradient(ellipse at bottom, rgba(198, 38, 218, 0.05) 0%, transparent 50%); }
+
+/* 碧波 - 蓝色系 */
+body.theme-blue {
+    --bg-dark: #080a10;
+    --bg-panel: #10151e;
+    --bg-panel-light: #161d2b;
+    --border-gold: #1a4a7a;
+    --border-gold-light: #2b7bc9;
+    --text-gold: #2676da;
+    --text-gold-light: #80b0ea;
+    --text-primary: #c8d4e8;
+    --text-secondary: #7a8e9f;
+    --text-muted: #4a5b6c;
+    --shadow-gold: 0 0 20px rgba(38, 118, 218, 0.15);
+}
+body.theme-blue { background-image: radial-gradient(ellipse at top, rgba(26, 74, 122, 0.1) 0%, transparent 50%), radial-gradient(ellipse at bottom, rgba(38, 118, 218, 0.05) 0%, transparent 50%); }
+
+/* 翠林 - 绿色系 */
+body.theme-green {
+    --bg-dark: #08100a;
+    --bg-panel: #101e14;
+    --bg-panel-light: #162b1c;
+    --border-gold: #1a7a3a;
+    --border-gold-light: #2bc95b;
+    --text-gold: #26da5c;
+    --text-gold-light: #80ea9e;
+    --text-primary: #c8e8d0;
+    --text-secondary: #7a9f85;
+    --text-muted: #4a6c54;
+    --shadow-gold: 0 0 20px rgba(38, 218, 92, 0.15);
+}
+body.theme-green { background-image: radial-gradient(ellipse at top, rgba(26, 122, 58, 0.1) 0%, transparent 50%), radial-gradient(ellipse at bottom, rgba(38, 218, 92, 0.05) 0%, transparent 50%); }
+
+/* 赤炎 - 红色系 */
+body.theme-red {
+    --bg-dark: #100808;
+    --bg-panel: #1e1010;
+    --bg-panel-light: #2b1616;
+    --border-gold: #7a1a1a;
+    --border-gold-light: #c92b2b;
+    --text-gold: #da2626;
+    --text-gold-light: #ea8080;
+    --text-primary: #e8c8c8;
+    --text-secondary: #9f7a7a;
+    --text-muted: #6c4a4a;
+    --shadow-gold: 0 0 20px rgba(218, 38, 38, 0.15);
+}
+body.theme-red { background-image: radial-gradient(ellipse at top, rgba(122, 26, 26, 0.1) 0%, transparent 50%), radial-gradient(ellipse at bottom, rgba(218, 38, 38, 0.05) 0%, transparent 50%); }
+
+/* 暗夜 - 纯暗灰 */
+body.theme-dark {
+    --bg-dark: #0a0a0a;
+    --bg-panel: #141414;
+    --bg-panel-light: #1e1e1e;
+    --border-gold: #444444;
+    --border-gold-light: #777777;
+    --text-gold: #aaaaaa;
+    --text-gold-light: #cccccc;
+    --text-primary: #dddddd;
+    --text-secondary: #888888;
+    --text-muted: #555555;
+    --shadow-gold: 0 0 20px rgba(100, 100, 100, 0.1);
+}
+body.theme-dark { background-image: radial-gradient(ellipse at top, rgba(60, 60, 60, 0.08) 0%, transparent 50%), radial-gradient(ellipse at bottom, rgba(30, 30, 30, 0.05) 0%, transparent 50%); }
+
+/* 主题选择器样式 */
+.theme-selector {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-top: 8px;
+}
+.theme-option {
+    padding: 8px 4px;
+    border: 2px solid var(--border-gold);
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: center;
+    font-size: 12px;
+    transition: all 0.2s;
+    background: var(--bg-panel-light);
+}
+.theme-option:hover {
+    border-color: var(--border-gold-light);
+}
+.theme-option.active {
+    border-color: var(--text-gold-light);
+    background: rgba(212, 175, 55, 0.15);
+    font-weight: bold;
+}
+.theme-option .theme-dot {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 4px;
+    vertical-align: middle;
+}
+

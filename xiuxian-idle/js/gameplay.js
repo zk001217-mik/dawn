@@ -818,12 +818,13 @@ function getMaxHp() {
     const base = 100;
     const realmBonus = gameState.realmIndex * 50 + gameState.realmLayer * 10;
     const powerBonus = Math.floor(getPlayerPower() / 10);
-    return base + realmBonus + powerBonus;
+    const talentMult = 1 + getTalentBonus('maxHp');
+    return Math.floor((base + realmBonus + powerBonus) * talentMult);
 }
 
 // 生命恢复速率：基础1/秒 + 境界加成
 function getHpRegenRate() {
-    return 1 + gameState.realmIndex * 0.5;
+    return (1 + gameState.realmIndex * 0.5) * (1 + getTalentBonus('hpRegen'));
 }
 
 // 战力详情拆解

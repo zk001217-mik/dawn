@@ -11,6 +11,20 @@ let lastTickTime = Date.now();
 let gameStarted = false;
 
 function init() {
+    // 全局错误处理：出错时自动备份存档
+    window.addEventListener('error', (e) => {
+        console.error('游戏错误:', e.error || e.message);
+        try {
+            if (gameStarted && gameState) {
+                const backupKey = 'xiuxian_idle_backup_' + Date.now();
+                localStorage.setItem(backupKey, JSON.stringify(gameState));
+                console.log('已自动备份存档到:', backupKey);
+            }
+        } catch (err) {
+            console.error('备份存档失败:', err);
+        }
+    });
+
     initAudio();
     // 显示启动界面
     renderSaveSlots();
@@ -197,12 +211,29 @@ function gameTick() {
         if (prog && prog.remaining <= 0) completeAdventure();
     }
 
+    // 自动突破
+    if (gameState.autoSettings && gameState.autoSettings.autoBreakthrough) {
+        const cost = getBreakthroughCost();
+        if (gameState.cultivation >= cost && !document.getElementById('breakthrough-modal')?.classList.contains('hidden') === false) {
+            breakthrough();
+        }
+    }
+
+    // 自动使用丹药（双倍修为丹）
+    if (gameState.autoSettings && gameState.autoSettings.autoUsePills) {
+        const hasCultBuff = gameState.activeBuffs.some(b => b.type === 'buff_cult');
+        if (!hasCultBuff && getPillCount('double_cult') > 0) {
+            usePill('double_cult');
+        }
+    }
+
     if (Math.floor(gameState.playTime) % 5 === 0) checkAchievements();
     checkRandomEvent();
     checkCooldownNotifications();
     checkFormationExpiry();
     updateStageGoal();
     checkTitles();
+    checkNotifications();
     if (!isLocked) updateFastUI();
     updateTabDots();
 }
