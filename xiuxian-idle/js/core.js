@@ -86,143 +86,7 @@ function getUpgradeEffect(id) {
     const lv = gameState.upgrades[id];
     if (lv === 0) return 0;
     const btMult = getUpgradeBreakthroughMult(id);
-    const tierMult = getUpgradeTierEffectMult(id);
-    const profMult = getUpgradeProficiencyMult(id);
-    return u.baseEffect * lv * Math.pow(u.effectMult, lv) * btMult * tierMult * profMult;
-}
-
-// ========== 功法品阶系统 ==========
-function getUpgradeTier(id) {
-    return gameState.upgradeTiers?.[id] || 0;
-}
-
-function getUpgradeTierInfo(id) {
-    const tier = getUpgradeTier(id);
-    const tiers = CONFIG.upgradeTiers || [{ name: '凡品', color: '#9ca3af', effectMult: 1.0, maxLevel: 200, proficiencyMax: 100 }];
-    return tiers[tier] || tiers[0];
-}
-
-function getUpgradeTierEffectMult(id) {
-    return getUpgradeTierInfo(id).effectMult;
-}
-
-// ========== 功法熟练度系统 ==========
-function getUpgradeProficiency(id) {
-    return gameState.upgradeProficiency?.[id] || 0;
-}
-
-function getUpgradeProficiencyLevel(id) {
-    const prof = getUpgradeProficiency(id);
-    const tierInfo = getUpgradeTierInfo(id);
-    return Math.min(CONFIG.upgradeProficiencyMaxLevel, Math.floor(prof / CONFIG.upgradeProficiencyPerLevel));
-}
-
-function getUpgradeProficiencyMult(id) {
-    const lv = getUpgradeProficiencyLevel(id);
-    return 1 + lv * CONFIG.upgradeProficiencyEffectPerLevel;
-}
-
-function getUpgradeProficiencyProgress(id) {
-    const prof = getUpgradeProficiency(id);
-    const tierInfo = getUpgradeTierInfo(id);
-    const currentLvProf = (getUpgradeProficiencyLevel(id)) * CONFIG.upgradeProficiencyPerLevel;
-    const nextLvProf = (getUpgradeProficiencyLevel(id) + 1) * CONFIG.upgradeProficiencyPerLevel;
-    const maxProf = CONFIG.upgradeProficiencyMaxLevel * CONFIG.upgradeProficiencyPerLevel;
-    if (prof >= maxProf) return 1;
-    return (prof - currentLvProf) / (nextLvProf - currentLvProf);
-}
-
-// ========== 功法推演进阶 ==========
-function canEvolveUpgrade(id) {
-    const u = CONFIG.upgrades.find(x => x.id === id);
-    if (!u) return false;
-    const tier = getUpgradeTier(id);
-    if (tier >= CONFIG.upgradeTiers.length - 1) return false; // 已满阶
-    const lv = gameState.upgrades[id] || 0;
-    const tierInfo = getUpgradeTierInfo(id);
-    if (lv < tierInfo.maxLevel) return false; // 未满级
-    const profLv = getUpgradeProficiencyLevel(id);
-    if (profLv < CONFIG.upgradeProficiencyMaxLevel) return false; // 熟练度未满
-    if (getEvolveCooldown(id) > 0) return false; // 冷却中
-    return true;
-}
-
-function getEvolveCost(id) {
-    const tier = getUpgradeTier(id);
-    return Math.floor(CONFIG.upgradeEvolve.baseCost * Math.pow(CONFIG.upgradeEvolve.costMult, tier));
-}
-
-function getEvolveSuccessRate(id) {
-    const tier = getUpgradeTier(id);
-    return Math.max(0.2, CONFIG.upgradeEvolve.baseSuccess - tier * CONFIG.upgradeEvolve.successDecay);
-}
-
-function getEvolveCooldown(id) {
-    const cd = gameState.evolveCooldowns?.[id] || 0;
-    return Math.max(0, Math.ceil((cd - Date.now()) / 1000));
-}
-
-function evolveUpgrade(id) {
-    if (!canEvolveUpgrade(id)) {
-        const cd = getEvolveCooldown(id);
-        if (cd > 0) { addLog(`推演冷却中，还需${cd}秒`, ''); SFX.error(); }
-        else { addLog('功法未满级或熟练度不足，无法推演', ''); SFX.error(); }
-        return false;
-    }
-    const cost = getEvolveCost(id);
-    if (gameState.spiritStone < cost) { addLog('灵石不足，无法推演', ''); SFX.error(); return false; }
-    gameState.spiritStone -= cost;
-    const successRate = getEvolveSuccessRate(id);
-    const success = Math.random() < successRate;
-    const u = CONFIG.upgrades.find(x => x.id === id);
-    if (success) {
-        if (!gameState.upgradeTiers) gameState.upgradeTiers = {};
-        gameState.upgradeTiers[id] = getUpgradeTier(id) + 1;
-        gameState.upgrades[id] = 1; // 等级重置为1
-        if (gameState.upgradeProficiency) gameState.upgradeProficiency[id] = 0; // 熟练度重置
-        const newTier = getUpgradeTierInfo(id);
-        SFX.breakthrough();
-        addLog(`【${u.name}】推演成功！进阶为${newTier.name}，效果大幅提升`, 'breakthrough');
-    } else {
-        if (!gameState.evolveCooldowns) gameState.evolveCooldowns = {};
-        gameState.evolveCooldowns[id] = Date.now() + CONFIG.upgradeEvolve.cooldown * 1000;
-        SFX.error();
-        addLog(`【${u.name}】推演失败！熟练度保留，冷却${CONFIG.upgradeEvolve.cooldown}秒`, '');
-    }
-    updateUI();
-    return true;
-}
-
-// ========== 修炼分配与领悟 ==========
-function setCultivationAllocation(value) {
-    gameState.cultivationAllocation = Math.max(0, Math.min(100, value));
-    updateUI();
-}
-
-function setSelectedInsightUpgrade(id) {
-    gameState.selectedInsightUpgrade = id;
-    updateUI();
-}
-
-function processInsight(deltaSeconds) {
-    if (gameState.cultivationAllocation <= 0) return;
-    if (!gameState.selectedInsightUpgrade) return;
-    const u = CONFIG.upgrades.find(x => x.id === gameState.selectedInsightUpgrade);
-    if (!u) return;
-    if (gameState.upgrades[u.id] === 0) return; // 未学习的功法不能领悟
-    const allocRatio = gameState.cultivationAllocation / 100;
-    const insightGain = getCultivationPerSecond() * allocRatio * CONFIG.cultivationInsightRate * deltaSeconds;
-    if (!gameState.upgradeProficiency) gameState.upgradeProficiency = {};
-    gameState.upgradeProficiency[u.id] = (gameState.upgradeProficiency[u.id] || 0) + insightGain;
-    // 熟练度上限
-    const maxProf = CONFIG.upgradeProficiencyMaxLevel * CONFIG.upgradeProficiencyPerLevel;
-    if (gameState.upgradeProficiency[u.id] > maxProf) gameState.upgradeProficiency[u.id] = maxProf;
-}
-
-// 修炼时实际获得的修为（扣除领悟分配）
-function getEffectiveCultivationGain() {
-    if (gameState.cultivationAllocation <= 0) return 1;
-    return 1 - (gameState.cultivationAllocation / 100) * 0.5; // 最多扣50%修为（领悟不浪费，只是转化）
+    return u.baseEffect * lv * Math.pow(u.effectMult, lv) * btMult;
 }
 
 // ========== 功法突破系统 ==========
@@ -241,8 +105,7 @@ function canBreakthroughUpgrade(id) {
     const lv = gameState.upgrades[id] || 0;
     const btCount = getUpgradeBreakthrough(id);
     const requiredLv = (btCount + 1) * 10; // 第1次突破需10级，第2次需20级...
-    const tierMax = getUpgradeMaxLevel(id);
-    return lv >= requiredLv && lv < tierMax && btCount < 5; // 最多突破5次
+    return lv >= requiredLv && lv < u.maxLevel && btCount < 5; // 最多突破5次
 }
 
 function getUpgradeBreakthroughCost(id) {
@@ -274,8 +137,7 @@ function canMasterUpgrade(id) {
     const u = CONFIG.upgrades.find(x => x.id === id);
     if (!u) return false;
     const lv = gameState.upgrades[id] || 0;
-    const tierMax = getUpgradeMaxLevel(id);
-    return lv >= tierMax && !isUpgradeMastered(id);
+    return lv >= u.maxLevel && !isUpgradeMastered(id);
 }
 
 function getMasteryCost(id) {
@@ -558,10 +420,9 @@ function getRebirthDaoGain() {
 function getUpgradeMaxLevel(upgradeId) {
     const u = CONFIG.upgrades.find(x => x.id === upgradeId);
     if (!u) return 0;
-    // 品阶决定等级上限，境界每阶+10级
-    const tierMax = getUpgradeTierInfo(upgradeId).maxLevel;
+    // 境界每阶+10级上限
     const realmCap = (gameState.realmIndex + 1) * 10;
-    return Math.min(tierMax, realmCap);
+    return Math.min(u.maxLevel, realmCap);
 }
 
 // ========== 游戏操作 ==========
@@ -798,39 +659,6 @@ function upgradeFormation(id) {
     return true;
 }
 
-// ========== 功法顿悟（灵石回收） ==========
-function getEnlightenmentCost(upgradeId) {
-    const baseCost = getUpgradeCost(upgradeId);
-    return Math.floor(baseCost * 10); // 10倍升级成本
-}
-
-function canEnlightenment() {
-    return Date.now() >= (gameState.enlightenmentCooldown || 0);
-}
-
-function enlightenment(upgradeId) {
-    const u = CONFIG.upgrades.find(x => x.id === upgradeId);
-    if (!u) return false;
-    const maxLv = getUpgradeMaxLevel(upgradeId);
-    if (gameState.upgrades[upgradeId] >= maxLv) {
-        addLog('功法已达当前境界上限', ''); SFX.error(); return false;
-    }
-    if (!canEnlightenment()) {
-        const remain = Math.ceil(((gameState.enlightenmentCooldown || 0) - Date.now()) / 1000);
-        addLog(`顿悟冷却中，还需${remain}秒`, ''); SFX.error(); return false;
-    }
-    const cost = getEnlightenmentCost(upgradeId);
-    if (gameState.spiritStone < cost) { addLog(`灵石不足，顿悟需要${formatNumber(cost)}灵石`, ''); SFX.error(); return false; }
-    gameState.spiritStone -= cost;
-    gameState.upgrades[upgradeId]++;
-    gameState.enlightenmentCooldown = Date.now() + 300000; // 5分钟冷却
-    gameState.upgradeCount = (gameState.upgradeCount || 0) + 1;
-    SFX.breakthrough();
-    addLog(`顿悟成功！${u.name}直接提升至${gameState.upgrades[upgradeId]}层`, 'breakthrough');
-    updateUI();
-    return true;
-}
-
 function rebirth() {
     // 转世最低境界：筑基期
     const minRebirthRealm = 1;
@@ -841,7 +669,7 @@ function rebirth() {
     }
     const daoGain = getRebirthDaoGain();
     if (daoGain <= 0) { addLog('修为尚浅，转世无法获得道韵', ''); return false; }
-    if (!confirm(`确定转世重修？\n重置修为、灵石、功法等级、丹药，保留道韵、成就、称号、功法品阶/熟练度/突破/精通，以及最高品质法宝/灵宠和半数弟子`)) return false;
+    if (!confirm(`确定转世重修？\n重置修为、灵石、功法等级、丹药，保留道韵、成就、称号、功法突破/精通，以及最高品质法宝/灵宠和半数弟子`)) return false;
     gameState.dao += daoGain;
 
     // 保留最高品质法宝

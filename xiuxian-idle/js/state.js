@@ -19,11 +19,6 @@ let gameState = {
     upgrades: {},
     upgradeBreakthroughs: {}, // { upgradeId: count } 功法突破次数
     upgradeMastery: {}, // { upgradeId: true } 功法精通
-    upgradeTiers: {}, // { upgradeId: tierIndex } 功法品阶
-    upgradeProficiency: {}, // { upgradeId: amount } 功法熟练度
-    cultivationAllocation: 0, // 0=全修炼, 50=半修炼半领悟, 100=全领悟
-    selectedInsightUpgrade: null, // 当前领悟的功法ID
-    evolveCooldowns: {}, // { upgradeId: timestamp } 推演冷却
     formationPresets: [null, null], // 阵法预设方案 [formationId, formationId]
     pills: {},
     activeBuffs: [],
@@ -69,7 +64,6 @@ let gameState = {
     // 阵法
     activeFormations: [], // [{ id, endTime }]
     formationLevels: {}, // { formationId: level } 阵法等级
-    enlightenmentCooldown: 0, // 功法顿悟冷却结束时间
     // 永久丹药
     heavenlyUsed: {}, // { itemId: count }
     heavenlyBonus: { cultivation: 0, stone: 0, bothMult: 0 },

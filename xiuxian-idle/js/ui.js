@@ -421,40 +421,14 @@ function getUpgradeEffectAtLevel(id, level) {
     const u = CONFIG.upgrades.find(x => x.id === id);
     if (!u || level === 0) return 0;
     const btMult = getUpgradeBreakthroughMult(id);
-    const tierMult = getUpgradeTierEffectMult(id);
-    const profMult = getUpgradeProficiencyMult(id);
-    return u.baseEffect * level * Math.pow(u.effectMult, level) * btMult * tierMult * profMult;
+    return u.baseEffect * level * Math.pow(u.effectMult, level) * btMult;
 }
 
 function renderUpgrades() {
     const container = document.getElementById('upgrade-list');
     container.innerHTML = '';
 
-    // 修炼分配控制栏 - 放在upgrade-list外面避免grid布局bug
-    var allocContainer = document.getElementById('alloc-bar-container');
-    allocContainer.innerHTML = '';
-    var alloc = gameState.cultivationAllocation || 0;
-    var selectedInsight = gameState.selectedInsightUpgrade;
-    var insightU = selectedInsight ? CONFIG.upgrades.find(function(x){return x.id === selectedInsight;}) : null;
-    var allocBar = document.createElement('div');
-    allocBar.style.cssText = 'padding:10px 12px;background:var(--bg-panel-light);border:1px solid var(--border-gold);border-radius:6px;margin-bottom:8px';
-    var allocHtml = '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">';
-    allocHtml += '<span style="color:var(--text-gold);font-size:12px">◈ 修炼分配 ◈</span>';
-    allocHtml += '<span style="font-size:11px;color:var(--text-secondary)">领悟：' + (insightU ? insightU.name : '未选择') + '</span>';
-    allocHtml += '</div>';
-    allocHtml += '<div style="display:flex;gap:6px">';
-    allocHtml += '<button data-alloc="0" style="flex:1;padding:4px;font-size:11px;background:' + (alloc===0?'var(--border-gold)':'var(--bg-panel)') + ';color:' + (alloc===0?'#000':'var(--text-primary)') + ';border:1px solid var(--border-gold);border-radius:4px;cursor:pointer">全修炼</button>';
-    allocHtml += '<button data-alloc="50" style="flex:1;padding:4px;font-size:11px;background:' + (alloc===50?'var(--border-gold)':'var(--bg-panel)') + ';color:' + (alloc===50?'#000':'var(--text-primary)') + ';border:1px solid var(--border-gold);border-radius:4px;cursor:pointer">半修炼半领悟</button>';
-    allocHtml += '<button data-alloc="100" style="flex:1;padding:4px;font-size:11px;background:' + (alloc===100?'var(--border-gold)':'var(--bg-panel)') + ';color:' + (alloc===100?'#000':'var(--text-primary)') + ';border:1px solid var(--border-gold);border-radius:4px;cursor:pointer">全领悟</button>';
-    allocHtml += '</div>';
-    allocHtml += '<div style="margin-top:6px;font-size:10px;color:var(--text-muted)">领悟可增加功法熟练度，熟练度每级+5%效果；满级后可推演进阶</div>';
-    allocBar.innerHTML = allocHtml;
-    allocBar.querySelectorAll('button[data-alloc]').forEach(function(btn){
-        btn.addEventListener('click', function(){ setCultivationAllocation(parseInt(btn.dataset.alloc)); });
-    });
-    allocContainer.appendChild(allocBar);
-
-    // 功法卡片 - 完整功能（紧凑布局）
+    // 功法卡片
     CONFIG.upgrades.forEach(function(u) {
         var lv = gameState.upgrades[u.id] || 0;
         var cost = getUpgradeCost(u.id);
@@ -462,17 +436,10 @@ function renderUpgrades() {
         var nextEffect = getUpgradeEffectAtLevel(u.id, lv + 1) || 0;
         var unlocked = gameState.realmIndex >= u.unlockRealm;
         var canAfford = gameState.spiritStone >= cost;
-        var tierInfo = getUpgradeTierInfo(u.id);
-        var trueMaxed = lv >= tierInfo.maxLevel;
+        var trueMaxed = lv >= u.maxLevel;
         var realmMax = getUpgradeMaxLevel(u.id);
         var realmCapped = !trueMaxed && lv >= realmMax;
         var maxed = trueMaxed || realmCapped;
-        var tier = getUpgradeTier(u.id);
-        var profLv = getUpgradeProficiencyLevel(u.id);
-        var profProgress = getUpgradeProficiencyProgress(u.id) || 0;
-        var profMult = getUpgradeProficiencyMult(u.id);
-        var isInsightSelected = selectedInsight === u.id;
-        var isMaxTier = tier >= CONFIG.upgradeTiers.length - 1;
         var btCount = getUpgradeBreakthrough(u.id);
         var mastered = isUpgradeMastered(u.id);
 
@@ -482,11 +449,11 @@ function renderUpgrades() {
         else if (u.effect === 'stone') effectText = '灵石+' + formatNumber(effect) + '/s';
         else effectText = '修为+' + formatNumber(effect) + '/s 灵石+' + formatNumber(effect) + '/s';
 
-        // 构建卡片HTML - 紧凑布局
+        // 构建卡片HTML
         var html = '';
-        // 头部：名称+品阶+等级
+        // 头部：名称+等级
         html += '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">';
-        html += '<span style="font-size:13px;font-weight:bold;color:var(--text-gold-light)">' + u.name + ' <span style="color:' + tierInfo.color + ';font-size:9px">' + tierInfo.name + '</span>';
+        html += '<span style="font-size:13px;font-weight:bold;color:var(--text-gold-light)">' + u.name;
         if (btCount > 0) html += ' <span style="color:#a855f7;font-size:9px">突' + btCount + '</span>';
         if (mastered) html += ' <span style="color:#f59e0b;font-size:9px">精</span>';
         html += '</span>';
@@ -509,32 +476,12 @@ function renderUpgrades() {
             var nextRealm = CONFIG.realms[gameState.realmIndex + 1] ? CONFIG.realms[gameState.realmIndex + 1].name : '更高';
             html += '<div style="font-size:9px;color:var(--text-gold)">需突破' + nextRealm + '</div>';
         }
-        // 熟练度
-        if (unlocked && lv > 0) {
-            html += '<div style="font-size:9px;color:var(--text-muted);margin-top:2px">熟练Lv' + profLv + '/' + CONFIG.upgradeProficiencyMaxLevel + '(+' + Math.floor((profMult-1)*100) + '%)</div>';
-            html += '<div style="height:3px;background:var(--bg-panel);border-radius:2px;margin-top:1px;overflow:hidden">';
-            html += '<div style="height:100%;width:' + Math.floor(profProgress*100) + '%;background:linear-gradient(90deg,#059669,#10b981)"></div>';
-            html += '</div>';
-        }
         // 解锁提示
         if (!unlocked) {
             html += '<div style="font-size:10px;color:var(--accent-red);margin-top:2px">需' + CONFIG.realms[u.unlockRealm].name + '</div>';
         }
         // 按钮区 - 2列
         var btns = [];
-        if (unlocked && !maxed) {
-            var enCost = getEnlightenmentCost(u.id);
-            var canEn = canEnlightenment() && gameState.spiritStone >= enCost;
-            var enCd = !canEnlightenment() ? Math.ceil(((gameState.enlightenmentCooldown || 0) - Date.now()) / 1000) : 0;
-            var enText = enCd > 0 ? ('顿悟' + enCd + 's') : ('顿悟' + formatNumber(enCost));
-            btns.push({cls:'upgrade-enlighten-btn', text:enText, disabled:!canEn});
-        }
-        if (unlocked && lv > 0) {
-            var insightText = isInsightSelected ? '✓领悟' : '设领悟';
-            var insightBg = isInsightSelected ? 'linear-gradient(135deg,#059669,#10b981)' : 'var(--bg-panel-light)';
-            var insightColor = isInsightSelected ? '#fff' : 'var(--text-gold)';
-            btns.push({cls:'insight-btn', text:insightText, disabled:false, bg:insightBg, color:insightColor});
-        }
         if (canBreakthroughUpgrade(u.id)) {
             var btCost = getUpgradeBreakthroughCost(u.id);
             btns.push({cls:'upgrade-bt-btn', text:'突破' + formatNumber(btCost), disabled:false, bg:'linear-gradient(135deg,#7c3aed,#a855f7)', color:'#fff'});
@@ -542,16 +489,6 @@ function renderUpgrades() {
         if (canMasterUpgrade(u.id)) {
             var masterCost = getMasteryCost(u.id);
             btns.push({cls:'upgrade-master-btn', text:'精通' + formatNumber(masterCost), disabled:false, bg:'linear-gradient(135deg,#d97706,#f59e0b)', color:'#fff'});
-        }
-        var evolveCd = getEvolveCooldown(u.id);
-        if (!isMaxTier && trueMaxed && profLv >= CONFIG.upgradeProficiencyMaxLevel) {
-            if (evolveCd > 0) {
-                btns.push({text:'推演' + evolveCd + 's', disabled:true});
-            } else {
-                var evolveCost = getEvolveCost(u.id);
-                var evolveRate = getEvolveSuccessRate(u.id);
-                btns.push({cls:'evolve-btn', text:'推演' + formatNumber(evolveCost) + '(' + Math.floor(evolveRate*100) + '%)', disabled:false, bg:'linear-gradient(135deg,#dc2626,#ef4444)', color:'#fff'});
-            }
         }
         if (btns.length > 0) {
             html += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:3px;margin-top:4px">';
@@ -564,25 +501,16 @@ function renderUpgrades() {
         }
 
         var div = document.createElement('div');
-        div.style.cssText = 'padding:8px;background:var(--bg-panel-light);border:1px solid rgba(139,105,20,0.3);border-radius:6px;cursor:pointer' + (!unlocked ? ';opacity:0.3;cursor:not-allowed' : (!canAfford && !maxed ? ';opacity:0.5' : '')) + (isInsightSelected ? ';border-color:#10b981;box-shadow:0 0 6px rgba(16,185,129,0.3)' : '');
+        div.style.cssText = 'padding:8px;background:var(--bg-panel-light);border:1px solid rgba(139,105,20,0.3);border-radius:6px;cursor:pointer' + (!unlocked ? ';opacity:0.3;cursor:not-allowed' : (!canAfford && !maxed ? ';opacity:0.5' : ''));
         div.innerHTML = html;
         if (unlocked && !maxed) {
             div.addEventListener('click', function(){ buyUpgrade(u.id); });
         }
-        div.querySelectorAll('.upgrade-enlighten-btn').forEach(function(btn){
-            btn.addEventListener('click', function(e){ e.stopPropagation(); enlightenment(u.id); });
-        });
         div.querySelectorAll('.upgrade-bt-btn').forEach(function(btn){
             btn.addEventListener('click', function(e){ e.stopPropagation(); breakthroughUpgrade(u.id); });
         });
         div.querySelectorAll('.upgrade-master-btn').forEach(function(btn){
             btn.addEventListener('click', function(e){ e.stopPropagation(); masterUpgrade(u.id); });
-        });
-        div.querySelectorAll('.insight-btn').forEach(function(btn){
-            btn.addEventListener('click', function(e){ e.stopPropagation(); setSelectedInsightUpgrade(isInsightSelected ? null : u.id); });
-        });
-        div.querySelectorAll('.evolve-btn').forEach(function(btn){
-            btn.addEventListener('click', function(e){ e.stopPropagation(); evolveUpgrade(u.id); });
         });
         container.appendChild(div);
     });

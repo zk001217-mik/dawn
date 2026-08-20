@@ -130,7 +130,7 @@ function init() {
         if (e.target.files[0]) importSave(e.target.files[0]);
         e.target.value = '';
     });
-
+    
     // 标签页切换
     document.querySelectorAll('.center-tab-btn').forEach(btn => {
         btn.addEventListener('click', () => switchTab(btn.dataset.tab));
@@ -177,19 +177,13 @@ function gameTick() {
     const delta = (now - lastTickTime) / 1000;
     lastTickTime = now;
 
-    const allocRatio = (gameState.cultivationAllocation || 0) / 100;
-    const cultGain = getCultivationPerSecond() * delta * getEffectiveCultivationGain();
+    const cultGain = getCultivationPerSecond() * delta;
     const stoneGain = getStonePerSecond() * delta;
     gameState.cultivation += cultGain;
     gameState.spiritStone += stoneGain;
     gameState.totalCultivation += cultGain;
     gameState.totalStoneEarned = (gameState.totalStoneEarned || 0) + stoneGain;
     gameState.playTime += delta;
-
-    // 领悟功法（分配比例转化为熟练度）
-    if (allocRatio > 0 && gameState.selectedInsightUpgrade) {
-        processInsight(delta);
-    }
 
     // 血量自动恢复
     const maxHp = getMaxHp();
